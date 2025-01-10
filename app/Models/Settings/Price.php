@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Models\Settings;
+
+use App\Models\Contract;
+use App\Models\Event;
+use App\Models\StandType;
+use Illuminate\Database\Eloquent\Model;
+
+class Price extends Model
+{
+    protected $fillable = ['name', 'category_id', 'currency_id',
+                            'amount', 'event_id'];
+
+    public function Category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+    public function Currency()
+    {
+        return $this->belongsTo(Currency::class);
+    }
+    public function Event()
+    {
+        return $this->belongsTo(Event::class);
+    }
+    public function Contracts() {
+        return $this->hasMany(Contract::class);
+    }
+}

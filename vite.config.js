@@ -7,6 +7,8 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
+                'resources/js/extractFields.js',
+                'resources/js/fillPDF.js'
             ],
             refresh: true,
         }),

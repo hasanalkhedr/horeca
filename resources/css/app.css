@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+trix-editor ul {
+    list-style-type: disc; /* For unordered lists */
+    margin-left: 20px;
+}
+
+trix-editor ol {
+    list-style-type: decimal; /* For ordered lists */
+    margin-left: 20px;
+}
+
+trix-editor li {
+    margin-bottom: 5px;
+}
