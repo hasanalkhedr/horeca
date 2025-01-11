@@ -73,6 +73,8 @@ Route::get('events/{event}/dashboard',[EventController::class, 'dashboard'])->na
 //Route::resource('contracts', ContractController::class);
 Route::get('contracts/create/{event}', [ContractController::class, 'create'])->name('contracts.create');
 Route::post('contracts/store', [ContractController::class, 'store'])->name('contracts.store');
+Route::post('contracts/{contract}/uploadPDF', [ContractController::class, 'uploadPDF'])->name('contracts.uploadPDF');
+
 
 Route::resource('companies', CompanyController::class);
 Route::get('companies/{company}/brands',[BrandController::class, 'index'])->name('companies.brands');

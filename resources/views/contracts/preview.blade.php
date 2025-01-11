@@ -8,5 +8,6 @@
         <script>
             const fieldValues = @json($fieldValues ); // Laravel -> JS
             const contractPDF = @json($path);
+            const contract = @json($contract)
         </script>
 @endsection

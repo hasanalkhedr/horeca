@@ -23,7 +23,7 @@ class Contract extends Model
 
     //     });
     // }
-    protected $fillable = ['contract_no', 'company_id', 'stand_id', 'price_id', 'event_id'];
+    protected $fillable = ['contract_no', 'company_id', 'stand_id', 'price_id', 'event_id', 'contract_type_id'];
     public function Company(){
         return $this->belongsTo(Company::class);
     }
@@ -38,5 +38,8 @@ class Contract extends Model
     }
     public function ContractType() {
         return $this->belongsTo(ContractType::class);
+    }
+    public function ContractValues(){
+        return $this->hasMany(ContractValue::class);
     }
 }

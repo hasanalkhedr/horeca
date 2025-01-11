@@ -7,6 +7,7 @@ import {
     PDFFont,
 } from "pdf-lib";
 
+
 async function fillPDFForm(arrayBuffer, fieldValues) {
     try {
         const pdfDoc = await PDFDocument.load(arrayBuffer);
@@ -39,7 +40,21 @@ async function fillPDFForm(arrayBuffer, fieldValues) {
     }
 }
 
-function previewPDF(pdfBytes) {
+async function previewPDF(pdfBytes) {
+    // Create a FormData object
+    const formData = new FormData();
+    const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+    formData.append('file', pdfBlob, 'filled-form.pdf');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+const uploadUrl = `/contracts/${contract.id}/uploadPDF`;
+    // Send the FormData to the server
+    await fetch(uploadUrl, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        },
+        body: formData,
+    });
     const blob = new Blob([pdfBytes], { type: "application/pdf" });
     const url = URL.createObjectURL(blob);
     window.open(url, "_blank");
@@ -54,8 +69,8 @@ function downloadPDF(pdfBytes, fileName) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-//    const pdfFileUrl = "/storage/forms/HR-LB-25.pdf"; // Make sure this is the correct URL
-console.log(fieldValues);
+    //    const pdfFileUrl = "/storage/forms/HR-LB-25.pdf"; // Make sure this is the correct URL
+
     const pdfFileUrl = contractPDF; // Make sure this is the correct URL
 
     try {
@@ -76,7 +91,7 @@ console.log(fieldValues);
         //const fieldValues = fieldValues || {}; // Assuming `fieldValues` is defined in the Blade template
         //console.log(window.fieldValues);
         // Call the function to fill the PDF form
-        fillPDFForm(arrayBuffer, fieldValues, );
+        fillPDFForm(arrayBuffer, fieldValues,);
     } catch (error) {
         console.error("Error fetching PDF:", error);
     }
