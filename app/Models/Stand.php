@@ -45,4 +45,7 @@ class Stand extends Model
     public function Contract(){
         return $this->hasOne(Contract::class);
     }
+    public function ScopeAvailable($query) {
+        return $query->where('status','Available');
+    }
 }

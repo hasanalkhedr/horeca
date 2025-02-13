@@ -32,7 +32,7 @@ class Company extends Model
         return $this->hasMany(Brand::class);
     }
     public function Clients() {
-        return $this->hasmany(Client::class);
+        return $this->hasMany(Client::class);
     }
     public function Contracts() {
         return $this->hasMany(Contract::class);

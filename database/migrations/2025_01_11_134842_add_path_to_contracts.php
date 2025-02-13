@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::table('contracts', function (Blueprint $table) {
             $table->string('path')->nullable();
+            $table->decimal('space_amount')->default(0);
+            $table->decimal('sponsor_amount')->default(0);
+            $table->decimal('advertisment_amount')->default(0);
+            $table->decimal('total_amount')->default(0);
+            $table->string('status');
+            $table->date('contract_date')->nullable();
+            $table->decimal('price_amount')->nullable();
         });
     }
 
@@ -23,6 +30,13 @@ return new class extends Migration
     {
         Schema::table('contracts', function (Blueprint $table) {
             $table->dropColumn('path');
+            $table->dropColumn('space_amount');
+            $table->dropColumn('sponsor_amount');
+            $table->dropColumn('advertisment_amount');
+            $table->dropColumn('total_amount');
+            $table->dropColumn('status');
+            $table->dropColumn('contract_date');
+            $table->dropColumn('price_amount');
         });
     }
 };

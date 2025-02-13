@@ -155,28 +155,13 @@
                     </form>
                 </div>
                 <div x-show="action === 'import'">
-                    {{-- <form @submit.prevent="importStands" enctype="multipart/form-data">
-                        <div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <x-input-label for="standsFile">Select File to import</x-input-label>
-                                    <input type="file" name="standsFile" x-model="standsFile" id="standsFile">
-                                </div>
-                            </div>
-                            <div class="mt-4 w-full text-center">
-                                <x-primary-button type="submit">Import Stands</x-primary-button>
-                            </div>
-                        </div>
-                    </form> --}}
                     <form @submit.prevent="uploadFile">
                         <label for="file">Upload Stands File: (file with 3 columns only, titled as: no, space, deductable)</label>
                         <x-text-input type="file" id="file" @change="handleFileUpload" />
                         <x-primary-button type="submit">Upload</x-primary-button>
                     </form>
-
                     <!-- Display Messages -->
                     <div x-show="message" x-text="message" style="margin-top: 10px;"></div>
-
                 </div>
             </div>
         </div>

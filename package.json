@@ -16,6 +16,7 @@
         "vite": "^5.0"
     },
     "dependencies": {
-        "pdf-lib": "^1.17.1"
+        "pdf-lib": "^1.17.1",
+        "sortablejs": "^1.15.6"
     }
 }

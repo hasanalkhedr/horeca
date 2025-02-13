@@ -1,5 +1,5 @@
 <!-- resources/views/components/sidebar-mobile.blade.php -->
-<div x-data="{ showSidebar: false,settingsMenu: false, spaceManagementMenu: false, sponsorshipManagementMenu: false, clientsMenu: false }" class="lg:hidden">
+<div x-data="{ showSidebar: false,settingsMenu: false, spaceManagementMenu: false, sponsorshipManagementMenu: false, clientsMenu: false, contractsMenu: false }" class="lg:hidden">
     <!-- Toggle button for showing/hiding the mobile sidebar -->
     <button @click="showSidebar = !showSidebar" class="p-4 focus:outline-none hover:bg-gray-200">
         <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
@@ -31,7 +31,7 @@
 
         <!-- Sidebar links -->
         <div class="flex flex-col h-full p-4">
-            <x-sidebar-mobile-link href="#" icon="fas fa-tachometer-alt" label="Dashboard" />
+            <x-sidebar-mobile-link href="{{route('dashboard')}}" icon="fas fa-tachometer-alt" label="Dashboard" />
         <x-sidebar-mobile-link href="{{ route('events.index') }}" icon="fas fa-calendar-alt" label="Events" />
         <x-sidebar-mobile-link href="" icon="fa-solid fa-users-gear" label="Clients" @click.prevent="clientsMenu=!clientsMenu">
             <x-slot name="subIcon">
@@ -74,7 +74,18 @@
                     icon="fa-solid fa-filter-circle-dollar" />
             </div>
         </x-sidebar-mobile-link>
-        <x-sidebar-mobile-link href="#" icon="fas fa-file-contract" label="Contracts" />
+        <x-sidebar-mobile-link href="" icon="fas fa-file-contract" label="Contracts" @click.prevent="contractsMenu=!contractsMenu">
+            <x-slot name="subIcon">
+                <svg x-bind:class="{ 'rotate-180': contractsMenu }" class="ml-auto mr-2 transition-transform h-6 w-6"
+                    fill="currentColor">
+                    <path d="M6 15l6-6 6 6H6z" />
+                </svg>
+            </x-slot>
+            <div x-show="contractsMenu" x-transition class="pl-4">
+                <x-sidebar-mobile-link href="{{ route('reports.index') }}" label="Contract Templates" icon="fas fa-file-contract" />
+                <x-sidebar-mobile-link href="{{ route('contracts.index') }}" label="Contracts" icon="fas fa-file-contract" />
+            </div>
+        </x-sidebar-mobile-link>
         <x-sidebar-mobile-link href="" icon="fas fa-cog" label="Settings"
             @click.prevent="settingsMenu=!settingsMenu">
             <x-slot name="subIcon">

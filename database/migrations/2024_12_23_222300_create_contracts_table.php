@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('contract_no');
             $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
             $table->foreignId('stand_id')->constrained('stands')->cascadeOnDelete();
-            $table->foreignId('price_id')->constrained('prices')->cascadeOnDelete();
+            $table->foreignId('price_id')->nullable()->constrained('prices')->cascadeOnDelete();
             $table->foreignId('event_id')->constrained('events')->cascadeOnDelete();
             $table->timestamps();
         });

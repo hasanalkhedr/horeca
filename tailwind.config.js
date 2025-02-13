@@ -9,8 +9,8 @@ export default {
         "./resources/views/**/*.blade.php",
         "./vendor/rappasoft/laravel-livewire-tables/resources/views/*.blade.php",
         "./vendor/rappasoft/laravel-livewire-tables/resources/views/**/*.blade.php",
-        './app/Livewire/*.php',
-        './app/Livewire/**/*.php',
+        "./app/Livewire/*.php",
+        "./app/Livewire/**/*.php",
         "./resources/**/*.blade.php",
         "./resources/**/*.js",
         "./resources/**/*.vue",
@@ -18,7 +18,7 @@ export default {
         "./vendor/vildanbina/livewire-wizard/resources/views/*.blade.php",
         "./vendor/wireui/wireui/resources/**/*.blade.php",
         "./vendor/wireui/wireui/ts/**/*.ts",
-        "./vendor/wireui/wireui/src/View/**/*.php"
+        "./vendor/wireui/wireui/src/View/**/*.php",
     ],
 
     theme: {
@@ -28,8 +28,11 @@ export default {
             },
         },
     },
-    presets: [
-        require("./vendor/wireui/wireui/tailwind.config.js")
+    presets: [require("./vendor/wireui/wireui/tailwind.config.js")],
+    plugins: [
+        forms({
+            strategy: "class", // Add this line
+        }),
+        require("@tailwindcss/forms"),
     ],
-    plugins: [forms,require("@tailwindcss/forms"),],
 };

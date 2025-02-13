@@ -30,9 +30,6 @@ class StandController extends Controller
     }
     public function store(Request $request)
     {
-        dd(
-            $request
-        );
         $validator = Validator::make($request->all(), [
             'no' => 'required|string|max:20',
             'space' => 'required|decimal:0,3',

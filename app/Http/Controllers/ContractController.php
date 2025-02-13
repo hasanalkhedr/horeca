@@ -8,17 +8,22 @@ use App\Models\Contract;
 use App\Models\ContractType;
 use App\Models\ContractValue;
 use App\Models\Event;
+use App\Models\Report;
 use App\Models\Settings\Price;
 use App\Models\Stand;
 use Illuminate\Http\Request;
 
 class ContractController extends Controller
 {
+    public function index(Event $event)
+    {
+        return view('contracts.index', compact('event'));
+    }
     public function create(Request $request, Event $event)
     {
-        $stands = $event->Stands()->get();
+        $stands = $event->availableStands()->get();
         $prices = $event->Prices()->get();
-        $contract_type = ContractType::find($request->contract_type_id);
+        $report = Report::find($request->report_id);
         $categories = [
             'BakeryPastry',
             'Beverage',
@@ -33,10 +38,12 @@ class ContractController extends Controller
             'undefined',
             'Techzone'
         ];
-        return view('contracts.create', compact('event', 'stands', 'prices', 'contract_type', 'categories'));
+        return view('contracts.create', compact('event', 'stands', 'prices', 'report', 'categories'));
     }
     public function store(Request $request)
     {
+        $event = Event::find($request->event_id);
+        $report = Report::find($request->report_id);
         $cats = $request->categories;
         $stand = Stand::find($request->stand_id);
         $company = Company::find($request->company_id);
@@ -44,6 +51,8 @@ class ContractController extends Controller
         $price_amount = $price ? $price->amount : $request->special_price_amount;
         $coordinator = Client::find($request->coordinator_id);
         $contact_person = Client::find($request->contact_person);
+        /*if($contract_type->name === 'Application Form')
+        {
         $fieldValues = [
             'Stand No m x m' => $stand->space . ' sqm',
             'Company' => $company->name,
@@ -73,34 +82,46 @@ class ContractController extends Controller
             'undefined' => in_array('undefined', $cats),
             'Techzone' => in_array('Techzone', $cats)
         ];
-        $contract_type = ContractType::find($request->contract_type_id);
+        } else if($contract_type->name === 'arabic') {
+            $fieldValues = [
+                'Stand #' => $stand->no,
+                'Company  Firm' => $company->name,
+                'Daily Contact Person' => $contact_person->name,
+                'Total_space1' =>$stand->space,
+            ];
+        }*/
         $contract = Contract::create([
             'contract_no' => $request->contract_no,
             'company_id' => $request->company_id,
             'stand_id' => $request->stand_id,
-            'price_id' => $request->price_id,
+            'price_id' => $request->price_id == 0 ? null : $request->price_id,
+            'price_amount' => $request->price_id == 0 ? $request->special_price_amount : null,
             'event_id' => $request->event_id,
-            'contract_type_id' => $request->contract_type_id,
+            'report_id' => $request->report_id,
+            'status' => 'draft',
+            'space_amount' => $stand->space * $price_amount,
+            'contact_person' => $request->contact_person,
+            'exhabition_coordinator' => $request->coordinator_id,
         ]);
-        foreach ($fieldValues as $fieldKey => $fieldValue) {
-            ContractValue::create([
-                'contract_id' => $contract->id,
-                'contract_field_id' => $contract_type->ContractFields()->where('field_name', $fieldKey)->first()->id,
-                'field_value' => $fieldValue,
-            ]);
-        }
-        // $fields = [];
-
-        // foreach ($contract_type->ContractFields as $field) {
-        //     $fields[$field->field_name] = $request->get(str_replace(' ','_',$field->field_name));
+        $stand->status = 'Sold';
+        $stand->save();
+        // foreach ($fieldValues as $fieldKey => $fieldValue) {
+        //     ContractValue::create([
+        //         'contract_id' => $contract->id,
+        //         'contract_field_id' => $contract_type->ContractFields()->where('field_name', $fieldKey)->first()->id,
+        //         'field_value' => $fieldValue,
+        //     ]);
         // }
 
-        $path = url('/storage/' . str_replace('\\\\', '/', $request->path));
-        return view('contracts.preview', compact('fieldValues', 'path', 'contract'));
+        //$path = url('/storage/' . str_replace('\\\\', '/', $request->path));
+        //return view('contracts.preview', compact('fieldValues', 'path', 'contract'));
+        return view('contracts.preview', compact('contract'))->layout('components.layouts.app');
     }
-
-    public function uploadPDF(Request $request, Contract $contract){
-
+    public function preview(Contract $contract) {
+        return view('contracts.preview',compact('contract'))->layout('components.layouts.app');
+    }
+    public function uploadPDF(Request $request, Contract $contract)
+    {
         $request->validate([
             'file' => 'required|file|mimetypes:application/pdf',
         ]);
@@ -108,17 +129,40 @@ class ContractController extends Controller
         // Save the file to storage
         $path = $request->file('file')->storeAs(
             'uploads\\contracts',
-            $contract->contract_no .'-'.$contract->Event->CODE.'-'.$contract->ContractType->name.'.pdf',
+            $contract->contract_no . '-' . $contract->Event->CODE . '-' . $contract->ContractType->name . '.pdf',
         );
-$contract->path = $path;
-$contract->save();
+        $contract->path = $path;
+        $contract->save();
         return response()->json([
             'message' => 'PDF uploaded successfully',
             'path' => $path,
         ]);
 
     }
-    public function previewContract(Request $request)
+
+    public function edit(Contract $contract)
+    {
+        $stands = $contract->event->Stands()->get();
+        $prices = $contract->event->Prices()->get();
+        $contract_type = $contract->ContractType;
+        $categories = [
+            'BakeryPastry',
+            'Beverage',
+            'Catering equipment',
+            'Coffee  Tea Pavilion',
+            'Consultancy Recruitment  Franchise',
+            'Education',
+            'Food',
+            'Hygiene',
+            'Interiors',
+            'International Pavilion',
+            'undefined',
+            'Techzone'
+        ];
+        return view('contracts.edit', compact('contract', 'stands', 'prices', 'contract_type', 'categories'));
+    }
+
+    public function update(Request $request, Contract $contract)
     {
         $cats = $request->categories;
         $stand = Stand::find($request->stand_id);
@@ -157,15 +201,37 @@ $contract->save();
             'Techzone' => in_array('Techzone', $cats)
         ];
         $contract_type = ContractType::find($request->contract_type_id);
+        $contract->Stand->status = 'Available';
+        $contract->Stand->save();
+        $contract->update([
+            'contract_no' => $request->contract_no,
+            'company_id' => $request->company_id,
+            'stand_id' => $request->stand_id,
+            'price_id' => $request->price_id == 0 ? null : $request->price_id,
+            'price_amount' => $request->price_id == 0 ? $request->special_price_amount : null,
 
-        // $fields = [];
-
-        // foreach ($contract_type->ContractFields as $field) {
-        //     $fields[$field->field_name] = $request->get(str_replace(' ','_',$field->field_name));
-        // }
-
+            'contract_type_id' => $request->contract_type_id,
+            'status' => 'draft',
+            'space_amount' => $stand->space * $price_amount,
+        ]);
+        $stand->status = 'Sold';
+        $stand->save();
+        foreach ($contract->ContractValues as $contractValue) {
+            $contractValue->delete();
+        }
+        foreach ($fieldValues as $fieldKey => $fieldValue) {
+            ContractValue::create([
+                'contract_id' => $contract->id,
+                'contract_field_id' => $contract_type->ContractFields()->where('field_name', $fieldKey)->first()->id,
+                'field_value' => $fieldValue,
+            ]);
+        }
         $path = url('/storage/' . str_replace('\\\\', '/', $request->path));
+        return view('contracts.preview', compact('fieldValues', 'path', 'contract'));
+    }
 
-        return view('contracts.preview', compact('fieldValues', 'path'));
+    public function destroy(Contract $contract) {
+        $contract->delete();
+        return response()->json(null, 204);
     }
 }

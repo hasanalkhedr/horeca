@@ -40,8 +40,8 @@ class StandTable extends DataTableComponent
                 }),
             // Column::make('Event', 'event.name')
             //     ->sortable(),
-           // Column::make('Stand Type', 'standType.name')
-             //   ->sortable(),
+            // Column::make('Stand Type', 'standType.name')
+            //   ->sortable(),
             // Column::make('Category', 'category.name')
             //     ->sortable()->collapseAlways(),
             Column::make('Deductable', 'deductable')
@@ -58,10 +58,10 @@ class StandTable extends DataTableComponent
     {
         //dd($this->event);
         if ($this->event->id) {
-            return Stand::query()->where('event_id', $this->event->id)->select(['stands.id', 'no',  'stands.space', 'category_id', 'event_id', 'deductable', /*'stand_type_id'*/]);
+            return Stand::query()->where('event_id', $this->event->id)->select(['stands.id', 'no', 'stands.space', 'category_id', 'event_id', 'deductable', /*'stand_type_id'*/]);
         } else {
             //dd('hhhh');
-            return Stand::query()->select(['stands.id', 'no',  'stands.space', 'category_id', 'event_id', 'deductable', /* 'stand_type_id'*/]);
+            return Stand::query()->select(['stands.id', 'no', 'stands.space', 'category_id', 'event_id', 'deductable', /* 'stand_type_id'*/]);
         }
     }
     public function filters(): array
@@ -80,8 +80,8 @@ class StandTable extends DataTableComponent
                     }),
                 SelectFilter::make('Deductable', 'deductable')
                     ->options(['Not Deductable', 'Deductable'])
-                    ->filter(function(Builder $builder, string $value) {
-                            $builder->where('deductable',$value);
+                    ->filter(function (Builder $builder, string $value) {
+                        $builder->where('deductable', $value);
                     })
             ];
         }

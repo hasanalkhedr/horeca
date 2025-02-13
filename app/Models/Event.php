@@ -22,7 +22,7 @@ class Event extends Model
         });
         static::updated(function (Event $event) {
 
-            if(!$event->wasRecentlyUpdated){
+            if (!$event->wasRecentlyUpdated) {
                 if (array_key_exists('total_space', $event->getChanges()) || array_key_exists('space_to_sell', $event->getChanges())) {
                     $event->free_space = $event->total_space - $event->space_to_sell;
                     $event->remaining_free_space = $event->free_space;
@@ -50,6 +50,12 @@ class Event extends Model
         'vat_rate',
         'payment_method'
     ];
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'apply_start_date' => 'date',
+        'apply_deadline_date' => 'date',
+    ];
     public function BankAccount()
     {
         return $this->hasOne(BankAccount::class);
@@ -71,18 +77,30 @@ class Event extends Model
     {
         return $this->hasMany(Stand::class);
     }
+    public function availableStands()
+    {
+        return $this->stands()->available();
+    }
     public function Prices()
     {
         return $this->hasMany(Price::class);
     }
 
-    public function ContractTypes() {
+    public function ContractTypes()
+    {
         return $this->hasMany(ContractType::class);
     }
-    public function ContractFields() {
-        return $this->hasManyThrough(ContractField::class,ContractType::class,'event_id','contract_type_id','id','id');
+    public function ContractFields()
+    {
+        return $this->hasManyThrough(ContractField::class, ContractType::class, 'event_id', 'contract_type_id', 'id', 'id');
     }
-    public function Contracts() {
+    public function Contracts()
+    {
         return $this->hasMany(Contract::class);
+    }
+
+    public function Reports()
+    {
+        return $this->hasMany(Report::class);
     }
 }
