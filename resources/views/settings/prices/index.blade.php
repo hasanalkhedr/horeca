@@ -67,6 +67,11 @@
                                     <x-text-input type="number" id="amount"
                                         x-model="formData.amount" required />
                                 </div>
+                                <div>
+                                    <x-input-label for="description">Description</x-input-label>
+                                    <x-text-input type="text" class="w-full" id="description"
+                                        x-model="formData.description" required />
+                                </div>
                             </div>
                             <div class="mt-4 w-full text-center">
                                 <x-primary-button type="submit"
@@ -96,7 +101,8 @@
                     category_id: '',
                     stand_type_id: '',
                     currency_id: '',
-                    amount: ''
+                    amount: '',
+                    description: ''
                 },
                 selectedPriceId: null,
                 selectedPrice: null,
@@ -133,7 +139,8 @@
                     category_id: '',
                     stand_type_id: '',
                     currency_id: '',
-                    amount: ''
+                    amount: '',
+                    description: ''
                     };
                     this.errors = null;
                 },

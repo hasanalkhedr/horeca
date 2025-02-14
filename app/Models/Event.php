@@ -48,7 +48,10 @@ class Event extends Model
         'remaining_space_to_sell',
         'remaining_free_space',
         'vat_rate',
-        'payment_method'
+        'payment_method',
+        'country',
+        'city',
+        'address'
     ];
     protected $casts = [
         'start_date' => 'date',

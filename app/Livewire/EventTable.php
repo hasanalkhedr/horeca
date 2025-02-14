@@ -24,6 +24,9 @@ class EventTable extends DataTableComponent
             Column::make('Name', 'name')
                 ->sortable()
                 ->searchable(),
+                Column::make('Location', 'country')
+                ->sortable()
+                ->searchable(),
             Column::make('Apply from date', 'apply_start_date')
                 ->sortable()
                 ->collapseAlways(),
@@ -83,6 +86,9 @@ class EventTable extends DataTableComponent
             'remaining_space_to_sell',
             'remaining_free_space',
             'vat_rate',
+            'country',
+            'city',
+            'address',
         ]);
     }
 

@@ -129,7 +129,7 @@
             </button>
 
             <!-- Go to Route Button -->
-            <button onclick="window.location.href='{{ route('contract_types.index') }}'"
+            <button onclick="window.location.href='{{ route('reports.index') }}'"
                 class="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none">
                 View Templates
             </button>

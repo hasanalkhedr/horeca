@@ -14,4 +14,7 @@ class SponsorPackage extends Model
     public function Currency() {
         return $this->belongsTo(Currency::class);
     }
+    public function Contracts() {
+        return $this->hasMany(Contract::class);
+    }
 }

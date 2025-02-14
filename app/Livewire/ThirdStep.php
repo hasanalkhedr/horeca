@@ -33,6 +33,7 @@ class ThirdStep extends Step
                     'currency_id' => $price->currency_id,
                     'currency_code' => $price->Currency->CODE ?? null,
                     'event_id' => $price->event_id ?? 0,
+                    'description' =>$price->description
                 ];
             })->toArray()),
 
@@ -62,6 +63,7 @@ class ThirdStep extends Step
                     'currency_id'=>$price->currency_id,
                     //'event_id' => $price->event_id,
                     'amount' => $price->amount,
+                    'description' => $price->description
                 ]);
             } else {
                 $p = Price::find($price->id);
@@ -71,6 +73,7 @@ class ThirdStep extends Step
                         'currency_id'=>$price->currency_id,
                         'event_id' => $price->event_id,
                         'amount' => $price->amount,
+                        'description' => $price->description
                     ]);
                 }
             }

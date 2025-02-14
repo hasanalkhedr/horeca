@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 class Price extends Model
 {
     protected $fillable = ['name', 'category_id', 'currency_id',
-                            'amount', 'event_id'];
+                            'amount', 'event_id', 'description'];
 
     public function Category()
     {

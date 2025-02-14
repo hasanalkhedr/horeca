@@ -92,6 +92,7 @@
         </div>
     </div>
     <div class="row mt-4">
+        @if($currentEvents->count()>0)
         <div class="col-lg-6 mb-lg-0 mb-4">
             <div class="card">
                 <div class="card-body p-3">
@@ -134,6 +135,28 @@
                 </div>
             </div>
         </div>
+        @else
+        <div class="col-lg-6 mb-lg-0 mb-4">
+            <div class="card">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div>
+                            <div class="d-flex flex-column h-100">
+                                <p class="mb-1 pt-2 text-bold">No Open Events</p>
+                                <h5 class="font-weight-bolder"></h5>
+                                <p class="mb-5"></p>
+                                <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto"
+                                    href="{{ route('events.create') }}">
+                                    Add New Event
+                                    <i class="fas fa-arrow-right text-sm ms-1" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
         {{-- <div class="col-lg-5">
       <div class="card h-100 p-3">
         <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100" style="background-image: url('../assets/img/ivancik.jpg');">

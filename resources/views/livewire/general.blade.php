@@ -9,6 +9,18 @@
                 <x-input-label for="CODE">Event CODE</x-input-label>
                 <x-text-input id="CODE" wire:model="state.CODE" required />
             </div>
+            <div class="w-1/3 px-4 py-2">
+                <x-input-label for="country">Event country</x-input-label>
+                <x-text-input id="country" wire:model="state.country" required />
+            </div>
+            <div class="w-1/3 px-4 py-2">
+                <x-input-label for="city">Event city</x-input-label>
+                <x-text-input id="city" wire:model="state.city" required />
+            </div>
+            <div class="w-1/3 px-4 py-2">
+                <x-input-label for="address">Event address</x-input-label>
+                <x-text-input id="address" wire:model="state.address" required />
+            </div>
             <div class="w-full px-4 py-2">
                 <x-input-label for="description">Description</x-input-label>
                 <x-textarea-input rows="3" id="description" wire:model="state.description" required />

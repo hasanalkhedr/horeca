@@ -15,6 +15,9 @@ class General extends Step
         $this->mergeState([
             'name' => $this->model->name,
             'CODE' => $this->model->CODE,
+            'country' => $this->model->country,
+            'city' => $this->model->city,
+            'address' => $this->model->address,
             'description' => $this->model->description,
             'start_date' => $this->model->start_date,
             'end_date' => $this->model->end_date,
@@ -39,6 +42,9 @@ class General extends Step
 
         $event->name = $state['name'];
         $event->CODE = $state['CODE'];
+        $event->country = $state['country'];
+        $event->city = $state['city'];
+        $event->address = $state['address'];
         $event->description = $state['description'];
         $event->start_date = $state['start_date'];
         $event->end_date = $state['end_date'];

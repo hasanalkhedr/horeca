@@ -155,6 +155,7 @@ class EventWizard extends WizardComponent
             'currency_id' =>0,
             'currency_code' => '',
             'event_id' => 0,
+            'description' => ''
         ];
     }
 
@@ -183,6 +184,7 @@ class EventWizard extends WizardComponent
             'currency_id' =>0,
             'currency_code' => '',
             'event_id' => 0,
+            'description' => ''
         ];
     }
 
@@ -208,6 +210,7 @@ class EventWizard extends WizardComponent
             'currency_id' =>0,
             'currency_code' => '',
             'event_id' => 0,
+            'description' => ''
         ];
     }
     public $price;
@@ -243,6 +246,7 @@ class EventWizard extends WizardComponent
             'currency_id' => 0,
             'currency_code' => '',
             'event_id' => 0,
+            'description' => ''
         ];
         //dd($this->price);
         return $event;

@@ -28,9 +28,11 @@
                         <table class="w-full border border-gray-300 rounded-lg shadow-lg">
                             <thead class="bg-gray-100">
                                 <tr>
-                                    <th @click="console.log(prices)" class="border border-gray-300 px-1 py-0.5 text-left">Name</th>
+                                    <th @click="console.log(prices)"
+                                        class="border border-gray-300 px-1 py-0.5 text-left">Name</th>
                                     <th class="border border-gray-300 px-1 py-0.5 text-left">Currency</th>
                                     <th class="border border-gray-300 px-1 py-0.5 text-left">Amount</th>
+                                    <th class="border border-gray-300 px-1 py-0.5 text-left">Description</th>
                                     <th class="border border-gray-300 px-1 py-0.5 text-left">Actions</th>
                                 </tr>
                             </thead>
@@ -42,6 +44,8 @@
                                             x-text="ps.currency_code"></td>
                                         <td class="border border-gray-300 px-1 py-0.5" style="width: 80px;"
                                             x-text="ps.amount"></td>
+                                        <td class="border border-gray-300 px-1 py-0.5 text-xs" style="width: 80px;"
+                                            x-text="ps.description"></td>
                                         <td class="border border-gray-300 px-1 py-0.5 space-x-2">
                                             <x-secondary-button type="button"
                                                 @click="$wire.editPrice(ps);isOpen=true;action='Edit';">Edit</x-secondary-button>
@@ -93,9 +97,15 @@
                                             <x-text-input type="number" id="amount" x-model="price.amount"
                                                 x-required="isOpen? 'required': ''" />
                                         </div>
+                                        <div>
+                                            <x-input-label for="description">description</x-input-label>
+                                            <x-text-input type="text" id="description" x-model="price.description"
+                                               />
+                                        </div>
                                     </div>
                                     <div class="mt-4 w-full text-center">
-                                        <x-primary-button type="button" @click="isOpen=false;action == 'Add' ?$wire.addPrice(price): $wire.updatePrice(price)"
+                                        <x-primary-button type="button"
+                                            @click="isOpen=false;action == 'Add' ?$wire.addPrice(price): $wire.updatePrice(price)"
                                             x-text="action"></x-primary-button>
                                     </div>
                                 </div>

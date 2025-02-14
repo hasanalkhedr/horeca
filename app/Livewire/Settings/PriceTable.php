@@ -29,6 +29,8 @@ class PriceTable extends DataTableComponent
                 ->sortable(),
             Column::make('Amount', 'amount')
                 ->sortable(),
+            Column::make('Description', 'description')
+                ->collapseAlways(),
             Column::make('Actions')
                 ->label(function ($row) {
                     return view('livewire.partials.price-actions')
@@ -39,7 +41,7 @@ class PriceTable extends DataTableComponent
 
     public function builder(): \Illuminate\Database\Eloquent\Builder
     {
-        return Price::query()->select(['prices.id', 'prices.name', 'currency_id', 'amount', /*'stand_type_id'*/]);
+        return Price::query()->select(['prices.id', 'prices.name', 'currency_id', 'amount', 'description' /*'stand_type_id'*/]);
     }
 
 }

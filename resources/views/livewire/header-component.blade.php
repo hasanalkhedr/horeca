@@ -4,7 +4,7 @@
         <div>
             <h1 class="text-7xl font-extrabold">{{ $contract->Event->name }}</h1>
             <p class="text-gray-600 text-lg">
-                <span class="font-bold text-gray-500">{{ $contract->Event->start_date->day }} - {{ $contract->Event->end_date->day }} {{ $contract->Event->end_date->format('F Y') }} | {{ $contract->Event->description }}</span>
+                <span class="font-bold text-gray-500">{{ $contract->Event->start_date->day }} - {{ $contract->Event->end_date->day }} {{ $contract->Event->end_date->format('F Y') }} | {{ $contract->Event->address }}, {{ $contract->Event->city }} in {{ $contract->Event->country }}</span>
             </p>
         </div>
     </div>
