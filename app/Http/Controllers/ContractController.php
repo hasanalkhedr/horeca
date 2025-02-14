@@ -24,20 +24,7 @@ class ContractController extends Controller
         $stands = $event->availableStands()->get();
         $prices = $event->Prices()->get();
         $report = Report::find($request->report_id);
-        $categories = [
-            'BakeryPastry',
-            'Beverage',
-            'Catering equipment',
-            'Coffee  Tea Pavilion',
-            'Consultancy Recruitment  Franchise',
-            'Education',
-            'Food',
-            'Hygiene',
-            'Interiors',
-            'International Pavilion',
-            'undefined',
-            'Techzone'
-        ];
+        $categories = $event->Categories()->get();
         return view('contracts.create', compact('event', 'stands', 'prices', 'report', 'categories'));
     }
     public function store(Request $request)
@@ -102,6 +89,19 @@ class ContractController extends Controller
             'space_amount' => $stand->space * $price_amount,
             'contact_person' => $request->contact_person,
             'exhabition_coordinator' => $request->coordinator_id,
+            'special_design_text' => $request->special_design_text,
+            'special_design_price' => $request->special_design_price,
+            'if_water' =>$request->if_water,
+            'if_electricity' =>$request->if_electricity,
+            'electricity_text' =>$request->electricity_text,
+            'water_electricity_amount' =>$request->water_electricity_amount,
+            'new_product' => '',
+            'sponsor_amount' => '',
+            'advertisment_amount' => '',
+            'sponsor_package_id' => '',
+            'specify_text' => '',
+            'notes1' => '',
+            'notes2' => '',
         ]);
         $stand->status = 'Sold';
         $stand->save();

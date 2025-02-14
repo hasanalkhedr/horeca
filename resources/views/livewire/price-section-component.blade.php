@@ -50,13 +50,14 @@
     </div>
     <div class="flex justify-between">
         <div class="w-5/6 text-sm items-center gap-2 mb-[2px] mr-6 border border-black">
-            <strong>Special design option</strong> (includes wooden platforms, carpet, wood white panel walls, lighting
-            and one counter with high stool)
-            <input type="text" class="border-b border-gray-500 ml-20 w-8"> m² x 100 US$ / m²
+            <strong>{{$contract->special_design_text}}</strong>
+             {{-- (includes wooden platforms, carpet, wood white panel walls, lighting
+            and one counter with high stool) --}}
+            {{$contract->Stand->space}} m² x {{$contract->special_design_price}} US$ / m²
         </div>
         <div class="w-1/6">
-            <div class="text-right font-bold border border-black pl-16 mb-[2px] pb-[5px]">
-                <p>US$</p>
+            <div class="text-right font-bold border border-black  mb-[2px] pb-[5px]">
+                <p>{{$contract->special_design_amount}} US$</p>
             </div>
         </div>
     </div>

@@ -4,6 +4,7 @@ namespace App\Livewire;
 use App\Models\Contract;
 use App\Models\ContractType;
 use App\Models\Event;
+use App\Models\Report;
 use App\Models\Stand;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
@@ -17,7 +18,7 @@ class ContractTable extends DataTableComponent
     public function mount($event = null, $contractType = null)
     {
         $this->event = $event;
-        $this->contractType =  $contractType;
+        $this->contractType = $contractType;
     }
     public function configure(): void
     {
@@ -37,12 +38,12 @@ class ContractTable extends DataTableComponent
                 ->sortable(),
             Column::make('Stand', 'stand.no')
                 ->sortable(),
-            Column::make('Amount', 'total_amount')
+            Column::make('Amount', 'net_total')
                 ->secondaryHeader(function ($rows) {
-                    return " Sum of Amount: " . $rows->sum('total_amount');
+                    return " Sum of Amount: " . $rows->sum('net_total');
                 }),
             Column::make('Form | Actions')
-                ->label(function($row) {
+                ->label(function ($row) {
                     return view('livewire.partials.contract-form-link')->with('contract', $row);
                 })
             // Column::make('Actions')
@@ -56,23 +57,94 @@ class ContractTable extends DataTableComponent
     public function builder(): Builder
     {
         if ($this->event->id) {
-            return Contract::query()->where('contracts.event_id', $this->event->id)->select(['contracts.id', 'contract_no',  'company_id', 'stand_id', 'price_id', 'contracts.event_id', 'contract_type_id','space_amount','sponsor_amount','advertisment_amount','total_amount','contracts.status', 'contracts.path']);
+            return Contract::query()->where('contracts.event_id', $this->event->id)->select([
+                'contracts.id',
+                'contract_no',
+                'company_id',
+                'stand_id',
+                'price_id',
+                'contracts.event_id',
+                'contract_type_id',
+                'space_amount',
+                'sponsor_amount',
+                'advertisment_amount',
+                'contracts.status',
+                'contracts.path',
+                'price_amount',
+                'report_id',
+                'contact_person',
+                'exhabition_coordinator',
+                'special_design_text',
+                'special_design_price',
+                'special_design_amount',
+                'if_water',
+                'if_electricity',
+                'electricity_text',
+                'water_electricity_amount',
+                'new_product',
+                'sponsor_package_id',
+                'specify_text',
+                'notes1',
+                'notes2',
+                'sub_total_1',
+                'd_i_a',
+                'sub_total_2',
+                'vat_amount',
+                'net_total'
+            ]);
 
         } else {
-            return Contract::query()->select(['contracts.id', 'contract_no',  'company_id', 'stand_id', 'price_id', 'contracts.event_id', 'contract_type_id','space_amount','sponsor_amount','advertisment_amount','total_amount','contracts.status', 'contracts.path']);
+            return Contract::query()->select([
+                'contracts.id',
+                'contract_no',
+                'company_id',
+                'stand_id',
+                'price_id',
+                'contracts.event_id',
+                'contract_type_id',
+                'space_amount',
+                'sponsor_amount',
+                'advertisment_amount',
+                'contracts.status',
+                'contracts.path',
+                'price_amount',
+                'report_id',
+                'contact_person',
+                'exhabition_coordinator',
+                'special_design_text',
+                'special_design_price',
+                'special_design_amount',
+                'if_water',
+                'if_electricity',
+                'electricity_text',
+                'water_electricity_amount',
+                'new_product',
+                'sponsor_package_id',
+                'specify_text',
+                'notes1',
+                'notes2',
+                'sub_total_1',
+                'd_i_a',
+                'sub_total_2',
+                'vat_amount',
+                'net_total'
+            ]);
         }
     }
     public function filters(): array
     {
         $values = [];
         if ($this->event->id) {
-            return [SelectFilter::make('Contract Type', 'contract_type')
-            ->options($this->event->ContractTypes
-                    ->keyBy('id')
-                    ->map(fn($ct)=>$ct->name)->toArray(),
-            )->filter(function(Builder $builder, string $value) {
-                    $builder->where('contracts.contract_type_id',$value);
-            })];
+            return [
+                SelectFilter::make('Contract Template', 'contract_template')
+                    ->options(
+                        $this->event->Reports
+                            ->keyBy('id')
+                            ->map(fn($ct) => $ct->name)->toArray(),
+                    )->filter(function (Builder $builder, string $value) {
+                        $builder->where('contracts.report_id', $value);
+                    })
+            ];
         } else {
 
             return [
@@ -84,12 +156,13 @@ class ContractTable extends DataTableComponent
                     )->filter(function (Builder $builder, string $value) {
                         $builder->where('contracts.event_id', $value);
                     }),
-                SelectFilter::make('Contract Type', 'contract_type')
-                    ->options(ContractType::all()
+                SelectFilter::make('Contract Template', 'contract_template')
+                    ->options(
+                        Report::all()
                             ->keyBy('id')
-                            ->map(fn($ct)=>$ct->name)->toArray(),
-                    )->filter(function(Builder $builder, string $value) {
-                            $builder->where('contracts.contract_type_id',$value);
+                            ->map(fn($ct) => $ct->name)->toArray(),
+                    )->filter(function (Builder $builder, string $value) {
+                        $builder->where('contracts.report_id', $value);
                     })
             ];
 

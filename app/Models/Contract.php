@@ -15,6 +15,7 @@ class Contract extends Model
             $contract->contract_no = Contract::generateContractNumber($contract);
         });
         static::created(function (Contract $contract) {
+            $contract->special_design_amount = $contract->special_design_price * $contract->Stand->space;
             $contract->sub_total_1 = $contract->space_amount + $contract->sponsor_amount +
                 $contract->advertisment_amount + $contract->special_design_amount +
                 $contract->water_electricity_amount;
@@ -27,6 +28,7 @@ class Contract extends Model
         static::updated(function (Contract $contract) {
 
             if (!$contract->wasRecentlyUpdated) {
+                $contract->special_design_amount = $contract->special_design_price * $contract->Stand->space;
                 $contract->sub_total_1 = $contract->space_amount + $contract->sponsor_amount +
                     $contract->advertisment_amount + $contract->special_design_amount +
                     $contract->water_electricity_amount;

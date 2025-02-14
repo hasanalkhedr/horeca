@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Event;
+use App\Models\Settings\Category;
 use App\Models\Settings\Currency;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -21,7 +22,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
-        User::create(['name' => 'admin', 'email'=>'admin@horeca.com', 'password'=>'password']);
+        User::create(['name' => 'admin', 'email' => 'admin@horeca.com', 'password' => 'password']);
         $this->call([
             RoleSeeder::class,
         ]);
@@ -38,5 +39,8 @@ class DatabaseSeeder extends Seeder
             'rate_to_usd' => '0.9',
             'country' => 'Europe'
         ]);
+
+
     }
 }
+

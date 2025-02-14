@@ -4,7 +4,7 @@
     <h1 class="text-3xl font-bold text-gray-800 text-center">Contract Form</h1>
     <p class="text-center text-gray-600">Fill out the contract form with the required details.</p>
 
-    <form x-data="contract()" action="{{ route('contracts.store') }}" method="POST"
+    <form action="{{ route('contracts.store') }}" method="POST"
         class="w-full mx-auto bg-white shadow-lg rounded-lg p-6 space-y-8">
         @csrf
         <h2 class="text-xl font-semibold text-gray-800">Contract Basic Information</h2>
@@ -49,7 +49,7 @@
         @endif
         @if (in_array('price-section-component', $report->components))
             <x-form-divider>Stand Info:</x-form-divider>
-            <div class="flex flex-wrap -mx-3 mb-2">
+            <div class="flex flex-wrap -mx-3 mb-2 w-full">
                 <div class="w-full px-3">
                     <x-input-label for="stand_id">Stand:</x-input-label>
                     <x-select-input name="stand_id" id="stand_id" required>
@@ -84,8 +84,48 @@
                             }
                         </script>
                     </div>
+                    <div class="">
+                        <x-input-label class="inline" for="special_design_text">Special Conditions:</x-input-label>
+                        <input
+                            class="w-1/2 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                            type="text" name="special_design_text" />
+                        <x-input-label class="inline" for="special_design_price">Price per SQM:</x-input-label>
+                        <input
+                            class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                            name="special_design_price" id="special_design_price" type="number" step="0.01" />
+                    </div>
                 </div>
             </div>
+        @endif
+        @if (in_array('water-section', $report->components))
+            <x-form-divider>Extra Water/Electricity:</x-form-divider>
+            <label class="inline-flex items-center">
+                <input type="checkbox" name="if_water" value="true"
+                    class="text-indigo-600 focus:ring-indigo-500 border-gray-300">
+                <span class="ml-2 text-sm text-gray-700"> Water point needed (if available)</span>
+            </label>
+            <label class="inline-flex items-center">
+                <input type="checkbox" name="if_electricity" class="text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                    value="true" id="if_electricity" onclick="toogleElectricityAmount(this)" /> Extra electricity
+                <input
+                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                    name="electricity_text" id="electricity_text" type="text" placeholder="WATT Needed" disabled />
+                <input
+                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                    name="water_electricity_amount" placeholder="Water & electricity Amount" type="number"
+                    step="0.01" />
+                <script>
+                    function toogleElectricityAmount(checkboxElement) {
+                        // Disable all amount inputs
+                        const amountInput = document.getElementById('electricity_text');
+                        const radio_sp = document.getElementById('if_electricity')
+                        amountInput.disabled = !radio_sp.checked;
+                        amountInput.focus();
+                    }
+                </script>
+
+            </label>
+            <h1>__TO_BE_CONTINUED__</h1>
         @endif
         {{-- <input type="hidden" name="path" value="{{ $contract_type->path }}"> --}}
         <input type="hidden" name="report_id" value="{{ $report->id }}">
@@ -96,54 +136,6 @@
                 class="w-1/2 bg-blue-600 text-white py-3 px-4 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                 Submit
             </button>
-            {{-- <button type="button" @click="openModal('{{$contract_type->path}}')"
-                class="w-1/2 bg-blue-600 text-white py-3 px-4 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                Preview Contract
-            </button> --}}
-        </div>
-
-
-        <!-- Modal -->
-        <div x-show="isOpen" @click.away="closeModal()" @keydown.escape.window="closeModal()" x-cloak
-            class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" x-transition>
-            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-4xl">
-                <div class="flex justify-between items-center mb-4">
-                    <button @click="closeModal()"
-                        class="text-gray-600 text-3xl hover:text-gray-800 transition-colors duration-200">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div id="pdfPreviewContainer" x-show="previewUrl">
-                    <embed id="pdfPreview" :src="previewUrl" type="application/pdf" width="100%" height="500px">
-                </div>
-            </div>
         </div>
     </form>
-    <script>
-        function contract() {
-            return {
-                isOpen: false,
-
-                previewUrl: '',
-
-                getBaseUrl() {
-                    return `${window.location.protocol}//${window.location.host}`;
-                },
-                convertPathToUrl(filePath) {
-                    const baseUrl = this.getBaseUrl();
-                    return `${baseUrl}/storage/${filePath.replace(/\\/g, '/')}`;
-                },
-
-                openModal(path) {
-                    this.isOpen = true;
-                    this.previewUrl = this.convertPathToUrl(path);
-                    console.log(this.previewUrl);
-                },
-                closeModal() {
-                    this.isOpen = false;
-                    this.previewUrl = null;
-                },
-            };
-        }
-    </script>
 @endsection
