@@ -10,6 +10,7 @@ use App\Models\ContractValue;
 use App\Models\Event;
 use App\Models\Report;
 use App\Models\Settings\Price;
+use App\Models\SponsorPackage;
 use App\Models\Stand;
 use Illuminate\Http\Request;
 
@@ -25,7 +26,8 @@ class ContractController extends Controller
         $prices = $event->Prices()->get();
         $report = Report::find($request->report_id);
         $categories = $event->Categories()->get();
-        return view('contracts.create', compact('event', 'stands', 'prices', 'report', 'categories'));
+        $sponsor_packages = SponsorPackage::all();
+        return view('contracts.create', compact('event', 'stands', 'prices', 'report', 'categories', 'sponsor_packages'));
     }
     public function store(Request $request)
     {
@@ -91,17 +93,16 @@ class ContractController extends Controller
             'exhabition_coordinator' => $request->coordinator_id,
             'special_design_text' => $request->special_design_text,
             'special_design_price' => $request->special_design_price,
-            'if_water' =>$request->if_water,
-            'if_electricity' =>$request->if_electricity,
-            'electricity_text' =>$request->electricity_text,
-            'water_electricity_amount' =>$request->water_electricity_amount,
-            'new_product' => '',
-            'sponsor_amount' => '',
-            'advertisment_amount' => '',
-            'sponsor_package_id' => '',
-            'specify_text' => '',
-            'notes1' => '',
-            'notes2' => '',
+            'if_water' => $request->if_water,
+            'if_electricity' => $request->if_electricity,
+            'electricity_text' => $request->electricity_text,
+            'water_electricity_amount' => $request->water_electricity_amount,
+            'new_product' => $request->new_product,
+            //'advertisment_amount' => '',
+            'sponsor_package_id' => $request->sponsor_package_id,
+            'specify_text' => $request->specify_text,
+            'notes1' => $request->notes1,
+            'notes2' => $request->notes2,
         ]);
         $stand->status = 'Sold';
         $stand->save();
@@ -117,8 +118,9 @@ class ContractController extends Controller
         //return view('contracts.preview', compact('fieldValues', 'path', 'contract'));
         return view('contracts.preview', compact('contract'))->layout('components.layouts.app');
     }
-    public function preview(Contract $contract) {
-        return view('contracts.preview',compact('contract'))->layout('components.layouts.app');
+    public function preview(Contract $contract)
+    {
+        return view('contracts.preview', compact('contract'))->layout('components.layouts.app');
     }
     public function uploadPDF(Request $request, Contract $contract)
     {
@@ -230,7 +232,8 @@ class ContractController extends Controller
         return view('contracts.preview', compact('fieldValues', 'path', 'contract'));
     }
 
-    public function destroy(Contract $contract) {
+    public function destroy(Contract $contract)
+    {
         $contract->delete();
         return response()->json(null, 204);
     }

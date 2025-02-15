@@ -1,8 +1,7 @@
-<div class="max-w-4xl mx-auto p-0 pt-[2px] bg-white">
+<div class="max-w-4xl w-full p-0 pt-[2px] bg-white">
     <div class="flex justify-between">
         <div class="w-5/6 items-center gap-2 mb-[2px] mr-6 border border-black">
-            <label class="font-bold">Advertisement in Hospitality News</label>
-            <input type="text" class="">
+            <label class="font-semibold">Advertisement in Hospitality News <span class="font-bold underline"></span></label>
         </div>
         <div class="w-1/6">
             <div class="text-right font-bold border border-black pl-16 mb-[2px]">

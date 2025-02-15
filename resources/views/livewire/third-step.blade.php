@@ -2,7 +2,7 @@
     <div class="flex flex-wrap px-4 mx-4">
         <div x-data="{ all_categories: @entangle('state.all_categories'), categories: @entangle('state.categories') }">
             <h2>Categories</h2>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {{-- <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <template x-for="category in all_categories">
                     <div>
                         <x-input-label x-text="category.name"></x-input-label>
@@ -15,6 +15,21 @@
                                 @change="$wire.toogleCategory(category.id,$event.target.checked)" />
                         </template>
                     </div>
+                </template>
+            </div> --}}
+            <div class="space-y-2 grid grid-cols-2 gap-2">
+                <template x-for="category in all_categories">
+                    <label class="flex items-center space-x-2">
+                        <template x-if="categories.includes(category.id)">
+                            <input type="checkbox" checked @change="$wire.toogleCategory(category.id,$event.target.checked)"
+                                class="form-checkbox h-5 w-5 text-blue-600 rounded">
+                        </template>
+                        <template x-if="!categories.includes(category.id)">
+                            <input type="checkbox" @change="$wire.toogleCategory(category.id,$event.target.checked)"
+                                class="form-checkbox h-5 w-5 text-blue-600 rounded">
+                        </template>
+                        <span class="text-gray-700" x-text="category.name"></span>
+                    </label>
                 </template>
             </div>
         </div>
@@ -99,8 +114,7 @@
                                         </div>
                                         <div>
                                             <x-input-label for="description">description</x-input-label>
-                                            <x-text-input type="text" id="description" x-model="price.description"
-                                               />
+                                            <x-text-input type="text" id="description" x-model="price.description" />
                                         </div>
                                     </div>
                                     <div class="mt-4 w-full text-center">

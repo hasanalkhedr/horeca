@@ -1,4 +1,4 @@
-<div class="max-w-4xl mx-auto p-0 bg-white pt-[2px]">
+<div class="max-w-4xl w-full p-0 bg-white pt-[2px]">
     <div class="flex justify-between">
         <div class="w-5/6">
             <h2 class="font-bold text-lg leading-none">2. APPLICATION: <span class="text-sm font-normal">We hereby apply
@@ -26,7 +26,7 @@
             <div class="w-5/6 items-center text-xs gap-2 mb-[2px]">
                 <input type="checkbox" class="mr-2" @checked($price->id == $contract->price_id)>
                 <label class="font-bold">{{ $price->name }}</label>
-                <span class="text-[8px] ml-1">{{$price->description}}</span>
+                <span class="text-[8px] ml-1">{{ $price->description }}</span>
                 {{-- <span class="text-[8px] ml-1">(includes carpet, wall panels signboard, stand number, power point and
                 lighting)</span> --}}
                 {{ $contract->Stand->space }} m² x {{ $price->amount }} US$ / m²
@@ -48,17 +48,31 @@
 
         </div>
     </div>
-    <div class="flex justify-between">
-        <div class="w-5/6 text-sm items-center gap-2 mb-[2px] mr-6 border border-black">
-            <strong>{{$contract->special_design_text}}</strong>
-             {{-- (includes wooden platforms, carpet, wood white panel walls, lighting
+    @if ($contract->special_design_amount > 0)
+        <div class="flex justify-between">
+            <div class="w-5/6 text-sm items-center gap-2 mb-[2px] mr-6 border border-black">
+                <strong>{{ $contract->special_design_text }}</strong>
+                {{-- (includes wooden platforms, carpet, wood white panel walls, lighting
             and one counter with high stool) --}}
-            {{$contract->Stand->space}} m² x {{$contract->special_design_price}} US$ / m²
-        </div>
-        <div class="w-1/6">
-            <div class="text-right font-bold border border-black  mb-[2px] pb-[5px]">
-                <p>{{$contract->special_design_amount}} US$</p>
+                {{ $contract->Stand->space }} m² x {{ $contract->special_design_price }} US$ / m²
+            </div>
+            <div class="w-1/6">
+                <div class="text-right font-bold border border-black  mb-[2px] pb-[5px]">
+                    <p>{{ $contract->special_design_amount }} US$</p>
+                </div>
             </div>
         </div>
-    </div>
+    @else
+        <div class="flex justify-between">
+            <div class="w-5/6 text-sm items-center gap-2 mb-[2px] mr-6 border border-black">
+                <strong>Special Design Option</strong> (includes wooden platforms, carpet, wood white panel walls, lighting and one counter with high stool)
+                ______ m² x ______ US$ / m²
+            </div>
+            <div class="w-1/6">
+                <div class="text-right font-bold border border-black pl-16 mb-[2px] pb-[5px]">
+                    <p> US$</p>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

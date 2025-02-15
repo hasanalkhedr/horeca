@@ -37,12 +37,12 @@
                 placeholder="Choose a Company" parentLabel="Company" childLabel="Exhabition Co-ordinator"
                 child2Label="Daily Contact Person" />
             <x-form-divider>Categories:</x-form-divider>
-            <div class="mt-2 flex flex-wrap gap-4">
+            <div class="space-y-2 grid grid-cols-3 gap-2">
                 @foreach ($categories as $category)
-                    <label class="inline-flex items-center">
+                    <label class="flex items-center space-x-2">
                         <input type="checkbox" name="categories[]" value="{{ $category }}"
-                            class="text-indigo-600 focus:ring-indigo-500 border-gray-300">
-                        <span class="ml-2 text-sm text-gray-700">{{ $category }}</span>
+                            class="form-checkbox h-5 w-5 text-blue-600 rounded">
+                        <span class="ml-2 text-sm text-gray-700">{{ $category->name }}</span>
                     </label>
                 @endforeach
             </div>
@@ -100,13 +100,13 @@
         @if (in_array('water-section', $report->components))
             <x-form-divider>Extra Water/Electricity:</x-form-divider>
             <label class="inline-flex items-center">
-                <input type="checkbox" name="if_water" value="true"
+                <input type="checkbox" name="if_water" value="1"
                     class="text-indigo-600 focus:ring-indigo-500 border-gray-300">
                 <span class="ml-2 text-sm text-gray-700"> Water point needed (if available)</span>
             </label>
             <label class="inline-flex items-center">
                 <input type="checkbox" name="if_electricity" class="text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                    value="true" id="if_electricity" onclick="toogleElectricityAmount(this)" /> Extra electricity
+                    value="1" id="if_electricity" onclick="toogleElectricityAmount(this)" /> Extra electricity
                 <input
                     class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                     name="electricity_text" id="electricity_text" type="text" placeholder="WATT Needed" disabled />
@@ -125,7 +125,45 @@
                 </script>
 
             </label>
-            <h1>__TO_BE_CONTINUED__</h1>
+        @endif
+        @if (in_array('new-product-section', $report->components))
+            <x-form-divider>New Product to launch</x-form-divider>
+            <div class="w-full px-3">
+                <x-input-label for="new_product">New Product to launch</x-input-label>
+                <x-text-input name="new_product" id="new_product" required />
+            </div>
+        @endif
+        @if (in_array('sponsor-section', $report->components))
+            <x-form-divider>Sponsor Package:</x-form-divider>
+            <div class="flex flex-wrap -mx-3 mb-2 w-full">
+                <div class="w-full px-3">
+                    <x-input-label for="sponsor_package_id">Choose Sponsor Package:</x-input-label>
+                    <x-select-input name="sponsor_package_id" id="sponsor_package_id" required>
+                        <option value="">-- Select Value --</option>
+                        @foreach ($sponsor_packages as $package)
+                            <option value="{{ $package->id }}">{{ $package->title }}|{{ $package->total_price }}
+                                {{ $package->Currency->CODE }}</option>
+                        @endforeach
+                    </x-select-input>
+                </div>
+                <div class="w-full px-3">
+                    <x-input-label for="specify_text">Specify:</x-input-label>
+                    <x-text-input name="specify_text" id="specify_text" required />
+                </div>
+            </div>
+        @endif
+        @if (in_array('notes-section', $report->components))
+            <x-form-divider>Contract Notes:</x-form-divider>
+            <div class="flex flex-wrap -mx-3 mb-2 w-full">
+                <div class="w-full px-3">
+                    <x-input-label for="notes1">Notes:</x-input-label>
+                    <x-text-input name="notes1" id="notes1"/>
+                </div>
+                <div class="w-full px-3">
+                    <x-input-label for="notes2">Notes:</x-input-label>
+                    <x-text-input name="notes2" id="notes2"/>
+                </div>
+            </div>
         @endif
         {{-- <input type="hidden" name="path" value="{{ $contract_type->path }}"> --}}
         <input type="hidden" name="report_id" value="{{ $report->id }}">

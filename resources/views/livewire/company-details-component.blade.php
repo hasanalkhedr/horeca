@@ -100,14 +100,14 @@
             <tr>
                 <td class="border border-gray-800 p-0" rowspan="2"><span class="font-bold text-lg block leading-none">Category</span><span class="text-xs"> (please select)</span></td>
                 @php
-                    $l =floor(count($contract->Event->Categories) / 2)+1;
+                    $l =floor(count($contract->Event->Categories) / 2);
                 @endphp
                 @foreach ($contract->Event->Categories as $index => $category)
                     <td class="border border-gray-800 items-center text-center  p-0">
                         <label class="flex items-center">
                             <input type="checkbox" class="w-3 h-3 border rounded"
                                 @if (in_array($category, $selected_categories)) checked @endif>
-                            <span class="text-[10px]">{{ $category }}</span>
+                            <span class="text-[10px]">{{ $category->name }}</span>
                         </label>
                     </td>
                     @if ($index == $l - 1)

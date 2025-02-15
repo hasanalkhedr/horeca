@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use Ramsey\Uuid\Type\Decimal;
 use Vildanbina\LivewireWizard\Components\Step;
 use Illuminate\Validation\Rule;
 
