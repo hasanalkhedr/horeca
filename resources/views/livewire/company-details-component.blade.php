@@ -106,7 +106,7 @@
                     <td class="border border-gray-800 items-center text-center  p-0">
                         <label class="flex items-center">
                             <input type="checkbox" class="w-3 h-3 border rounded"
-                                @if (in_array($category, $selected_categories)) checked @endif>
+                                @if ($contract->category_id == $category->id) checked @endif>
                             <span class="text-[10px]">{{ $category->name }}</span>
                         </label>
                     </td>

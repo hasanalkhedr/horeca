@@ -7,7 +7,7 @@
             <label class="block font-semibold text-sm">Name <span class="font-bold underline">{{$contract->ExhabitionCoordinator->name}}</span></label>
             <label class="block font-semibold text-sm">Position in company <span class="font-bold underline">{{$contract->ExhabitionCoordinator->position}}</span></label>
 
-            <label class="font-semibold text-xs">For Organizers use only</label>
+            <label class="font-semibold text-xs mt-2 pt-2">For Organizers use only</label>
             <table class="w-full">
                 <tr>
                     <td class="border-l border-b border-gray-500 text-left text-sm font-semibold">SR/EO</td>

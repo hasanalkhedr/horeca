@@ -5,7 +5,7 @@
     <p class="text-center text-gray-600">Fill out the contract form with the required details.</p>
 
     <form action="{{ route('contracts.store') }}" method="POST"
-        class="w-full mx-auto bg-white shadow-lg rounded-lg p-6 space-y-8">
+        class="w-full mx-auto bg-white shadow-lg rounded-lg px-2 py-1 space-y-1">
         @csrf
         <h2 class="text-xl font-semibold text-gray-800">Contract Basic Information</h2>
         <div class="flex flex-wrap -mx-3 mb-2">
@@ -41,11 +41,23 @@
                 @foreach ($categories as $category)
                     <label class="flex items-center space-x-2">
                         <input type="checkbox" name="categories[]" value="{{ $category }}"
-                            class="form-checkbox h-5 w-5 text-blue-600 rounded">
+                            class="form-checkbox h-5 w-5 text-blue-600 rounded single-checkbox">
                         <span class="ml-2 text-sm text-gray-700">{{ $category->name }}</span>
                     </label>
                 @endforeach
             </div>
+            <script>
+                document.querySelectorAll('.single-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        if (this.checked) {
+                            // Uncheck all other checkboxes
+                            document.querySelectorAll('.single-checkbox').forEach(other => {
+                                if (other !== this) other.checked = false;
+                            });
+                        }
+                    });
+                });
+                </script>
         @endif
         @if (in_array('price-section-component', $report->components))
             <x-form-divider>Stand Info:</x-form-divider>
@@ -130,7 +142,7 @@
             <x-form-divider>New Product to launch</x-form-divider>
             <div class="w-full px-3">
                 <x-input-label for="new_product">New Product to launch</x-input-label>
-                <x-text-input name="new_product" id="new_product" required />
+                <x-text-input name="new_product" id="new_product" />
             </div>
         @endif
         @if (in_array('sponsor-section', $report->components))
@@ -138,7 +150,7 @@
             <div class="flex flex-wrap -mx-3 mb-2 w-full">
                 <div class="w-full px-3">
                     <x-input-label for="sponsor_package_id">Choose Sponsor Package:</x-input-label>
-                    <x-select-input name="sponsor_package_id" id="sponsor_package_id" required>
+                    <x-select-input name="sponsor_package_id" id="sponsor_package_id">
                         <option value="">-- Select Value --</option>
                         @foreach ($sponsor_packages as $package)
                             <option value="{{ $package->id }}">{{ $package->title }}|{{ $package->total_price }}
@@ -148,7 +160,7 @@
                 </div>
                 <div class="w-full px-3">
                     <x-input-label for="specify_text">Specify:</x-input-label>
-                    <x-text-input name="specify_text" id="specify_text" required />
+                    <x-text-input name="specify_text" id="specify_text" />
                 </div>
             </div>
         @endif

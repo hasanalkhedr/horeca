@@ -12,15 +12,13 @@
 @extends('components.layouts.app')
 @section('content')
     <!-- Page 1 -->
-    <div
-        class="page page-container mx-auto bg-white min-h-[297mm] max-w-[210mm] shadow-lg print:shadow-none px-[5mm] py-[1mm] my-8 print:my-0 relative">
+    <div class="page mx-auto bg-white min-h-[297mm] max-w-[210mm] shadow-lg print:shadow-none px-[7mm] py-[5mm] my-8 print:my-0 relative">
         @foreach ($contract->Report->components as $component)
             @livewire($component, [$contract])
         @endforeach
     </div>
     <!-- Page 2: Terms and Conditions -->
-    <div
-        class="page page-container mx-auto bg-white min-h-[297mm] max-w-[210mm] shadow-lg print:shadow-none px-[5mm] py-[1mm] my-8 print:my-0 relative">
+    <div class="page mx-auto bg-white min-h-[297mm] max-w-[210mm] shadow-lg print:shadow-none px-[7mm] py-[5mm] my-8 print:my-0 relative">
         @livewire('footer-component')
     </div>
 @endsection

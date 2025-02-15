@@ -11,7 +11,7 @@ use Livewire\Component;
 class SignatureSection extends Component
 {
     public Contract $contract;
-    public function mount($contract)
+    public function mount($contract = null)
     {
         if ($contract) {
             $this->contract = $contract;

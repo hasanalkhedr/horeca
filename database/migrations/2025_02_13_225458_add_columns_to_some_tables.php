@@ -36,6 +36,7 @@ return new class extends Migration {
             $table->decimal('sub_total_2')->default(0);
             $table->decimal('vat_amount')->default(0);
             $table->decimal('net_total')->default(0);
+            $table->foreignId('category_id')->nullable()->constrained('categories')->nullOnDelete();
         });
     }
 
@@ -44,13 +45,15 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('some_tables', function (Blueprint $table) {
+        Schema::table('events', function (Blueprint $table) {
             $table->dropColumn(['country', 'city', 'address']);
         });
         Schema::table('prices', function (Blueprint $table) {
             $table->dropColumn('description');
         });
         Schema::table('contracts', function (Blueprint $table) {
+            $table->dropForeign('contracts_sponsor_package_id_foreign');
+            $table->dropForeign('contracts_category_id_foreign');
             $table->dropColumn([
                 'special_design_text',
                 'special_design_price',
@@ -68,6 +71,7 @@ return new class extends Migration {
                 'sub_total_2',
                 'vat_amount',
                 'net_total',
+                'category_id',
             ]);
             $table->renameColumn('sub_total_1', 'total_amount');
         });

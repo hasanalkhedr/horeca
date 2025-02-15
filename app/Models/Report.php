@@ -11,7 +11,8 @@ class Report extends Model
     protected $fillable = [
         'name',
         'components',
-        'event_id'
+        'event_id',
+        'bankAccount'
     ];
 
     protected $casts = [

@@ -13,8 +13,8 @@
         </div>
         <div class="mb-4">
             <label class="text-gray-700 font-semibold">Choose Event <span class="text-red-500">*</span></label>
-            <select class="w-full px-3 py-2 border rounded-md focus:ring focus:ring-blue-200 focus:outline-none" required
-                wire:model="event_id" name="event_id">
+            <select class="w-full px-3 py-2 border rounded-md focus:ring focus:ring-blue-200 focus:outline-none"
+                required wire:model="event_id" name="event_id">
                 <option value="">-- Select Event --</option>
                 @foreach ($events as $evt)
                     <option value="{{ $evt->id }}">{{ $evt->name }}</option>
@@ -68,6 +68,7 @@
                         class="form-checkbox h-5 w-5 text-blue-600 rounded">
                     <span class="text-gray-700">Payment and Totals Section</span>
                 </label>
+                <input type="text" name="bankAccount" wire:model="bankAccount" id="">
                 <label class="flex items-center space-x-2">
                     <input type="checkbox" wire:model.live="selectedComponents" value="notes-section"
                         class="form-checkbox h-5 w-5 text-blue-600 rounded">
@@ -91,20 +92,20 @@
 
             </div>
         </div>
-<!-- Flash Message -->
-@if ($message)
-<div
-    class="p-4 @if ($messageType === 'success') bg-green-100 border-green-400 text-green-700 @else bg-red-100 border-red-400 text-red-700 @endif rounded">
-    {{ $message }}
-    @if ($messageType === 'success')
-        <div
-            class="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none">
-            <a target="_blank" href="{{ route('reports.show', ['id' => $report->id]) }}">Preview
-                Report</a>
-        </div>
-    @endif
-</div>
-@endif
+        <!-- Flash Message -->
+        @if ($message)
+            <div
+                class="p-4 @if ($messageType === 'success') bg-green-100 border-green-400 text-green-700 @else bg-red-100 border-red-400 text-red-700 @endif rounded">
+                {{ $message }}
+                @if ($messageType === 'success')
+                    <div
+                        class="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none">
+                        <a target="_blank" href="{{ route('reports.show', ['id' => $report->id]) }}">Preview
+                            Report</a>
+                    </div>
+                @endif
+            </div>
+        @endif
         {{-- <!-- Save Button -->
         <div class="mt-6">
             <button wire:click="saveReport"
@@ -163,7 +164,11 @@
                             <div data-id="{{ $component }}"
                                 class="bg-white p-2 border rounded shadow-sm cursor-move flex justify-between items-center">
                                 {{-- <span class="text-gray-700">{{ ucfirst(str_replace('_', ' ', $component)) }}</span> --}}
-                                @livewire($component, [], key($component . '-' . $index))
+                                @if ($component == 'payment-section')
+                                    @livewire($component, [$bankAccount], key($component . '-' . $index))
+                                @else
+                                    @livewire($component, [], key($component . '-' . $index))
+                                @endif
                                 <button wire:click="removeComponent('{{ $component }}')"
                                     class="text-red-500 hover:text-red-700">
                                     &times;

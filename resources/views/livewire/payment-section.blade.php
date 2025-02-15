@@ -5,8 +5,8 @@
         </div>
         <div class="w-1/3 flex justify-between">
             <div class="w-1/2 text-right font-bold">SUB TOTAL 1</div>
-            <div class="w-1/2 text-right font-bold border border-black pl-16 mb-[2px] ">
-                <p>US$</p>
+            <div class="w-1/2 text-right font-bold border border-black mb-[2px] ">
+                <p>{{$contract->sub_total_1}} US$</p>
             </div>
         </div>
     </div>
@@ -18,22 +18,26 @@
         </div>
         <div class="w-1/3 flex justify-between">
             <div class="w-1/2 text-right font-bold">D.I.A.</div>
-            <div class="w-1/2 text-right font-bold border border-black pl-16 mb-[2px]">
-                <p>US$</p>
+            <div class="w-1/2 text-right font-bold border border-black mb-[2px]">
+                <p>{{$contract->d_i_a}} US$</p>
             </div>
         </div>
     </div>
     <div class="flex justify-between">
         <div class="flex justify-start pt-[1px] w-2/3 mr-1 text-[10px]">
-            <p>
+            {{-- <p>
                 A/C No. <span class="font-bold">15911338015840</span> - BANQUE LIBANO-FRANCAISE S.A.L. - Sin-El Fil - Lebanon Swift Code: <span class="font-bold">BLFSLBBX</span>
+                IBAN: <span class="font-bold">LB 81001000000015911338015840</span>. Please allow an extra USD 25 for each bank transfer.
+            </p> --}}
+            <p>
+                A/C No. <span class="font-bold">{{$bankAccount}}</span> - BANQUE LIBANO-FRANCAISE S.A.L. - Sin-El Fil - Lebanon Swift Code: <span class="font-bold">BLFSLBBX</span>
                 IBAN: <span class="font-bold">LB 81001000000015911338015840</span>. Please allow an extra USD 25 for each bank transfer.
             </p>
         </div>
         <div class="w-1/3 flex justify-between">
             <div class="w-1/2 text-right font-bold">SUB TOTAL 2</div>
-            <div class="w-1/2 text-right font-bold border border-black pl-16 mb-[2px]">
-                <p>US$</p>
+            <div class="w-1/2 text-right font-bold border border-black mb-[2px]">
+                <p>{{$contract->sub_total_2}} US$</p>
             </div>
         </div>
     </div>
@@ -43,8 +47,8 @@
         </div>
         <div class="w-1/3 flex justify-between">
             <div class="w-1/2 text-right font-bold">+11% VAT</div>
-            <div class="w-1/2 text-right font-bold border border-black pl-16 mb-[2px]">
-                <p>US$</p>
+            <div class="w-1/2 text-right font-bold border border-black mb-[2px]">
+                <p>{{$contract->vat_amount}} US$</p>
             </div>
         </div>
     </div>
@@ -54,8 +58,8 @@
         </div>
         <div class="w-1/3 flex justify-between">
             <div class="w-1/2 text-right font-bold">TOTAL</div>
-            <div class="w-1/2 text-right font-bold border border-black pl-16 mb-[2px]">
-                <p>US$</p>
+            <div class="w-1/2 text-right font-bold border border-black mb-[2px]">
+                <p>{{$contract->net_total}} US$</p>
             </div>
         </div>
     </div>

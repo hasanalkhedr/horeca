@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Settings\Category;
 use App\Models\Settings\Price;
 use Illuminate\Database\Eloquent\Model;
 use Storage;
@@ -15,43 +16,38 @@ class Contract extends Model
             $contract->contract_no = Contract::generateContractNumber($contract);
         });
         static::created(function (Contract $contract) {
-            $contract->sponsor_amount = $contract->SponsorPackage->total_price;
+            $contract->sponsor_amount = $contract->SponsorPackage? $contract->SponsorPackage->total_price : 0;
             $contract->special_design_amount = $contract->special_design_price * $contract->Stand->space;
             $contract->sub_total_1 = $contract->space_amount + $contract->sponsor_amount +
                 $contract->advertisment_amount + $contract->special_design_amount +
                 $contract->water_electricity_amount;
-            $contract->d_i_a = $contract->sub_total_1;
+            $contract->d_i_a = 0;// $contract->sub_total_1;
             $contract->sub_total_2 = $contract->sub_total_1 - $contract->d_i_a;
             $contract->vat_amount = $contract->sub_total_2 * $contract->Event->vat_rate / 100;
-            $contract->net_total = $contract->sub_total_2 - $contract->vat_amount;
+            $contract->net_total = $contract->sub_total_2 + $contract->vat_amount;
             $contract->save();
         });
         static::updated(function (Contract $contract) {
-
             if (!$contract->wasRecentlyUpdated) {
-                $contract->sponsor_amount = $contract->SponsorPackage->total_price;
+                $contract->sponsor_amount = $contract->SponsorPackage? $contract->SponsorPackage->total_price : 0;
                 $contract->special_design_amount = $contract->special_design_price * $contract->Stand->space;
                 $contract->sub_total_1 = $contract->space_amount + $contract->sponsor_amount +
                     $contract->advertisment_amount + $contract->special_design_amount +
                     $contract->water_electricity_amount;
-                $contract->d_i_a = $contract->sub_total_1;
+                $contract->d_i_a = 0;//$contract->sub_total_1;
                 $contract->sub_total_2 = $contract->sub_total_1 - $contract->d_i_a;
                 $contract->vat_amount = $contract->sub_total_2 * $contract->Event->vat_rate / 100;
-                $contract->net_total = $contract->sub_total_2 - $contract->vat_amount;
+                $contract->net_total = $contract->sub_total_2 + $contract->vat_amount;
                 $contract->wasRecentlyUpdated = true;
                 $contract->save();
             }
-
         });
-
-
         static::deleting(function ($document) {
             // Check if file exists and delete it
             if ($document->path && Storage::exists($document->path)) {
                 Storage::delete($document->path);
             }
         });
-
     }
     public static function generateContractNumber(Contract $contract)
     {
@@ -67,6 +63,7 @@ class Contract extends Model
     protected $fillable = [
         'contract_no',
         'company_id',
+        'contract_date',
         'stand_id',
         'price_id',
         'event_id',
@@ -97,7 +94,11 @@ class Contract extends Model
         'd_i_a',
         'sub_total_2',
         'vat_amount',
-        'net_total'
+        'net_total',
+        'category_id',
+    ];
+    protected $casts = [
+        'contrat_date' => 'date',
     ];
     public function Company()
     {
@@ -138,5 +139,8 @@ class Contract extends Model
     }
     public function SponsorPackage() {
         return $this->belongsTo(SponsorPackage::class);
+    }
+    public function Category() {
+        return $this->belongsTo(Category::class);
     }
 }

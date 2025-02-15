@@ -12,6 +12,7 @@ use App\Models\Report;
 use App\Models\Settings\Price;
 use App\Models\SponsorPackage;
 use App\Models\Stand;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ContractController extends Controller
@@ -81,6 +82,7 @@ class ContractController extends Controller
         }*/
         $contract = Contract::create([
             'contract_no' => $request->contract_no,
+            'contract_date' => Carbon::parse($request->contract_date),
             'company_id' => $request->company_id,
             'stand_id' => $request->stand_id,
             'price_id' => $request->price_id == 0 ? null : $request->price_id,
@@ -92,17 +94,18 @@ class ContractController extends Controller
             'contact_person' => $request->contact_person,
             'exhabition_coordinator' => $request->coordinator_id,
             'special_design_text' => $request->special_design_text,
-            'special_design_price' => $request->special_design_price,
-            'if_water' => $request->if_water,
-            'if_electricity' => $request->if_electricity,
+            'special_design_price' => $request->special_design_price ? $request->special_design_price : 0,
+            'if_water' => $request->if_water ? $request->if_water : 0,
+            'if_electricity' => $request->if_electricity ? $request->if_electricity : 0,
             'electricity_text' => $request->electricity_text,
-            'water_electricity_amount' => $request->water_electricity_amount,
+            'water_electricity_amount' => ($request->if_water || $request->if_electricity) ? $request->water_electricity_amount : 0,
             'new_product' => $request->new_product,
             //'advertisment_amount' => '',
             'sponsor_package_id' => $request->sponsor_package_id,
             'specify_text' => $request->specify_text,
             'notes1' => $request->notes1,
             'notes2' => $request->notes2,
+            'category_id' => $request->categories ? json_decode($request->categories[0])->id : null,
         ]);
         $stand->status = 'Sold';
         $stand->save();

@@ -2,6 +2,7 @@
 
 namespace App\Models\Settings;
 
+use App\Models\Contract;
 use App\Models\Event;
 use App\Models\Stand;
 use Illuminate\Database\Eloquent\Model;
@@ -17,5 +18,8 @@ class Category extends Model
     }
     public function Prices(){
         return $this->hasMany(Price::class);
+    }
+    public function Contracts() {
+        return $this->hasMany(Contract::class);
     }
 }

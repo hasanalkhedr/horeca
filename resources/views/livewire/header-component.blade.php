@@ -2,7 +2,7 @@
     <div class="flex items-center space-x-4">
         <!-- Event Details -->
         <div>
-            <label class="text-4xl font-extrabold">{{ $contract->Event->name }}</label>
+            <label class="text-5xl font-extrabold">{{ $contract->Event->name }}</label>
             <p class="text-gray-600 text-lg">
                 <span class="font-bold text-gray-500">{{ $contract->Event->start_date->day }} - {{ $contract->Event->end_date->day }} {{ $contract->Event->end_date->format('F Y') }} | {{ $contract->Event->address }}, {{ $contract->Event->city }} in {{ $contract->Event->country }}</span>
             </p>

@@ -16,14 +16,14 @@ class CategorySeeder extends Seeder
         Category::create(['name' => 'BakeryPastry',]);
         Category::create(['name' => 'Beverage',]);
         Category::create(['name' => 'Catering equipment',]);
-        Category::create(['name' => 'Coffee  Tea Pavilion',]);
-        Category::create(['name' => 'Consultancy Recruitment  Franchise',]);
+        Category::create(['name' => 'Coffee & Tea Pavilion',]);
+        Category::create(['name' => 'Consultancy, Recruitment & Franchise',]);
         Category::create(['name' => 'Education',]);
         Category::create(['name' => 'Food',]);
         Category::create(['name' => 'Hygiene',]);
         Category::create(['name' => 'Interiors',]);
         Category::create(['name' => 'International Pavilion',]);
-        Category::create(['name' => 'undefined',]);
+        Category::create(['name' => 'Packaging/Labeling',]);
         Category::create(['name' => 'Techzone',]);
     }
 }

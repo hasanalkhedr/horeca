@@ -1,4 +1,4 @@
-<div class="flex justify-between pt-[2px]">
+<div class="flex justify-between pt-[1px]">
     <div class="flex justify-end border border-black w-5/6 mr-6">
         <div class="w-1/2 items-center text-xs gap-2 pb-[2px]">
             <input type="checkbox" class="mr-2" @checked($contract->if_water)>

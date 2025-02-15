@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\Company;
 use App\Models\Contract;
 use App\Models\Event;
+use App\Models\Settings\Category;
 use Livewire\Component;
 
 class CompanyDetailsComponent extends Component

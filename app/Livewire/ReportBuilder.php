@@ -11,6 +11,8 @@ class ReportBuilder extends Component
     //public $selectedComponents = []; // Stores selected components
     public $reportName = ''; // Optional: Report name
     public $event_id;
+
+    public string $bankAccount;
     public function mount($report = null)
     {
         if ($report) {
@@ -44,6 +46,7 @@ class ReportBuilder extends Component
             'name' => $this->reportName,
             'components' => $this->selectedComponents,
             'event_id' =>$this->event_id,
+            'bank_account' => $this->bankAccount
         ]);
 
         $this->message = 'Report template saved successfully! ID: ' . $this->report->id;

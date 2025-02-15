@@ -40,7 +40,7 @@ class DatabaseSeeder extends Seeder
             'country' => 'Europe'
         ]);
 
-
+        $this->call(CategorySeeder::class);
     }
 }
 

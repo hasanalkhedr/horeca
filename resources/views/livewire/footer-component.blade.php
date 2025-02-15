@@ -4,7 +4,7 @@
     <p>Footer Title: {{ $title }}</p>
 </div> --}}
 <!-- Page 2 -->
-<div class="page-container">
+<div class="">
     <!-- Header Section -->
     <header class="mb-1">
         <h1 class="text-xl font-bold text-center mb-0">TERMS AND REGULATIONS FOR PARTICIPATION</h1>
