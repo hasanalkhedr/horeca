@@ -68,7 +68,7 @@
                         class="form-checkbox h-5 w-5 text-blue-600 rounded">
                     <span class="text-gray-700">Payment and Totals Section</span>
                 </label>
-                <input type="text" name="bankAccount" wire:model="bankAccount" id="">
+                <input type="text" name="bankAccount" wire:model.live="bankAccount" id="">
                 <label class="flex items-center space-x-2">
                     <input type="checkbox" wire:model.live="selectedComponents" value="notes-section"
                         class="form-checkbox h-5 w-5 text-blue-600 rounded">
@@ -165,7 +165,7 @@
                                 class="bg-white p-2 border rounded shadow-sm cursor-move flex justify-between items-center">
                                 {{-- <span class="text-gray-700">{{ ucfirst(str_replace('_', ' ', $component)) }}</span> --}}
                                 @if ($component == 'payment-section')
-                                    @livewire($component, [$bankAccount], key($component . '-' . $index))
+                                    @livewire($component, [], key($component . '-' . $index))
                                 @else
                                     @livewire($component, [], key($component . '-' . $index))
                                 @endif

@@ -48,7 +48,6 @@ class ReportBuilder extends Component
             'event_id' =>$this->event_id,
             'bank_account' => $this->bankAccount
         ]);
-
         $this->message = 'Report template saved successfully! ID: ' . $this->report->id;
         $this->messageType = 'success';
         return redirect()->route('reports.index');

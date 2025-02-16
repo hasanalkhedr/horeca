@@ -3,7 +3,7 @@
     <!-- Page 1 -->
     <div class="page mx-auto bg-white min-h-[297mm] max-w-[210mm] shadow-lg print:shadow-none px-[5mm] py-[1mm] my-8 print:my-0 relative">
         @foreach ($components as $component)
-        @if($component == 'header-component')
+        {{-- @if($component == 'header-component')
            @php
                $fields = [
                 'name' => 'HORECA',
@@ -14,8 +14,8 @@
                 'reportId' => $report->id,
             ]
            @endphp
-        @endif
-            @livewire($component, $fields)
+        @endif --}}
+            @livewire($component, ['report'=>$report])
         @endforeach
         <!-- Header Section -->
         {{-- @if (in_array('header', $components))

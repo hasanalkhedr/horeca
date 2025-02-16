@@ -12,7 +12,7 @@ class Report extends Model
         'name',
         'components',
         'event_id',
-        'bankAccount'
+        'bank_account'
     ];
 
     protected $casts = [

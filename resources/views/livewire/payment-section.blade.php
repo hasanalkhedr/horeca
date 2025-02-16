@@ -30,7 +30,7 @@
                 IBAN: <span class="font-bold">LB 81001000000015911338015840</span>. Please allow an extra USD 25 for each bank transfer.
             </p> --}}
             <p>
-                A/C No. <span class="font-bold">{{$bankAccount}}</span> - BANQUE LIBANO-FRANCAISE S.A.L. - Sin-El Fil - Lebanon Swift Code: <span class="font-bold">BLFSLBBX</span>
+                A/C No. <span class="font-bold">{{$contract->Report ? $contract->Report->bank_account : $report->bank_account}}</span> - BANQUE LIBANO-FRANCAISE S.A.L. - Sin-El Fil - Lebanon Swift Code: <span class="font-bold">BLFSLBBX</span>
                 IBAN: <span class="font-bold">LB 81001000000015911338015840</span>. Please allow an extra USD 25 for each bank transfer.
             </p>
         </div>
