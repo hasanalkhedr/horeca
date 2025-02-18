@@ -12,13 +12,15 @@
 @extends('components.layouts.app')
 @section('content')
     <!-- Page 1 -->
-    <div class="page mx-auto bg-white min-h-[297mm] max-w-[210mm] shadow-lg print:shadow-none px-[7mm] py-[5mm] my-8 print:my-0 relative">
+    <div
+        class="page mx-auto bg-white min-h-[297mm] max-w-[210mm] shadow-lg print:shadow-none px-[7mm] py-[5mm] my-8 print:my-0 relative">
         @foreach ($contract->Report->components as $component)
-            @livewire($component, [$contract, $contract->Report])
+            @livewire($component, [$contract, 'paymentMethod' => $contract->Report->payment_method, 'bankAccount' => $contract->Report->bank_account, 'bankNameAddress' => $contract->Report->bank_name_address, 'swiftCode' => $contract->Report->swift_code, 'iban' => $contract->Report->iban])
         @endforeach
     </div>
     <!-- Page 2: Terms and Conditions -->
-    <div class="page mx-auto bg-white min-h-[297mm] max-w-[210mm] shadow-lg print:shadow-none px-[7mm] py-[5mm] my-8 print:my-0 relative">
+    <div
+        class="page mx-auto bg-white min-h-[297mm] max-w-[210mm] shadow-lg print:shadow-none px-[7mm] py-[5mm] my-8 print:my-0 relative">
         @livewire('footer-component')
     </div>
 @endsection

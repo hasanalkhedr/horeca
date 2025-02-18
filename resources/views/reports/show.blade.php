@@ -15,7 +15,11 @@
             ]
            @endphp
         @endif --}}
-            @livewire($component, ['report'=>$report])
+            @livewire($component, ['paymentMethod' => $report->payment_method ,
+            'bankAccount' => $report->bank_account ,
+            'bankNameAddress' => $report->bank_name_address ,
+            'swiftCode' => $report->swift_code ,
+            'iban' => $report->iban,] )
         @endforeach
         <!-- Header Section -->
         {{-- @if (in_array('header', $components))

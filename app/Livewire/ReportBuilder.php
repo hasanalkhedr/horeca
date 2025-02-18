@@ -40,16 +40,15 @@ class ReportBuilder extends Component
             $this->messageType = 'error';
             return;
         }
-
         // Save the selected components and their order
         $this->report = Report::create([
             'name' => $this->reportName,
             'components' => $this->selectedComponents,
             'event_id' =>$this->event_id,
-            'paymentMethod' => $this->paymentMethod,
-            'bankAccount' => $this->bankAccount,
-            'bankNameAddress' => $this->bankNameAddress,
-            'swiftCode' => $this->swiftCode,
+            'payment_method' => $this->paymentMethod,
+            'bank_account' => $this->bankAccount,
+            'bank_name_address' => $this->bankNameAddress,
+            'swift_code' => $this->swiftCode,
             'iban' => $this->iban,
         ]);
         $this->message = 'Report template saved successfully! ID: ' . $this->report->id;
