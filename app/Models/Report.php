@@ -12,17 +12,23 @@ class Report extends Model
         'name',
         'components',
         'event_id',
-        'bank_account'
+        'payment_method',
+        'bank_account',
+        'bank_name_address',
+        'swift_code',
+        'iban'
     ];
 
     protected $casts = [
         'components' => 'array',
-        ];
+    ];
 
-    public function Event() {
+    public function Event()
+    {
         return $this->belongsTo(Event::class);
     }
-    public function Contracts() {
+    public function Contracts()
+    {
         return $this->hasMany(Contract::class);
     }
 }

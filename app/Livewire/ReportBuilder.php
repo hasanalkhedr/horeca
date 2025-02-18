@@ -46,7 +46,11 @@ class ReportBuilder extends Component
             'name' => $this->reportName,
             'components' => $this->selectedComponents,
             'event_id' =>$this->event_id,
-            'bank_account' => $this->bankAccount
+            'paymentMethod' => $this->paymentMethod,
+            'bankAccount' => $this->bankAccount,
+            'bankNameAddress' => $this->bankNameAddress,
+            'swiftCode' => $this->swiftCode,
+            'iban' => $this->iban,
         ]);
         $this->message = 'Report template saved successfully! ID: ' . $this->report->id;
         $this->messageType = 'success';

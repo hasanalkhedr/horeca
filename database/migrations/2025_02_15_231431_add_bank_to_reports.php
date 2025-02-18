@@ -12,7 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('reports', function (Blueprint $table) {
+            $table->string('payment_method')->nullable();
             $table->string('bank_account')->nullable();
+            $table->string('bank_name_address')->nullable();
+            $table->string('swift_code')->nullable();
+            $table->string('iban')->nullable();
         });
     }
 
@@ -22,7 +26,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('reports', function (Blueprint $table) {
-            $table->dropColumn('bank_account');
+            $table->dropColumn('payment_method','bank_account','bank_name_address','swift_code','iban');
         });
     }
 };
