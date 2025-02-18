@@ -1,7 +1,8 @@
 <div class="pt-[2px]">
     <div class="flex justify-between">
         <div class="flex justify-start  text-sm  pt-[1px] w-2/3 mr-1">
-            <p class="">PAYMENT METHOD: <span class="font-bold">50% upon signature-50% on/or before 8 March 2025</span></p>
+            {{-- <p class="">PAYMENT METHOD: <span class="font-bold">50% upon signature-50% on/or before 8 March 2025</span></p> --}}
+            <p class="">PAYMENT METHOD: <span class="font-bold">{{$paymentMethod}}</span></p>
         </div>
         <div class="w-1/3 flex justify-between">
             <div class="w-1/2 text-right font-bold">SUB TOTAL 1</div>
@@ -30,8 +31,8 @@
                 IBAN: <span class="font-bold">LB 81001000000015911338015840</span>. Please allow an extra USD 25 for each bank transfer.
             </p> --}}
             <p>
-                A/C No. <span class="font-bold">{{$contract->Report ? $contract->Report->bank_account : $report->bank_account}}</span> - BANQUE LIBANO-FRANCAISE S.A.L. - Sin-El Fil - Lebanon Swift Code: <span class="font-bold">BLFSLBBX</span>
-                IBAN: <span class="font-bold">LB 81001000000015911338015840</span>. Please allow an extra USD 25 for each bank transfer.
+                A/C No. <span class="font-bold">{{$bankAccount}}</span> - {{$bankNameAddress}} Swift Code: <span class="font-bold">{{$swiftCode}}</span>
+                IBAN: <span class="font-bold">{{$iban}}</span>. Please allow an extra USD 25 for each bank transfer.
             </p>
         </div>
         <div class="w-1/3 flex justify-between">

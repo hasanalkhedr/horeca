@@ -9,19 +9,25 @@ use Livewire\Component;
 class PaymentSection extends Component
 {
     public Contract $contract;
-    public Report $report;
-    public function mount($contract = null, $report = null) {
+    public string $paymentMethod;
+    public string $bankAccount;
+    public string $bankNameAddress;
+    public string $swiftCode;
+    public string $iban;
+    public function mount($contract = null,$paymentMethod = null, $bankAccount = null, $bankNameAddress = null,
+    $swiftCode=null, $iban=null) {
         if($contract) {
             $this->contract = $contract;
         } else {
             $c = new Contract([]);
             $this->contract = $c;
         }
-        if($report) {
-            $this->report = $report;
-        } else {
-            $this->report = new Report([]);
-        }
+
+        $this->paymentMethod = $paymentMethod;
+        $this->bankAccount = $bankAccount;
+        $this->bankNameAddress = $bankNameAddress;
+        $this->swiftCode = $swiftCode;
+        $this->iban = $iban;
     }
     public function render()
     {

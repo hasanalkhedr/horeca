@@ -12,7 +12,7 @@ class ReportBuilder extends Component
     public $reportName = ''; // Optional: Report name
     public $event_id;
 
-    public string $bankAccount;
+   // public string $bankAccount;
     public function mount($report = null)
     {
         if ($report) {
@@ -73,6 +73,18 @@ class ReportBuilder extends Component
     {
         $this->selectedComponents = array_values(array_diff($this->selectedComponents, [$component]));
     }
+
+    public function addComponent($component)
+{
+    if (!in_array($component, $this->selectedComponents)) {
+        $this->selectedComponents[] = $component;
+    }
+}
+    public string $paymentMethod = '';
+    public string $bankAccount = '';
+    public string $bankNameAddress = '';
+    public string $swiftCode = '';
+    public string $iban = '';
 }
 
 
