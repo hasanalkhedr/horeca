@@ -4,7 +4,7 @@
         <h1 class="text-3xl font-semibold mb-4">Events</h1>
 
         <!-- Button to Add Event -->
-        <x-primary-button><a href="{{ route('events.create') }}">Add Event</a></x-primary-button>
+        <a href="{{ route('events.create') }}"><x-primary-button>Add Event</x-primary-button></a>
 
         <!-- Table of Events -->
         @livewire('event-table')
