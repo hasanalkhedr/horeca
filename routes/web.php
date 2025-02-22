@@ -87,6 +87,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('events/{event}/contracts', [ContractController::class, 'index'])->name('events.contracts');
 });
 Route::get('/report-builder', ReportBuilder::class)->name('report.builder');
+Route::get('/report-builder/{report}', ReportBuilder::class)->name('report.editor');
 Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 Route::get('/reports/{id}', [ReportController::class, 'show'])->name('reports.show');
 Route::delete('/reports/{report}', [ReportController::class, 'destroy'])->name('reports.destroy');

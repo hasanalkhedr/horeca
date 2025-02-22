@@ -19,7 +19,10 @@
             'bankAccount' => $report->bank_account ,
             'bankNameAddress' => $report->bank_name_address ,
             'swiftCode' => $report->swift_code ,
-            'iban' => $report->iban,] )
+            'iban' => $report->iban,
+            'with_logo' => $report->with_logo,
+            'logo_path' => $report->logo_path,
+            'currency' => $report->Currency], )
         @endforeach
         <!-- Header Section -->
         {{-- @if (in_array('header', $components))

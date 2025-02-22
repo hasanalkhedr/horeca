@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Contract;
 use App\Models\Event;
+use App\Models\Settings\Currency;
 use App\Models\Settings\Price;
 use App\Models\Stand;
 use Livewire\Component;
@@ -11,7 +12,8 @@ use Livewire\Component;
 class PriceSectionComponent extends Component
 {
     public Contract $contract;
-    public function mount($contract = null)
+    public Currency $currency;
+    public function mount($contract = null, $currency = null)
     {
         if ($contract) {
             $this->contract = $contract;
@@ -33,6 +35,7 @@ class PriceSectionComponent extends Component
             $this->contract->Stand = $s;
             $this->contract->Event = $e;
         }
+        $this->currency = $currency;
     }
     public function render()
     {

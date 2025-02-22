@@ -2,13 +2,18 @@
 namespace App\Livewire;
 
 use App\Models\Contract;
-use App\Models\ContractType;
-use Date;
 use Livewire\Component;
 use App\Models\Event;
 class HeaderComponent extends Component
 {
 
+    public bool $with_logo;
+    // protected $listeners = ['updateWithLogo']; // Listen for the event
+    // public function updateWithLogo($value)
+    // {
+    //     $this->with_logo = $value; // Update the property
+    // }
+    public string $logo_path;
     public Contract $contract;
     // public $event_name = 'Event Name';
     // public $event_dates = 'Event Dates';
@@ -22,9 +27,9 @@ class HeaderComponent extends Component
     //     $this->event_location = $location;
     //     $this->contract_no = $contract_no;
     // }
-    public function mount($contract = null)
+    public function mount($contract = null, $with_logo = null, $logo_path = null)
     {
-        if($contract) {
+        if ($contract) {
             $this->contract = $contract;
         } else {
             $e = new Event([
@@ -37,6 +42,8 @@ class HeaderComponent extends Component
             ]);
             $this->contract->Event = $e;
         }
+        $this->with_logo = $with_logo;
+        $this->logo_path = $logo_path;
         // $this->contract = $contract ?? new Contract([
         //     'Event' => new Event([
         //         'name' => 'EVENT Name',

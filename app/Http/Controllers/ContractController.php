@@ -24,8 +24,8 @@ class ContractController extends Controller
     public function create(Request $request, Event $event)
     {
         $stands = $event->availableStands()->get();
-        $prices = $event->Prices()->get();
         $report = Report::find($request->report_id);
+        $prices = $event->Prices()->where('currency_id', $report->Currency->id)->get();
         $categories = $event->Categories()->get();
         $sponsor_packages = SponsorPackage::all();
         return view('contracts.create', compact('event', 'stands', 'prices', 'report', 'categories', 'sponsor_packages'));
@@ -77,8 +77,8 @@ class ContractController extends Controller
     public function edit(Contract $contract)
     {
         $stands = $contract->event->Stands()->get();
-        $prices = $contract->event->Prices()->get();
         $report = $contract->Report;
+        $prices = $contract->event->Prices()->where('currency_id', $report->Currency->id)->get();
         $categories = $contract->event->Categories()->get();
         $sponsor_packages = SponsorPackage::all();
         return view('contracts.edit', compact('contract', 'stands', 'prices', 'report', 'categories', 'sponsor_packages'));

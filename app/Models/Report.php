@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 
+use App\Models\Settings\Currency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,7 +17,10 @@ class Report extends Model
         'bank_account',
         'bank_name_address',
         'swift_code',
-        'iban'
+        'iban',
+        'with_logo',
+        'logo_path',
+        'currency_id'
     ];
 
     protected $casts = [
@@ -30,5 +34,8 @@ class Report extends Model
     public function Contracts()
     {
         return $this->hasMany(Contract::class);
+    }
+    public function Currency() {
+        return $this->belongsTo(Currency::class);
     }
 }

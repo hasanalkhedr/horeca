@@ -84,6 +84,11 @@ class Event extends Model
     {
         return $this->stands()->available();
     }
+    public function soldStands()
+    {
+        return $this->stands()->sold();
+    }
+
     public function Prices()
     {
         return $this->hasMany(Price::class);

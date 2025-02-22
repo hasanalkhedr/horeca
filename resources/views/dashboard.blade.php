@@ -32,7 +32,7 @@
                             <div class="numbers">
                                 <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Sales</p>
                                 <h5 class="font-weight-bolder mb-0">
-                                    {{$lastContracts->sum('total_amount')}} US$
+                                    {{$lastContracts->sum('net_total')}} US$
                                     <span class="text-success text-sm font-weight-bolder">+3%</span>
                                 </h5>
                             </div>

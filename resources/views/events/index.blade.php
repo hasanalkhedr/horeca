@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('content')
-    <div x-data="eventModal()" class="max-w-7xl mx-auto p-6">
+    <div x-data="eventModal()" class="w-full mx-2 p-1">
         <h1 class="text-3xl font-semibold mb-4">Events</h1>
 
         <!-- Button to Add Event -->
