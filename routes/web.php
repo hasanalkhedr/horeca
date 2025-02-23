@@ -90,6 +90,7 @@ Route::get('/report-builder', ReportBuilder::class)->name('report.builder');
 Route::get('/report-builder/{report}', ReportBuilder::class)->name('report.editor');
 Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 Route::get('/reports/{id}', [ReportController::class, 'show'])->name('reports.show');
+Route::get('events/{event}/reports', [ReportController::class, 'index'])->name('events.reports');
 Route::delete('/reports/{report}', [ReportController::class, 'destroy'])->name('reports.destroy');
 
 // Auth routes

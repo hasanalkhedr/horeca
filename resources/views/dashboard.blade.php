@@ -32,7 +32,7 @@
                             <div class="numbers">
                                 <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Sales</p>
                                 <h5 class="font-weight-bolder mb-0">
-                                    {{$lastContracts->sum('net_total')}} US$
+                                    {{ $lastContracts->sum('net_total') }} US$
                                     <span class="text-success text-sm font-weight-bolder">+3%</span>
                                 </h5>
                             </div>
@@ -54,7 +54,7 @@
                             <div class="numbers">
                                 <p class="text-sm mb-0 text-capitalize font-weight-bold">Sold Space</p>
                                 <h5 class="font-weight-bolder mb-0">
-                                    {{$soldSpace}} SQM
+                                    {{ $soldSpace }} SQM
                                     <span class="text-danger text-sm font-weight-bolder">-2%</span>
                                 </h5>
                             </div>
@@ -76,7 +76,7 @@
                             <div class="numbers">
                                 <p class="text-sm mb-0 text-capitalize font-weight-bold">Available Space</p>
                                 <h5 class="font-weight-bolder mb-0">
-                                    {{$availableStands->sum('space')}} SQM
+                                    {{ $availableStands->sum('space') }} SQM
                                     <span class="text-success text-sm font-weight-bolder">+5%</span>
                                 </h5>
                             </div>
@@ -92,70 +92,100 @@
         </div>
     </div>
     <div class="row mt-4">
-        @if($currentEvents->count()>0)
-        <div class="col-lg-6 mb-lg-0 mb-4">
-            <div class="card">
-                <div class="card-body p-3">
-                    <div class="row">
-                        <div>
-                            <div class="d-flex flex-column h-100">
-                                <p class="mb-1 pt-2 text-bold">{{ $currentEvents[0]->name }}</p>
-                                <h5 class="font-weight-bolder">{{ $currentEvents[0]->start_date }} -
-                                    {{ $currentEvents[0]->end_date }}</h5>
-                                <p class="mb-5">{{ $currentEvents[0]->description }}</p>
-                                <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto"
-                                    href="{{ route('events.dashboard', [$currentEvents[0]->id]) }}">
-                                    Event Dashboard
-                                    <i class="fas fa-arrow-right text-sm ms-1" aria-hidden="true"></i>
-                                </a>
+        @if ($currentEvents->count() > 0)
+            @foreach ($currentEvents as $event)
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-body p-3">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="d-flex flex-column h-100">
+                                        <p class="mb-1 pt-2 text-bold">{{ $event->name }}</p>
+                                        <h5 class="font-weight-bolder">{{ $event->start_date }} -
+                                            {{ $event->end_date }}</h5>
+                                        <p class="mb-5">{{ $event->description }}</p>
+                                        <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto"
+                                            href="{{ route('events.dashboard', [$event->id]) }}">
+                                            <x-primary-button>Event Dashboard
+                                                <i class="fas fa-arrow-right text-sm ms-1"
+                                                    aria-hidden="true"></i></x-primary-button>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="col-lg-5 ms-auto text-center mt-5 mt-lg-0">
+                                    <div class="bg-gradient-primary border-radius-lg h-100">
+                                      <img src="{{asset('assets/event-logo.jpg')}}" class="position-absolute h-100 w-50 top-0 d-lg-block d-none" alt="waves">
+
+                                    </div>
+                                  </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+            {{-- <div class="col-lg-6 mb-lg-0 mb-4">
+                <div class="card">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div>
+                                <div class="d-flex flex-column h-100">
+                                    <p class="mb-1 pt-2 text-bold">{{ $currentEvents[0]->name }}</p>
+                                    <h5 class="font-weight-bolder">{{ $currentEvents[0]->start_date }} -
+                                        {{ $currentEvents[0]->end_date }}</h5>
+                                    <p class="mb-5">{{ $currentEvents[0]->description }}</p>
+                                    <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto"
+                                        href="{{ route('events.dashboard', [$currentEvents[0]->id]) }}">
+                                        Event Dashboard
+                                        <i class="fas fa-arrow-right text-sm ms-1" aria-hidden="true"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-6 mb-lg-0 mb-4">
-            <div class="card">
-                <div class="card-body p-3">
-                    <div class="row">
-                        <div>
-                            <div class="d-flex flex-column h-100">
-                                <p class="mb-1 pt-2 text-bold">{{ $currentEvents[0]->name }}</p>
-                                <h5 class="font-weight-bolder">{{ $currentEvents[0]->start_date }} -
-                                    {{ $currentEvents[0]->end_date }}</h5>
-                                <p class="mb-5">{{ $currentEvents[0]->description }}</p>
-                                <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto"
-                                    href="{{ route('events.dashboard', [$currentEvents[0]->id]) }}">
-                                    Event Dashboard
-                                    <i class="fas fa-arrow-right text-sm ms-1" aria-hidden="true"></i>
-                                </a>
+            <div class="col-lg-6 mb-lg-0 mb-4">
+                <div class="card">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div>
+                                <div class="d-flex flex-column h-100">
+                                    <p class="mb-1 pt-2 text-bold">{{ $currentEvents[0]->name }}</p>
+                                    <h5 class="font-weight-bolder">{{ $currentEvents[0]->start_date }} -
+                                        {{ $currentEvents[0]->end_date }}</h5>
+                                    <p class="mb-5">{{ $currentEvents[0]->description }}</p>
+                                    <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto"
+                                        href="{{ route('events.dashboard', [$currentEvents[0]->id]) }}">
+                                        Event Dashboard
+                                        <i class="fas fa-arrow-right text-sm ms-1" aria-hidden="true"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </div> --}}
         @else
-        <div class="col-lg-6 mb-lg-0 mb-4">
-            <div class="card">
-                <div class="card-body p-3">
-                    <div class="row">
-                        <div>
-                            <div class="d-flex flex-column h-100">
-                                <p class="mb-1 pt-2 text-bold">No Open Events</p>
-                                <h5 class="font-weight-bolder"></h5>
-                                <p class="mb-5"></p>
-                                <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto"
-                                    href="{{ route('events.create') }}">
-                                    Add New Event
-                                    <i class="fas fa-arrow-right text-sm ms-1" aria-hidden="true"></i>
-                                </a>
+            <div class="col-lg-6 mb-lg-0 mb-4">
+                <div class="card">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div>
+                                <div class="d-flex flex-column h-100">
+                                    <p class="mb-1 pt-2 text-bold">No Open Events</p>
+                                    <h5 class="font-weight-bolder"></h5>
+                                    <p class="mb-5"></p>
+                                    <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto"
+                                        href="{{ route('events.create') }}">
+                                        Add New Event
+                                        <i class="fas fa-arrow-right text-sm ms-1" aria-hidden="true"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
         @endif
         {{-- <div class="col-lg-5">
       <div class="card h-100 p-3">
@@ -354,7 +384,7 @@
                             <h6>Contracts</h6>
                             <p class="text-sm mb-0">
                                 <i class="fa fa-check text-info" aria-hidden="true"></i>
-                                <span class="font-weight-bold ms-1">{{$lastContracts->count()}} done</span>
+                                <span class="font-weight-bold ms-1">{{ $lastContracts->count() }} done</span>
                             </p>
                         </div>
                         <div class="col-lg-6 col-5 my-auto text-end">
@@ -393,46 +423,48 @@
                             </thead>
                             <tbody>
                                 @foreach ($lastContracts as $contract)
-                                <tr>
-                                    <td>
-                                        <div class="d-flex px-2 py-1">
-                                            <div>
-                                                <img src="../assets/img/small-logos/logo-xd.svg"
-                                                    class="avatar avatar-sm me-3" alt="xd">
-                                            </div>
-                                            <div class="d-flex flex-column justify-content-center">
-                                                <h6 class="mb-0 text-sm">{{$contract->Company->name}}</h6>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex px-2 py-1">
-                                            <div>
-                                                <img src="../assets/img/small-logos/logo-xd.svg"
-                                                    class="avatar avatar-sm me-3" alt="xd">
-                                            </div>
-                                            <div class="d-flex flex-column justify-content-center">
-                                                <h6 class="mb-0 text-sm">{{$contract->Event->name}}</h6>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="align-middle text-center text-sm">
-                                        <span class="text-xs font-weight-bold"> {{$contract->Stand->no}} </span>
-                                    </td>
-                                    <td class="align-middle">
-                                        <div class="progress-wrapper w-75 mx-auto">
-                                            <div class="progress-info">
-                                                <div class="progress-percentage">
-                                                    <span class="text-xs font-weight-bold">{{$contract->total_amount}} US$</span>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex px-2 py-1">
+                                                <div>
+                                                    <img src="../assets/img/small-logos/logo-xd.svg"
+                                                        class="avatar avatar-sm me-3" alt="xd">
+                                                </div>
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <h6 class="mb-0 text-sm">{{ $contract->Company->name }}</h6>
                                                 </div>
                                             </div>
-                                            <div class="progress">
-                                                <div class="progress-bar bg-gradient-info w-60" role="progressbar"
-                                                    aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex px-2 py-1">
+                                                <div>
+                                                    <img src="../assets/img/small-logos/logo-xd.svg"
+                                                        class="avatar avatar-sm me-3" alt="xd">
+                                                </div>
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <h6 class="mb-0 text-sm">{{ $contract->Event->name }}</h6>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                </tr>
+                                        </td>
+                                        <td class="align-middle text-center text-sm">
+                                            <span class="text-xs font-weight-bold"> {{ $contract->Stand->no }} </span>
+                                        </td>
+                                        <td class="align-middle">
+                                            <div class="progress-wrapper w-75 mx-auto">
+                                                <div class="progress-info">
+                                                    <div class="progress-percentage">
+                                                        <span
+                                                            class="text-xs font-weight-bold">{{ $contract->total_amount }}
+                                                            US$</span>
+                                                    </div>
+                                                </div>
+                                                <div class="progress">
+                                                    <div class="progress-bar bg-gradient-info w-60" role="progressbar"
+                                                        aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 @endforeach
                                 {{-- <tr>
                                     <td>
@@ -706,21 +738,22 @@
                     <h6>Available Stands</h6>
                     <p class="text-sm">
                         <i class="fa fa-arrow-up text-success" aria-hidden="true"></i>
-                        <span class="font-weight-bold">{{$availableStands->count()}}</span> stand
+                        <span class="font-weight-bold">{{ $availableStands->count() }}</span> stand
                     </p>
                 </div>
                 <div class="card-body p-3">
                     <div class="timeline timeline-one-side">
                         @foreach ($availableStands as $stand)
-                        <div class="timeline-block mb-3">
-                            <span class="timeline-step">
-                                <i class="ni ni-bell-55 text-success text-gradient"></i>
-                            </span>
-                            <div class="timeline-content">
-                                <h6 class="text-dark text-sm font-weight-bold mb-0">{{$stand->no}}</h6>
-                                <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">{{$stand->space}} SQM</p>
+                            <div class="timeline-block mb-3">
+                                <span class="timeline-step">
+                                    <i class="ni ni-bell-55 text-success text-gradient"></i>
+                                </span>
+                                <div class="timeline-content">
+                                    <h6 class="text-dark text-sm font-weight-bold mb-0">{{ $stand->no }}</h6>
+                                    <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">{{ $stand->space }} SQM
+                                    </p>
+                                </div>
                             </div>
-                        </div>
                         @endforeach
 
                         {{-- <div class="timeline-block mb-3">

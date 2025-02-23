@@ -20,15 +20,15 @@
             <div class="space-y-2 grid grid-cols-2 gap-2">
                 <template x-for="category in all_categories">
                     <label class="flex items-center space-x-2">
-                        <template x-if="categories.includes(category.id)">
-                            <input type="checkbox" checked @change="$wire.toogleCategory(category.id,$event.target.checked)"
+                        <template x-if="categories.some(cat=>cat.id==category.id)">
+                            <input type="checkbox" checked @change="$wire.toogleCategory(category,$event.target.checked)"
                                 class="form-checkbox h-5 w-5 text-blue-600 rounded">
                         </template>
-                        <template x-if="!categories.includes(category.id)">
-                            <input type="checkbox" @change="$wire.toogleCategory(category.id,$event.target.checked)"
+                        <template x-if="!categories.some(cat=>cat.id==category.id)">
+                            <input type="checkbox" @change="$wire.toogleCategory(category,$event.target.checked)"
                                 class="form-checkbox h-5 w-5 text-blue-600 rounded">
                         </template>
-                        <span class="text-gray-700" x-text="category.name"></span>
+                        <span class="text-gray-700" x-text="category.name" @click="console.log(categories)"></span>
                     </label>
                 </template>
             </div>

@@ -6,7 +6,7 @@
     </div>
     <div class="flex space-x-2">
         <a href="{{ route('events.stands', $event) }}"><x-primary-button>Stand Management</x-primary-button></a>
-        <a href="{{ route('reports.index', $event) }}"><x-primary-button>Contract Templates</x-primary-button></a>
+        <a href="{{ route('events.reports', $event) }}"><x-primary-button>Contract Templates</x-primary-button></a>
         <a href="{{ route('events.contracts', $event) }}"><x-primary-button>Contracts</x-primary-button></a>
     </div>
 </div>

@@ -55,6 +55,13 @@ class ThirdStep extends Step
     {
         $prices = json_decode($state['prices'] ?? '[]');
         $event = $this->model;
+        $categories = $state['categories'];
+        $ids = array_map(function ($category) {
+            return $category['id'];
+        }, $categories);
+
+        //dd($state);
+        $event->Categories()->sync($ids);
         foreach ($prices as $price) {
             $price->event_id = $event->id;
             if ($price->id == 0) {

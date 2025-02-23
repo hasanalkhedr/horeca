@@ -475,7 +475,7 @@
                             <span class="timeline-step">
                                 <i class="ni ni-bell-55 text-success text-gradient"></i>
                             </span>
-                            <a href="{{ route('reports.index', $event) }}">
+                            <a href="{{ route('events.reports', $event) }}">
                                 <x-primary-button>Manage Contract Templates</x-primary-button>
                             </a>
                         </div>

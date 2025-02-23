@@ -101,16 +101,23 @@ class EventWizard extends WizardComponent
             'currencies' => $this->currencies,
         ]);
     }
-    public function toogleCategory($id, $isChecked)
+    public function toogleCategory($category, $isChecked)
     {
-        $event = $this->model();
+        //$event = $this->model();
         if ($isChecked) {
-            $event->Categories()->syncWithoutDetaching($id);
-            $this->categories[] = ($id);
+          //  $event->Categories()->syncWithoutDetaching($id);
+            // $this->categories[] = ($category);
+            array_push($this->categories, $category);
         } else {
-            $event->Categories()->detach($id);
-            array_diff($this->categories, [$id]);
+            $this->categories = array_filter($this->categories,function($cat) use ($category) {
+                return $cat['id'] != $category['id'];
+            });
+            //$this->categories = array_diff($this->categories,[$category]);
+            //$event->Categories()->detach($id);
+            //$this->categories = array_diff($this->categories, [$id]);
         }
+        //dd($this->categories);
+
         $this->mergeState([
             'categories' => $this->categories
         ]);
@@ -224,8 +231,8 @@ class EventWizard extends WizardComponent
             //  'payment_rates' => $this->payment_rates,
         ]);
         $this->all_currencies = json_encode(Currency::all());
-        $this->categories = $event->Categories()->get(['id'])->pluck('id')->toArray();
-
+        $this->categories = $event->Categories->toArray() ?? [];
+        //()->get(['id'])->pluck('id')
         $this->mergeState([
             'categories' => $this->categories,
             // 'prices' => Price::with('Currency')->where('event_id', $event->id)->get()->map(function ($price)  {
