@@ -3,13 +3,15 @@
 namespace App\Livewire;
 
 use App\Models\Contract;
+use App\Models\Settings\Currency;
 use Livewire\Component;
 
 class WaterSection extends Component
 {
     public Contract $contract;
 
-    public function mount($contract = null)
+    public Currency $currency;
+    public function mount($contract = null, $currency = null)
     {
         if($contract) {
             $this->contract = $contract;
@@ -24,6 +26,7 @@ class WaterSection extends Component
             ]);
             // $this->contract->Event = $e;
         }
+        $this->currency = $currency;
     }
     public function render()
     {

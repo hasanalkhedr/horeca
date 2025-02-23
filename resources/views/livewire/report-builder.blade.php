@@ -187,10 +187,16 @@
                             <div data-id="{{ $component }}"
                                 class="bg-white p-2 border rounded shadow-sm cursor-move flex justify-between items-center">
                                 @if ($component == 'payment-section')
-                                    @livewire($component, [null, $paymentMethod, $bankAccount, $bankNameAddress, $swiftCode, $iban], key($component . '-' . $index))
+                                    @livewire($component, [null, $paymentMethod, $bankAccount, $bankNameAddress, $swiftCode, $iban, $currency], key($component . '-' . $index))
                                 @elseif($component == 'header-component')
                                     @livewire($component, [null, $with_logo, $logo_path], key($component . '-' . $index))
                                 @elseif($component == 'price-section-component')
+                                    @livewire($component, [null, $currency], key($component . '-' . $index))
+                                @elseif($component == 'water-section')
+                                    @livewire($component, [null, $currency], key($component . '-' . $index))
+                                @elseif($component == 'advertisement-section')
+                                    @livewire($component, [null, $currency], key($component . '-' . $index))
+                                @elseif($component == 'sponsor-section')
                                     @livewire($component, [null, $currency], key($component . '-' . $index))
                                 @else
                                     @livewire($component, [], key($component . '-' . $index))

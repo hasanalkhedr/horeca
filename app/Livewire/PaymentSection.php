@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Contract;
 use App\Models\Report;
+use App\Models\Settings\Currency;
 use Livewire\Component;
 
 class PaymentSection extends Component
@@ -14,8 +15,9 @@ class PaymentSection extends Component
     public string $bankNameAddress;
     public string $swiftCode;
     public string $iban;
+    public Currency $currency;
     public function mount($contract = null,$paymentMethod = null, $bankAccount = null, $bankNameAddress = null,
-    $swiftCode=null, $iban=null) {
+    $swiftCode=null, $iban=null, $currency = null) {
         if($contract) {
             $this->contract = $contract;
         } else {
@@ -28,6 +30,7 @@ class PaymentSection extends Component
         $this->bankNameAddress = $bankNameAddress;
         $this->swiftCode = $swiftCode;
         $this->iban = $iban;
+        $this->currency = $currency;
     }
     public function render()
     {

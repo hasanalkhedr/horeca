@@ -7,7 +7,7 @@
         <div class="w-1/3 flex justify-between">
             <div class="w-1/2 text-right font-bold">SUB TOTAL 1</div>
             <div class="w-1/2 text-right font-bold border border-black mb-[2px] ">
-                <p>{{$contract->sub_total_1}} US$</p>
+                <p>{{$contract->sub_total_1}} {{$currency->CODE}}</p>
             </div>
         </div>
     </div>
@@ -20,7 +20,7 @@
         <div class="w-1/3 flex justify-between">
             <div class="w-1/2 text-right font-bold">D.I.A.</div>
             <div class="w-1/2 text-right font-bold border border-black mb-[2px]">
-                <p>{{$contract->d_i_a}} US$</p>
+                <p>{{$contract->d_i_a}} {{$currency->CODE}}</p>
             </div>
         </div>
     </div>
@@ -38,7 +38,7 @@
         <div class="w-1/3 flex justify-between">
             <div class="w-1/2 text-right font-bold">SUB TOTAL 2</div>
             <div class="w-1/2 text-right font-bold border border-black mb-[2px]">
-                <p>{{$contract->sub_total_2}} US$</p>
+                <p>{{$contract->sub_total_2}} {{$currency->CODE}}</p>
             </div>
         </div>
     </div>
@@ -49,7 +49,7 @@
         <div class="w-1/3 flex justify-between">
             <div class="w-1/2 text-right font-bold">+11% VAT</div>
             <div class="w-1/2 text-right font-bold border border-black mb-[2px]">
-                <p>{{$contract->vat_amount}} US$</p>
+                <p>{{$contract->vat_amount}} {{$currency->CODE}}</p>
             </div>
         </div>
     </div>
@@ -60,7 +60,7 @@
         <div class="w-1/3 flex justify-between">
             <div class="w-1/2 text-right font-bold">TOTAL</div>
             <div class="w-1/2 text-right font-bold border border-black mb-[2px]">
-                <p>{{$contract->net_total}} US$</p>
+                <p>{{$contract->net_total}} {{$currency->CODE}}</p>
             </div>
         </div>
     </div>

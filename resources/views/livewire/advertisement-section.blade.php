@@ -5,7 +5,7 @@
         </div>
         <div class="w-1/6">
             <div class="text-right font-bold border border-black pl-16 mb-[2px]">
-                <p>US$</p>
+                <p>{{$currency->CODE}}</p>
             </div>
         </div>
     </div>

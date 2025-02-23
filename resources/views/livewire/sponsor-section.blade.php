@@ -6,7 +6,7 @@
         </div>
         <div class="w-1/6">
             <div class="text-right font-bold border border-black mb-[2px]">
-                <p>{{ $contract->sponsor_amount }} US$</p>
+                <p>{{ $contract->sponsor_amount }} {{$currency->CODE}}</p>
             </div>
         </div>
     </div>

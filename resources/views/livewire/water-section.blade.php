@@ -12,7 +12,7 @@
     </div>
     <div class="w-1/6">
         <div class="text-right font-bold border border-black pb-[2px]">
-            <p>{{$contract->water_electricity_amount}} US$</p>
+            <p>{{$contract->water_electricity_amount}} {{$currency->CODE}}</p>
         </div>
     </div>
 </div>
