@@ -40,9 +40,11 @@ new class extends Component
             </div>
 
             <!-- Settings Dropdown -->
-            {{-- <div class="hidden sm:flex sm:items-center sm:ml-6">
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
+            <div class="hidden sm:flex sm:items-center sm:ml-6">
+                {{-- <x-dropdown align="right" width="48">
+                    <x-slot name="trigger"> --}}
+                        <div class="relative" x-data="{ open: false }" @click.outside="open = false" @close.stop="open = false">
+                            <div @click="open = ! open">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
                             <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
                             <div class="ml-1">
@@ -51,9 +53,22 @@ new class extends Component
                                 </svg>
                             </div>
                         </button>
-                    </x-slot>
+                    {{-- </x-slot> --}}
 
-                    <x-slot name="content">
+                    {{-- <x-slot name="content"> --}}
+                    </div>
+
+                    <div x-show="open" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-75"
+                    x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-95"
+                    class="absolute z-50 mt-2 w-48 rounded-md shadow-lg ltr:origin-top-left rtl:origin-top-right start-0"
+                    style="display: none;"
+                    @click="open = false">
+        <div class="rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-white dark:bg-gray-700">
+
                         <x-dropdown-link :href="route('profile')" wire:navigate>
                             {{ __('Profile') }}
                         </x-dropdown-link>
@@ -63,9 +78,12 @@ new class extends Component
                                 {{ __('Log Out') }}
                             </x-dropdown-link>
                         </button>
-                    </x-slot>
-                </x-dropdown>
-            </div> --}}
+                    </div>
+                </div>
+            </div>
+                    {{-- </x-slot>
+                </x-dropdown> --}}
+            </div>
         </div>
     </div>
 

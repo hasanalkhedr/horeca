@@ -1,5 +1,5 @@
 <!-- resources/views/components/sidebar-large.blade.php -->
-<div x-data="{ sideOpen: true, userSubMenuOpen: false, settingsMenu: false, spaceManagementMenu: false, sponsorshipManagementMenu: false, clientsMenu: false, contractsMenu: false }"
+<div x-data="{ sideOpen: true, userSubMenuOpen: false, settingsMenu: false, spaceManagementMenu: false, sponsorshipManagementMenu: false, clientsMenu: false, contractsMenu: false, usersMenu: false }"
     class="hidden lg:flex flex-shrink-0 bg-gray-100 shadow-md h-full border-r border-gray-100 pb-20"
     x-bind:class="{ 'w-30': !sideOpen, 'w-1/6': sideOpen }">
     <!-- Sidebar links -->
@@ -81,6 +81,20 @@
                 <x-sidebar-link href="{{ route('categories.index') }}" label="Categories" icon="fa-solid fa-layer-group" />
                 <x-sidebar-link href="{{ route('currencies.index') }}" label="Currencies" icon="fa-solid fa-coins" />
                 <x-sidebar-link href="{{ route('prices.index') }}" label="Prices" icon="fa-solid fa-money-bill-1-wave" />
+            </div>
+        </x-sidebar-link>
+        <x-sidebar-link href="" icon="fa-solid fa-users-gear" label="Users"
+            @click.prevent="usersMenu=!usersMenu">
+            <x-slot name="subIcon">
+                <svg x-bind:class="{ 'rotate-180': usersMenu }" class="ml-auto mr-2 transition-transform h-6 w-6"
+                    fill="currentColor">
+                    <path d="M6 15l6-6 6 6H6z" />
+                </svg>
+            </x-slot>
+            <div x-show="usersMenu" x-transition class="pl-4">
+                <x-sidebar-link href="#" label="Users" icon="fa-solid fa-users-line" />
+                <x-sidebar-link href="#" label="User Roles" icon="fa-solid fa-unlock-keyhole" />
+                <x-sidebar-link href="#" label="User/Role Permissions" icon="fa-solid fa-key" />
             </div>
         </x-sidebar-link>
     </div>
