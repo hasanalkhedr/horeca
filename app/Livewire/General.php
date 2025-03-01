@@ -69,7 +69,7 @@ class General extends Step
                 'state.description' => ['required', ],
                 'state.start_date' => ['required', 'date', 'after_or_equal:today' ],
                 'state.end_date' => ['required', 'date', 'after_or_equal:state.start_date'],
-                'state.apply_start_date' => ['required','date', 'after_or_equal:today', 'before_or_equal:state.start_date'],
+                'state.apply_start_date' => ['required','date', 'before_or_equal:state.start_date'],
                 'state.apply_deadline_date' => ['required','date', 'after_or_equal:today', 'after_or_equal:state.apply_start_date'],
                 'state.total_space' => ['required','decimal:0,3'],
                 'state.space_to_sell' => ['required','decimal:0,3'],

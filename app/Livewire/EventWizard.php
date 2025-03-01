@@ -103,9 +103,9 @@ class EventWizard extends WizardComponent
     }
     public function toogleCategory($category, $isChecked)
     {
-        //$event = $this->model();
+        $event = $this->model();
         if ($isChecked) {
-          //  $event->Categories()->syncWithoutDetaching($id);
+            $event->Categories()->syncWithoutDetaching($category['id']);
             // $this->categories[] = ($category);
             array_push($this->categories, $category);
         } else {
@@ -113,7 +113,7 @@ class EventWizard extends WizardComponent
                 return $cat['id'] != $category['id'];
             });
             //$this->categories = array_diff($this->categories,[$category]);
-            //$event->Categories()->detach($id);
+            $event->Categories()->detach($category['id']);
             //$this->categories = array_diff($this->categories, [$id]);
         }
         //dd($this->categories);
