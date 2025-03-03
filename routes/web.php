@@ -20,6 +20,9 @@ use App\Http\Controllers\{
     StandController,
     HomeController
 };
+use App\Http\Controllers\Auth\PermissionController;
+use App\Http\Controllers\Auth\RoleController;
+use App\Http\Controllers\Auth\UserController;
 use App\Http\Controllers\ReportController;
 use App\Livewire\ReportBuilder;
 use Illuminate\Support\Facades\Route;
@@ -94,4 +97,9 @@ Route::get('events/{event}/reports', [ReportController::class, 'index'])->name('
 Route::delete('/reports/{report}', [ReportController::class, 'destroy'])->name('reports.destroy');
 
 // Auth routes
+//Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+Route::resource('users', UserController::class);
+Route::resource('roles', RoleController::class);
+Route::resource('permissions', PermissionController::class);
 require __DIR__ . '/auth.php';
+

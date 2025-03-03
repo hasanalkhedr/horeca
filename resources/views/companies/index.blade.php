@@ -1,11 +1,13 @@
 @extends('layouts.app')
 @section('content')
     <div x-data="companyModal()" class="max-w-7xl mx-auto p-6">
-        <h1 class="text-3xl font-semibold mb-4">Companies</h1>
-
-        <!-- Button to Add Company -->
-        <x-primary-button @click="openModal('add')">Add Company</x-primary-button>
-
+        <div class="flex">
+            <h1 class="text-3xl w-1/2 font-semibold mb-1">Companies</h1>
+            <!-- Button to Add Company -->
+            <div class="w-1/2 justify-end text-right">
+                <x-primary-button @click="openModal('add')">Add Company</x-primary-button>
+            </div>
+        </div>
         <!-- Table of Companies -->
         @livewire('company-table')
 
@@ -174,10 +176,11 @@
                             ...this.selectedCompany
                         };
                         if (action === 'edit') {
-                            this.modalTitle = 'Edit Company: ' + this.selectedCompany.name + '|' + this.selectedCompany.CODE;
+                            this.modalTitle = 'Edit Company: ' + this.selectedCompany.name + '|' + this.selectedCompany
+                            .CODE;
                         } else if (action === 'delete') {
                             this.modalTitle = 'Delete Company: ' + this.selectedCompany.name + '|' + this.selectedCompany
-                            .CODE;
+                                .CODE;
                         }
                     }
                 },

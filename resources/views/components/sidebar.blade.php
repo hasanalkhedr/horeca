@@ -92,9 +92,9 @@
                 </svg>
             </x-slot>
             <div x-show="usersMenu" x-transition class="pl-4">
-                <x-sidebar-link href="#" label="Users" icon="fa-solid fa-users-line" />
-                <x-sidebar-link href="#" label="User Roles" icon="fa-solid fa-unlock-keyhole" />
-                <x-sidebar-link href="#" label="User/Role Permissions" icon="fa-solid fa-key" />
+                <x-sidebar-link href="{{route('users.index')}}" label="Users" icon="fa-solid fa-users-line" />
+                <x-sidebar-link href="{{route('roles.index')}}" label="User Roles" icon="fa-solid fa-unlock-keyhole" />
+                <x-sidebar-link href="{{route('permissions.index')}}" label="User/Role Permissions" icon="fa-solid fa-key" />
             </div>
         </x-sidebar-link>
     </div>
