@@ -60,24 +60,29 @@
             </thead>
             <tbody>
                 @foreach ($users as $user)
-                    <tr class="border-b">
-                        <td class="py-3 px-4">{{ $user->id }}</td>
-                        <td class="py-3 px-4">
-                            @if ($user->profile_picture)
+                <tr class="border-b hover:bg-gray-100{{ $loop->even ? 'bg-gray-50' : '' }}" onclick="window.location.href='{{ route('users.show', $user->id) }}'">
+                        <td class="py-3 px-4 cursor-pointer ">{{ $user->id }}</td>
+                        <td class="py-3 px-4 cursor-pointer ">
+                            <img src="{{ $user->getProfilePictureUrlAttribute() }}" alt="Profile Picture"
+                                class="w-10 h-10 rounded-full">
+                            {{-- @if ($user->profile_picture)
                                 <img src="{{ asset('storage/' . $user->profile_picture) }}" alt="Profile Picture"
                                     class="w-10 h-10 rounded-full">
                             @else
                                 <div class="w-10 h-10 bg-gray-200 rounded-full"></div>
-                            @endif
+                            @endif --}}
                         </td>
-                        <td class="py-3 px-4">{{ $user->name }}</td>
-                        <td class="py-3 px-4">{{ $user->email }}</td>
-                        <td class="py-3 px-4">
+                        <td class="py-3 px-4 cursor-pointer ">{{ $user->name }}</td>
+                        <td class="py-3 px-4 cursor-pointer ">{{ $user->email }}</td>
+                        <td class="py-3 px-4"  onclick="event.stopPropagation()">
                             @foreach ($user->roles as $role)
-                                <span class="bg-gray-200 px-2 py-1 rounded text-sm">{{ $role->name }}</span>
+                                <span class="bg-gray-200 px-2  cursor-pointer py-1 rounded text-sm hover:bg-gray-300"
+                                    onclick="event.stopPropagation(); window.location.href='{{ route('roles.show', $role->id) }}'">
+                                    {{ $role->name }}
+                                </span>
                             @endforeach
                         </td>
-                        <td class="py-3 px-4">
+                        <td class="py-3 px-4"  onclick="event.stopPropagation()">
                             <button @click="openModal('edit', {{ $user }})"
                                 class="text-yellow-500 hover:text-yellow-700">
                                 <i class="fas fa-edit"></i> Edit
@@ -194,12 +199,13 @@
                 },
                 selectedUserId: null,
                 selectedUser: null,
+
                 openModal(action, user = null) {
                     this.action = action;
                     this.isOpen = true;
                     this.errors = null;
-                    this.modalTitle = action === 'add' ? 'Add User' : action === 'edit' ? 'Edit User' :
-                        'Delete User';
+                    this.modalTitle = action === 'add' ? 'Add User' : action === 'edit' ? 'Edit User' : 'Delete User';
+
                     if (user) {
                         this.selectedUser = user;
                         this.selectedUserId = this.selectedUser.id;
@@ -207,17 +213,18 @@
                             id: user.id,
                             name: user.name,
                             email: user.email,
-                            roles: user.roles.map(role => role.name),
+                            roles: user.roles.map(role => role.id), // Map roles to IDs, not names
                             profile_picture_url: user.profile_picture ?
                                 `{{ asset('storage/${user.profile_picture}') }}` : '',
                         };
                         if (action === 'edit') {
-                            this.modalTitle = 'Edit User: ' + this.selectedUser.name
+                            this.modalTitle = 'Edit User: ' + this.selectedUser.name;
                         } else if (action === 'delete') {
-                            this.modalTitle = 'Delete User: ' + this.selectedUser.name
+                            this.modalTitle = 'Delete User: ' + this.selectedUser.name;
                         }
                     }
                 },
+
                 handleFileUpload(event) {
                     const file = event.target.files[0];
                     if (file) {
@@ -225,6 +232,7 @@
                         this.formData.profile_picture_url = URL.createObjectURL(file); // Preview the image
                     }
                 },
+
                 closeModal() {
                     this.isOpen = false;
                     this.resetForm();
@@ -244,94 +252,24 @@
                     this.errors = null;
                 },
 
-                // submitForm() {
-                //     const method = this.action === 'add' ? 'POST' : 'PUT';
-                //     const url = this.action === 'add' ?
-                //         `{{ route('users.store') }}` :
-                //         `{{ route('users.update', '') }}/${this.selectedUserId}`;
-                //     fetch(url, {
-                //             method: method,
-                //             headers: {
-                //                 'Content-Type': 'application/json',
-                //                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                //             },
-                //             body: JSON.stringify(this.formData)
-                //         })
-                //         .then(response => {
-                //             if (!response.ok) {
-                //                 return response.json().then(data => {
-                //                     throw data;
-                //                 });
-                //             }
-                //             return response.json();
-                //         })
-                //         .then(() => {
-                //             this.closeModal();
-                //             location.reload();
-                //         })
-                //         .catch(error => {
-                //             this.errors = error;
-                //         });
-                // },
-
-                // submitForm() {
-                //     const formData = new FormData();
-
-                //     for (const key in this.formData) {
-                //         if (this.formData[key] !== null) {
-                //             formData.append(key, this.formData[key]);
-                //         }
-                //     }
-
-                //     const method = this.action === 'add' ? 'POST' : 'PUT';
-                //     const url = this.action === 'add' ?
-                //         `{{ route('users.store') }}` :
-                //         `{{ route('users.update', '') }}/${this.selectedUserId}`;
-                //     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                //     fetch(url, {
-                //             method: method,
-                //             headers: {
-                //                 'X-CSRF-TOKEN': csrfToken,
-                //             },
-                //             body: formData
-                //         })
-                //         .then(response => {
-                //             if (!response.ok) {
-                //                 return response.json().then(data => {
-                //                     throw data;
-                //                 });
-                //             }
-                //             return response.json();
-                //         })
-                //         .then(() => {
-                //             this.closeModal();
-                //             location.reload();
-                //         })
-                //         .catch(error => {
-                //             console.log(error);
-                //             this.errors = error || {
-                //                 general: ['Something went wrong. Please try again.']
-                //             };
-                //         });
-                // },
-
                 submitForm() {
                     const formData = new FormData();
-
+                    // For update requests, append _method=PUT
+                    if (this.action === 'edit') {
+                        formData.append('_method', 'PUT');
+                    }
                     // Append basic fields
-                    if (this.formData.name) {
-                        formData.append('name', this.formData.name);
-                    }
-                    if (this.formData.email) {
-                        formData.append('email', this.formData.email);
-                    }
+                    formData.append('name', this.formData.name || '');
+                    formData.append('email', this.formData.email || '');
+
+                    // Append password fields only if they are provided
                     if (this.formData.password) {
                         formData.append('password', this.formData.password);
                         formData.append('password_confirmation', this.formData.password_confirmation);
                     }
 
                     // Append roles as an array
-                    if (this.formData.roles) {
+                    if (this.formData.roles && this.formData.roles.length > 0) {
                         this.formData.roles.forEach(role => {
                             formData.append('roles[]', role); // Use 'roles[]' for arrays
                         });
@@ -342,12 +280,7 @@
                         formData.append('profile_picture', this.formData.profile_picture);
                     }
 
-                    // Debug: Log FormData entries
-                    for (let [key, value] of formData.entries()) {
-                        console.log(key, value);
-                    }
-
-                    const method = this.action === 'add' ? 'POST' : 'PUT';
+                    const method = this.action === 'add' ? 'POST' : 'POST';
                     const url = this.action === 'add' ?
                         `{{ route('users.store') }}` :
                         `{{ route('users.update', '') }}/${this.selectedUserId}`;

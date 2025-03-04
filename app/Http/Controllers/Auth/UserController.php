@@ -76,10 +76,9 @@ class UserController extends Controller
     }
     public function update(Request $request, User $user)
     {
-        dd($request->all(), $user);
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,',
+            'email' => 'sometimes|email|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
             'roles' => 'nullable|array',
             'roles.*' => 'exists:roles,id',
@@ -88,7 +87,6 @@ class UserController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
-
         $data = $request->except('profile_picture');
         if ($request->hasFile('profile_picture')) {
             // Delete old profile picture if it exists
@@ -101,7 +99,6 @@ class UserController extends Controller
         $user->roles()->sync($request->roles);
         return response()->json(['message' => 'User updated successfully']);
     }
-    // Delete a user
     public function destroy(User $user)
     {
         if ($user->profile_picture) {
@@ -114,93 +111,8 @@ class UserController extends Controller
     {
         // Load the user's roles
         $user->load('roles');
+        $roles = Role::all();
 
-        return response()->json([
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'roles' => $user->roles->pluck('name')->toArray(), // Return role IDs as an array
-            'profile_picture' => $user->profile_picture, // Return profile picture path
-        ]);
+        return view('auth.users.show', compact('user', 'roles'));
     }
-    //     // public function store(Request $request)
-//     // {
-//     //     $validator = Validator::make( $request->all(),[
-//     //         'name' => 'required|string|max:255',
-//     //         'email' => 'required|email|unique:users,email,',
-//     //         'password' => 'nullable|string|min:8|confirmed',
-//     //         'roles' => 'nullable|array',
-//     //         'roles.*' => 'exists:roles,name',
-//     //         'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-//     //     ]);
-//     //     if ($validator->fails()) {
-//     //         return response()->json($validator->errors(), 422);
-//     //     }
-
-    //     //     // Handle profile picture upload
-//     //     $profilePicturePath = null;
-//     //     if ($request->hasFile('profile_picture')) {
-//     //         $profilePicturePath = $request->file('profile_picture')->store('profile_pictures', 'public');
-//     //     }
-
-    //     //     // Create the user
-//     //     $user = User::create([
-//     //         'name' => $request->input('name'),
-//     //         'email' => $request->input('email'),
-//     //         'password' => Hash::make($request->input('password')),
-//     //         'profile_picture' => $profilePicturePath,
-//     //     ]);
-
-    //     //     // Assign roles
-//     //     if ($request->has('roles')) {
-//     //         $user->syncRoles($request->input('roles'));
-//     //     }
-
-    //     //     return response()->json($user, '201');
-//     // }
-
-
-    //     // public function update(Request $request, User $user)
-//     // {
-//     //     $validator = Validator::make( $request->all(),[
-//     //         'name' => 'required|string|max:255',
-//     //         'email' => 'required|email|unique:users,email,' . $user->id,
-//     //         'password' => 'nullable|string|min:8|confirmed',
-//     //         'roles' => 'nullable|array',
-//     //         'roles.*' => 'exists:roles,name',
-//     //         'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-//     //     ]);
-//     //     if ($validator->fails()) {
-//     //         return response()->json($validator->errors(), 422);
-//     //     }
-//     //     // Handle profile picture upload
-//     //     if ($request->hasFile('profile_picture')) {
-//     //         // Delete old profile picture if it exists
-//     //         if ($user->profile_picture) {
-//     //             Storage::disk('public')->delete($user->profile_picture);
-//     //         }
-//     //         $profilePicturePath = $request->file('profile_picture')->store('profile_pictures', 'public');
-//     //         $user->profile_picture = $profilePicturePath;
-//     //     }
-
-    //     //     // Update user details
-//     //     $user->name = $request->input('name');
-//     //     $user->email = $request->input('email');
-//     //     if ($request->filled('password')) {
-//     //         $user->password = Hash::make($request->input('password'));
-//     //     }
-//     //     $user->save();
-//     //     // Sync roles (preserve existing roles and add new ones)
-//     //     if ($request->has('roles')) {
-
-    //     //         $user->syncRoles($request->input('roles'));
-//     //     }
-//     //     return response()->json($user, '201');
-//     // }
-
-    //     public function destroy(User $user)
-//     {
-//         $user->delete();
-//         return redirect()->route('users.index');
-//     }
 }
