@@ -35,7 +35,7 @@ Route::get('/', function () {
 // Authenticated routes
 Route::middleware(['auth'])->group(function () {
     // Dashboard and profile
-    Route::get('/dashboard',[HomeController::class, 'dashboard'])->middleware('verified')->name('dashboard');
+    Route::get('/dashboard', [HomeController::class, 'dashboard'])->middleware('verified')->name('dashboard');
     Route::view('welcome', 'welcome')->middleware('verified')->name('welcome');
     Route::view('profile', 'profile')->name('profile');
 
@@ -99,7 +99,18 @@ Route::delete('/reports/{report}', [ReportController::class, 'destroy'])->name('
 // Auth routes
 //Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
 Route::resource('users', UserController::class);
+// Route to assign a role to a user
+Route::post('users/{user}/assign-role', [UserController::class, 'assignRole'])
+    ->name('users.assignRole');
+
+// Route to unassign a role from a user
+Route::delete('users/{user}/unassign-role/{role}', [UserController::class, 'unassignRole'])
+    ->name('users.unassignRole');
 Route::resource('roles', RoleController::class);
-Route::resource('permissions', PermissionController::class);
+Route::post('roles/{role}/give-permission', [RoleController::class, 'givePermission'])
+    ->name('roles.givePermission');
+
+Route::delete('roles/{role}/remove-permission/{permission}', [RoleController::class, 'removePermission'])
+    ->name('roles.removePermission');
 require __DIR__ . '/auth.php';
 

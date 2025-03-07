@@ -60,7 +60,8 @@
             </thead>
             <tbody>
                 @foreach ($users as $user)
-                <tr class="border-b hover:bg-gray-100{{ $loop->even ? 'bg-gray-50' : '' }}" onclick="window.location.href='{{ route('users.show', $user->id) }}'">
+                    <tr class="border-b hover:bg-gray-100{{ $loop->even ? 'bg-gray-50' : '' }}"
+                        onclick="window.location.href='{{ route('users.show', $user->id) }}'">
                         <td class="py-3 px-4 cursor-pointer ">{{ $user->id }}</td>
                         <td class="py-3 px-4 cursor-pointer ">
                             <img src="{{ $user->getProfilePictureUrlAttribute() }}" alt="Profile Picture"
@@ -74,7 +75,7 @@
                         </td>
                         <td class="py-3 px-4 cursor-pointer ">{{ $user->name }}</td>
                         <td class="py-3 px-4 cursor-pointer ">{{ $user->email }}</td>
-                        <td class="py-3 px-4"  onclick="event.stopPropagation()">
+                        <td class="py-3 px-4" onclick="event.stopPropagation()">
                             @foreach ($user->roles as $role)
                                 <span class="bg-gray-200 px-2  cursor-pointer py-1 rounded text-sm hover:bg-gray-300"
                                     onclick="event.stopPropagation(); window.location.href='{{ route('roles.show', $role->id) }}'">
@@ -82,7 +83,7 @@
                                 </span>
                             @endforeach
                         </td>
-                        <td class="py-3 px-4"  onclick="event.stopPropagation()">
+                        <td class="py-3 px-4" onclick="event.stopPropagation()">
                             <button @click="openModal('edit', {{ $user }})"
                                 class="text-yellow-500 hover:text-yellow-700">
                                 <i class="fas fa-edit"></i> Edit
@@ -147,6 +148,7 @@
                                         x-model="formData.password_confirmation" />
                                 </div>
                                 <div class="mb-2">
+                                    <x-input-label for="roles[]">Roles</x-input-label>
                                     <select name="roles[]" x-model="formData.roles" multiple>
                                         @foreach ($roles as $role)
                                             <option value="{{ $role->id }}">{{ $role->name }}</option>

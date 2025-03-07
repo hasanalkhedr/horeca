@@ -28,7 +28,6 @@ class UserController extends Controller
 
         // Filter by role
         if ($request->has('role') && $request->input('role') !== '' && $request->input('role') != null) {
-            dd($request);
             $role = $request->input('role');
             $users->whereHas('roles', function ($query) use ($role) {
                 $query->where('name', $role);
@@ -112,7 +111,28 @@ class UserController extends Controller
         // Load the user's roles
         $user->load('roles');
         $roles = Role::all();
+        $assignedRoleIds = $user->roles->pluck('id')->toArray();
+        $availableRoles = Role::whereNotIn('id', $assignedRoleIds)->get();
 
-        return view('auth.users.show', compact('user', 'roles'));
+        return view('auth.users.show', compact('user', 'roles', 'availableRoles'));
+        //return view('auth.users.show', compact('user', 'roles'));
+    }
+    public function assignRole(Request $request, User $user)
+    {
+        $request->validate([
+            'role_id' => 'required|exists:roles,id',
+        ]);
+
+        $role = Role::findOrFail($request->role_id);
+        //$user->roles()->attach($role);
+        $user->assignRole($role);
+
+        return redirect()->back()->with('success', 'Role assigned successfully.');
+    }
+    public function unassignRole(User $user, Role $role)
+    {
+        //$user->roles()->detach($role);
+        $user->removeRole($role);
+        return redirect()->back()->with('success', 'Role unassigned successfully.');
     }
 }
