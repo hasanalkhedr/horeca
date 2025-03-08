@@ -54,14 +54,13 @@
             </thead>
             <tbody>
                 @foreach ($roles as $role)
-                    <tr class="border-b hover:bg-gray-100{{ $loop->even ? 'bg-gray-50' : '' }}"
+                    <tr class="border-b {{ $loop->even ? 'bg-gray-50' : '' }} hover:bg-gray-100"
                         onclick="window.location.href='{{ route('roles.show', $role->id) }}'">
                         <td class="py-3 px-4 cursor-pointer ">{{ $role->id }}</td>
                         <td class="py-3 px-4 cursor-pointer ">{{ $role->name }}</td>
                         <td class="py-3 px-4" onclick="event.stopPropagation()">
                             @foreach ($role->permissions as $permission)
-                                <span class="bg-gray-200 px-2  cursor-pointer py-1 rounded text-sm hover:bg-gray-300"
-                                    onclick="event.stopPropagation(); window.location.href='{{ route('permissions.show', $permission->id) }}'">
+                                <span class="bg-gray-200 px-2  cursor-pointer py-1 rounded text-sm hover:bg-gray-300">
                                     {{ $permission->name }}
                                 </span>
                             @endforeach

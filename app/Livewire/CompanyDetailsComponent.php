@@ -14,46 +14,17 @@ class CompanyDetailsComponent extends Component
 {
     public Contract $contract;
 
-    public $company = '';
-    public $billing = '';
-    public $mof_number = '';
-    public $commercial_register = '';
-    public $contact_person = '';
-    public $mobile = '';
-    public $exhibition_coordinator = '';
-    public $exhibition_mobile = '';
-    public $mailing_address = '';
-    public $country = '';
-    public $phone = '';
-    public $email = '';
-    public $facebook = '';
-    public $instagram = '';
-    public $twitter = '';
-    public $website = '';
-    public $selected_categories = [];
-    public $event_categories = [
-        'Bakery/Pastry',
-        'Beverage',
-        'Catering Equipment',
-        'Coffee & Tea Pavilion',
-        'Consultancy, Recruitment & Franchise',
-        'Education',
-        'Food',
-        'Hygiene',
-        'Interiors',
-        'International Pavilion',
-        'Packaging/Labeling',
-        'Techzone',
-    ];
-    public function mount($contract = null) {
-        if($contract) {
+    public function mount($contract = null, $event = null)
+    {
+        if ($contract) {
             $this->contract = $contract;
         } else {
-            $e = new Event([
-'name' => 'EVENT NAME',
+            if($event == null) {
+            $event = new Event([
+                'name' => 'EVENT NAME',
                 'start_date' => '01/01/2025',
                 'end_date' => '01/01/2025'
-            ]);
+            ]);}
             $p = new Client([
                 'name' => 'Contact Person',
             ]);
@@ -66,7 +37,7 @@ class CompanyDetailsComponent extends Component
             $this->contract = new Contract([
 
             ]);
-            $this->contract->Event = $e;
+            $this->contract->Event = $event;
             $this->contract->Company = $c;
             $this->contract->ContactPerson = $p;
             $this->contract->ExhabitionCoordinator = $p1;

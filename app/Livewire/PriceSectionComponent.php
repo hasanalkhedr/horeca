@@ -13,7 +13,7 @@ class PriceSectionComponent extends Component
 {
     public Contract $contract;
     public Currency $currency;
-    public function mount($contract = null, $currency = null)
+    public function mount($contract = null, $currency = null, $event = null)
     {
         if ($contract) {
             $this->contract = $contract;
@@ -25,15 +25,16 @@ class PriceSectionComponent extends Component
                 'name' => 'Space Only',
                 'amount' => 100,
             ]);
-            $e = new Event([
+            if($event==null) {
+            $event = new Event([
 
-            ]);
-            $p->Event = $e;
+            ]);}
+            $p->Event = $event;
             $this->contract = new Contract([
 
             ]);
             $this->contract->Stand = $s;
-            $this->contract->Event = $e;
+            $this->contract->Event = $event;
         }
         $this->currency = $currency;
     }

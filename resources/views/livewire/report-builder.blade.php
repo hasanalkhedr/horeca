@@ -191,13 +191,15 @@
                                 @elseif($component == 'header-component')
                                     @livewire($component, [null, $with_logo, $logo_path], key($component . '-' . $index))
                                 @elseif($component == 'price-section-component')
-                                    @livewire($component, [null, $currency], key($component . '-' . $index))
+                                    @livewire($component, [null, $currency, $event], key($component . '-' . $index))
                                 @elseif($component == 'water-section')
                                     @livewire($component, [null, $currency], key($component . '-' . $index))
                                 @elseif($component == 'advertisement-section')
                                     @livewire($component, [null, $currency], key($component . '-' . $index))
                                 @elseif($component == 'sponsor-section')
                                     @livewire($component, [null, $currency], key($component . '-' . $index))
+                                @elseif($component == 'company-details-component')
+                                    @livewire($component, [null, $event], key($component . '-' . $index))
                                 @else
                                     @livewire($component, [], key($component . '-' . $index))
                                 @endif

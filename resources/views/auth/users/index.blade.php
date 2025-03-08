@@ -60,7 +60,7 @@
             </thead>
             <tbody>
                 @foreach ($users as $user)
-                    <tr class="border-b hover:bg-gray-100{{ $loop->even ? 'bg-gray-50' : '' }}"
+                    <tr class="border-b {{ $loop->even ? 'bg-gray-50' : '' }} hover:bg-gray-100"
                         onclick="window.location.href='{{ route('users.show', $user->id) }}'">
                         <td class="py-3 px-4 cursor-pointer ">{{ $user->id }}</td>
                         <td class="py-3 px-4 cursor-pointer ">

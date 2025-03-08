@@ -22,7 +22,8 @@
             'iban' => $report->iban,
             'with_logo' => $report->with_logo,
             'logo_path' => $report->logo_path,
-            'currency' => $report->Currency], )
+            'currency' => $report->Currency,
+            'event'=>$report->Event], )
         @endforeach
         <!-- Header Section -->
         {{-- @if (in_array('header', $components))

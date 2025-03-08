@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Event;
+use App\Models\Settings\Category;
 use App\Models\Settings\Currency;
 use App\Models\Settings\PaymentRate;
 use App\Models\Settings\Price;
@@ -103,31 +104,35 @@ class EventWizard extends WizardComponent
     }
     public function toogleCategory($category, $isChecked)
     {
-        $event = $this->model();
+        ///$event = $this->model();
+        $this->categories = $this->state['categories'];
+        $cats = array_map(function ($c) {
+            return new Category((array) $c);
+        }, json_decode($this->categories, true));
         if ($isChecked) {
-            $event->Categories()->syncWithoutDetaching($category['id']);
+           /// $event->Categories()->syncWithoutDetaching($category['id']);
             // $this->categories[] = ($category);
-            array_push($this->categories, $category);
+            array_push($cats, Category::find($category['id']));
         } else {
-            $this->categories = array_filter($this->categories,function($cat) use ($category) {
-                return $cat['id'] != $category['id'];
-            });
+            $filtered_cs = collect($cats)->reject(fn($c) => $c->name === $category['name']);
+
+            $cats = $filtered_cs->toArray();
             //$this->categories = array_diff($this->categories,[$category]);
-            $event->Categories()->detach($category['id']);
+           /// $event->Categories()->detach($category['id']);
             //$this->categories = array_diff($this->categories, [$id]);
         }
         //dd($this->categories);
-
         $this->mergeState([
-            'categories' => $this->categories
+            'categories' => json_encode($cats),
         ]);
+        //dd($cats);
     }
 
     public function addPrice($price)
     {
         $price['currency_code'] = Currency::find($price['currency_id'])->CODE;
         $state = $this->getState();
-        $prices = json_decode($state['prices'] ?? '[]')  ;
+        $prices = json_decode($state['prices'] ?? '[]');
         array_push($prices, $price);
         $this->mergeState([
             //'prices' => json_encode($prices),
@@ -159,7 +164,7 @@ class EventWizard extends WizardComponent
             'id' => 0,
             'name' => '',
             'amount' => 0,
-            'currency_id' =>0,
+            'currency_id' => 0,
             'currency_code' => '',
             'event_id' => 0,
             'description' => ''
@@ -167,16 +172,18 @@ class EventWizard extends WizardComponent
     }
 
     public $tempPrice;
-    public function editPrice($price){
+    public function editPrice($price)
+    {
         $this->price = $price;
         $this->tempPrice = $price;
     }
-    public function updatePrice($price){
+    public function updatePrice($price)
+    {
         // dd($this->tempPrice, $price);
         $price['currency_code'] = Currency::find($price['currency_id'])->CODE;
         $state = $this->getState();
-        $prices = json_decode($state['prices'] ?? '[]')  ;
-        $p = collect($prices)->reject(fn($p)=>$p->id == $this->tempPrice['id'] && $p->amount == $this->tempPrice['amount']);
+        $prices = json_decode($state['prices'] ?? '[]');
+        $p = collect($prices)->reject(fn($p) => $p->id == $this->tempPrice['id'] && $p->amount == $this->tempPrice['amount']);
 
         $prices = $p->values()->toArray();
         array_push($prices, $price);
@@ -188,7 +195,7 @@ class EventWizard extends WizardComponent
             'id' => 0,
             'name' => '',
             'amount' => 0,
-            'currency_id' =>0,
+            'currency_id' => 0,
             'currency_code' => '',
             'event_id' => 0,
             'description' => ''
@@ -197,14 +204,13 @@ class EventWizard extends WizardComponent
 
     public function deletePrice($price)
     {
-        if($price['id']>0)
-        {
+        if ($price['id'] > 0) {
             $p = Price::find($price['id']);
             $p->delete();
         }
         $state = $this->getState();
-        $prices = json_decode($state['prices'] ?? '[]')  ;
-        $p = collect($prices)->reject(fn($p)=>$p->id == $price['id'] && $p->amount == $price['amount']);
+        $prices = json_decode($state['prices'] ?? '[]');
+        $p = collect($prices)->reject(fn($p) => $p->id == $price['id'] && $p->amount == $price['amount']);
         $prices = $p->values()->toArray();
         $this->mergeState([
             //'prices' => json_encode($prices),
@@ -214,7 +220,7 @@ class EventWizard extends WizardComponent
             'id' => 0,
             'name' => '',
             'amount' => 0,
-            'currency_id' =>0,
+            'currency_id' => 0,
             'currency_code' => '',
             'event_id' => 0,
             'description' => ''
@@ -231,7 +237,7 @@ class EventWizard extends WizardComponent
             //  'payment_rates' => $this->payment_rates,
         ]);
         $this->all_currencies = json_encode(Currency::all());
-        $this->categories = $event->Categories->toArray() ?? [];
+        $this->categories = json_encode($event->Categories->toArray() ?? []);
         //()->get(['id'])->pluck('id')
         $this->mergeState([
             'categories' => $this->categories,
