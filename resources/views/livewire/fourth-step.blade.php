@@ -1,21 +1,14 @@
 <div class="flex">
     <div class="w-full px-4 mx-4">
-        <div x-data="{ all_packages: @entangle('state.all_packages'), event_packages: @entangle('state.event_packages') }">
-            <h2>Sponsorship Packages</h2>
+        {{-- <div x-data="{ all_packages: @entangle('state.all_packages'), event_packages: @entangle('state.event_packages') }"> --}}
+            <div><h2>Sponsorship Packages</h2>
             <div class="flex w-full">
                 <div class="w-1/2">
-                    <div>
+                    <div x-data="{ all_packages: @entangle('state.all_packages')}">
                         <h1>Available Packages</h1>
-                        <template x-for="package in all_packages">
-                            {{-- <label class="flex items-center space-x-2">
-                                <input type="checkbox" checked @change="$wire.toogleCategory(package,$event.target.checked)"
-                                    class="form-checkbox h-5 w-5 text-blue-600 rounded">
-                            <span class="text-gray-700" x-text="package.title"></span>
-                        </label> --}}
-
+                        <template x-for="package in JSON.parse(all_packages)">
                             <div x-data="{ open: false }" class="border rounded-md">
-                                <!-- Collapsible Header -->
-                                <button @click="open = !open"
+                                <button @click="open = !open" type="button"
                                     class="w-full text-left p-3 bg-gray-50 hover:bg-gray-100 flex justify-between items-center">
                                     <span class="font-medium text-gray-700" x-text="package.title"></span>
                                     <svg :class="{ 'transform rotate-180': open }"
@@ -25,34 +18,27 @@
                                             d="M19 9l-7 7-7-7"></path>
                                     </svg>
                                 </button>
-
-                                <!-- Collapsible Content -->
                                 <div x-show="open" x-collapse class="p-3 space-y-2">
-                                    <!-- Example Properties -->
                                     <div class="text-sm text-gray-600">
                                         <template x-for="opt in package.sponsor_options">
                                             <li><span x-text="opt.title"></span></li>
                                         </template>
                                     </div>
-
-                                    <!-- Add Component Button -->
-                                    <button wire:click="addPackageToEvent(package)"
+                                    <button wire:click="addPackageToEvent(package)" type="button"
                                         class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none">
                                         Add this package to the event
                                     </button>
                                 </div>
                             </div>
-
                         </template>
                     </div>
                 </div>
                 <div class="w-1/2">
-                    <div>
+                    <div x-data="{ event_packages: @entangle('state.event_packages')}">
                         <h1>Currently Event Packages</h1>
-                        <template x-for="package in event_packages">
+                        <template x-for="package in JSON.parse(event_packages)">
                             <div x-data="{ open: false }" class="border rounded-md">
-                                <!-- Collapsible Header -->
-                                <button @click="open = !open"
+                                <button @click="open = !open" type="button"
                                     class="w-full text-left p-3 bg-gray-50 hover:bg-gray-100 flex justify-between items-center">
                                     <span class="font-medium text-gray-700" x-text="package.title"></span>
                                     <svg :class="{ 'transform rotate-180': open }"
@@ -62,24 +48,20 @@
                                             d="M19 9l-7 7-7-7"></path>
                                     </svg>
                                 </button>
-
-                                <!-- Collapsible Content -->
                                 <div x-show="open" x-collapse class="p-3 space-y-2">
-                                    <!-- Example Properties -->
                                     <div class="text-sm text-gray-600">
                                         <template x-for="opt in package.sponsor_options">
                                             <li><span x-text="opt.title"></span></li>
                                         </template>
                                     </div>
-
-                                    <!-- Add Component Button -->
-                                    <button wire:click="removePackageFromEvent(package)"
+                                    <button wire:click="removePackageFromEvent(package)" type="button"
                                         class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none">
                                         Remove this package from event
                                     </button>
                                 </div>
                             </div>
                         </template>
+                        <span @click="console.log(all_packages); console.log(event_packages);">Hasan HAsan</span>
                     </div>
                 </div>
             </div>

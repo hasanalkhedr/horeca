@@ -55,7 +55,7 @@ class ThirdStep extends Step
     {
         $prices = json_decode($state['prices'] ?? '[]');
         $event = $this->model;
-        $categories =array_map(function ($c) {
+        $categories = array_map(function ($c) {
             return new Category((array) $c);
         }, json_decode($state['categories'], true));
 
@@ -63,19 +63,18 @@ class ThirdStep extends Step
         //     return $category['id'];
         // }, $categories);
         $cats = [];
-foreach($categories as $c)
-{
-    $cats[] = Category::where('name','like',$c['name'])->get('id')->toArray();
-}
-// //dd($cats);
+        foreach ($categories as $c) {
+            $cats[] = Category::where('name', 'like', $c['name'])->get('id')->toArray();
+        }
+        // //dd($cats);
 // $ids = array_map(function($cat) {
 //     return $cat->id;
 // }, $cats);
-         $ids = collect($cats)
-         ->flatten(1) // Flatten the nested arrays by one level
-         ->pluck('id') // Extract the 'id' values
-         ->toArray(); // Convert the collection back to an array
-    //  dd($ids);
+        $ids = collect($cats)
+            ->flatten(1) // Flatten the nested arrays by one level
+            ->pluck('id') // Extract the 'id' values
+            ->toArray(); // Convert the collection back to an array
+        //  dd($ids);
         $event->Categories()->sync($ids);
         foreach ($prices as $price) {
             $price->event_id = $event->id;
@@ -100,7 +99,7 @@ foreach($categories as $c)
                 }
             }
         }
-       // redirect(route('events.index'));
+        // redirect(route('events.index'));
     }
     /*
      * Step Validation

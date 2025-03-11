@@ -229,26 +229,55 @@ class EventWizard extends WizardComponent
         ];
     }
 
+    public $all_packages = [];
+    public $event_packages = [];
     public function addPackageToEvent($package)
     {
-        $event = $this->model();
-        $event->SponsorPackages()->syncWithoutDetaching($package['id']);
-        $ev_pa = $event->SponsorPackages()->pluck('id')->toArray();
-        $av = SponsorPackage::all()->whereNotIn('id', $ev_pa)->toArray();
+        // $event = $this->model();
+        // $event->SponsorPackages()->syncWithoutDetaching($package['id']);
+        // $ev_pa = $event->SponsorPackages()->pluck('id')->toArray();
+        // $av = SponsorPackage::all()->whereNotIn('id', $ev_pa)->toArray();
+        // $this->mergeState([
+        //     'all_packages' => $av,
+        //     'event_packages' => $event->SponsorPackages->toArray()
+        // ]);
+        ///$event = $this->model();
+        $this->all_packages = array_map(function ($p) {
+            return new SponsorPackage((array) $p);
+        }, json_decode($this->state['all_packages'], true));
+        $this->event_packages = array_map(function($p){
+            return new SponsorPackage((array) $p);
+        }, json_decode($this->state['event_packages'], true));
+        // dd($this->all_packages, $this->event_packages);
+        array_push($this->event_packages, $package);
+        $this->all_packages = collect($this->all_packages)->reject(fn($p)=>$p->id === $package['id']);
         $this->mergeState([
-            'all_packages' => $av,
-            'event_packages' => $event->SponsorPackages->toArray()
+            'all_packages' => json_encode($this->all_packages),
+            'event_packages' => json_encode($this->event_packages),
         ]);
     }
     public function removePackageFromEvent($package)
     {
-        $event = $this->model();
-        $event->SponsorPackages()->detach($package['id']);
-        $ev_pa = $event->SponsorPackages()->pluck('id')->toArray();
-        $av = SponsorPackage::all()->whereNotIn('id', $ev_pa)->toArray();
+        // $event = $this->model();
+        // $event->SponsorPackages()->detach($package['id']);
+        // $ev_pa = $event->SponsorPackages()->pluck('id')->toArray();
+        // $av = SponsorPackage::all()->whereNotIn('id', $ev_pa)->toArray();
+        // $this->mergeState([
+        //     'all_packages' => $av,
+        //     'event_packages' => $event->SponsorPackages->toArray()
+        // ]);
+        $this->all_packages = array_map(function ($p) {
+            return new SponsorPackage((array) $p);
+        }, json_decode($this->state['all_packages'], true));
+        $this->event_packages = array_map(function($p){
+            return new SponsorPackage((array) $p);
+        }, json_decode($this->state['event_packages'], true));
+        // dd($this->all_packages, $this->event_packages);
+        array_push($this->all_packages, $package);
+        $this->event_packages = collect($this->event_packages)->reject(fn($p)=>$p->id === $package['id']);
         $this->mergeState([
-            'all_packages' => $av,
-            'event_packages' => $event->SponsorPackages->toArray()
+            'all_packages' => json_encode($this->all_packages),
+            'event_packages' => json_encode($this->event_packages),
         ]);
     }
 
@@ -288,6 +317,7 @@ class EventWizard extends WizardComponent
             'event_id' => 0,
             'description' => ''
         ];
+
         //dd($this->price);
         return $event;
     }
