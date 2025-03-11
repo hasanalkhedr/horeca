@@ -54,4 +54,8 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function Contracts() {
+        return $this->hasMany(Contract::class,'seller','id');
+    }
 }

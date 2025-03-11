@@ -111,4 +111,8 @@ class Event extends Model
     {
         return $this->hasMany(Report::class);
     }
+    public function SponsorPackages()
+    {
+        return $this->belongsToMany(SponsorPackage::class);
+    }
 }

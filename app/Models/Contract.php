@@ -96,6 +96,7 @@ class Contract extends Model
         'vat_amount',
         'net_total',
         'category_id',
+        'seller'
     ];
     protected $casts = [
         'contrat_date' => 'date',
@@ -142,5 +143,8 @@ class Contract extends Model
     }
     public function Category() {
         return $this->belongsTo(Category::class);
+    }
+    public function Seller()  {
+        return $this->belongsTo(User::class);
     }
 }

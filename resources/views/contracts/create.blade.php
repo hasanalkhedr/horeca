@@ -177,6 +177,17 @@
                 </div>
             </div>
         @endif
+        <h2 class="text-xl font-semibold text-gray-800">Who is the seller of this contract?</h2>
+        <div class="flex flex-wrap -mx-3 mb-2">
+            <div class="w-full px-3">
+                <x-select-input name="seller" id="seller">
+                    @foreach ($users as $user)
+                        <option value="{{ $user->id }}" @selected(auth()->id()==$user->id)>{{ $user->name }}|{{ $user->getRoleNames() }}
+                            </option>
+                    @endforeach
+                </x-select-input>
+            </div>
+        </div>
         {{-- <input type="hidden" name="path" value="{{ $contract_type->path }}"> --}}
         <input type="hidden" name="report_id" value="{{ $report->id }}">
         <input type="hidden" name="event_id" value="{{ $event->id }}">

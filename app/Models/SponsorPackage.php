@@ -17,4 +17,7 @@ class SponsorPackage extends Model
     public function Contracts() {
         return $this->hasMany(Contract::class);
     }
+    public function Events() {
+        return $this->belongsToMany(Event::class);
+    }
 }

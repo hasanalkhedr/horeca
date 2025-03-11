@@ -95,6 +95,7 @@
     </div>
 
     <!-- Categories Section -->
+    @if($showCategories)
     <div>
         <table class="border border-black w-full">
             <tr>
@@ -118,4 +119,5 @@
             </tr>
         </table>
     </div>
+    @endif
 </div>

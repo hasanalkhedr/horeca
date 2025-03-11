@@ -100,7 +100,7 @@ foreach($categories as $c)
                 }
             }
         }
-        redirect(route('events.index'));
+       // redirect(route('events.index'));
     }
     /*
      * Step Validation

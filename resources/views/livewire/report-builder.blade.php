@@ -115,6 +115,13 @@
                                             placeholder="choose logo">
                                     </div>
                                 @endif
+                                @if($component === 'company-details-component')
+                                <div class="space-y-2">
+                                    <input type="checkbox" wire:model.live="showCategories"
+                                        class="w-3 px-3 py-2 border rounded-md focus:ring focus:ring-blue-200 focus:outline-none">
+                                    <label class="text-gray-700 font-semibold">Show Categories Table</label>
+                                </div>
+                                @endif
                             </div>
 
                             <!-- Add Component Button -->
@@ -199,7 +206,7 @@
                                 @elseif($component == 'sponsor-section')
                                     @livewire($component, [null, $currency], key($component . '-' . $index))
                                 @elseif($component == 'company-details-component')
-                                    @livewire($component, [null, $event], key($component . '-' . $index))
+                                    @livewire($component, [null, $event, $showCategories], key($component . '-' . $index))
                                 @else
                                     @livewire($component, [], key($component . '-' . $index))
                                 @endif

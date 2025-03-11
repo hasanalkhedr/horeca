@@ -20,7 +20,8 @@ class Report extends Model
         'iban',
         'with_logo',
         'logo_path',
-        'currency_id'
+        'currency_id',
+        'show_categories'
     ];
 
     protected $casts = [

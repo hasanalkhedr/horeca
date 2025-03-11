@@ -23,7 +23,8 @@
             'with_logo' => $report->with_logo,
             'logo_path' => $report->logo_path,
             'currency' => $report->Currency,
-            'event'=>$report->Event], )
+            'event'=>$report->Event,
+            'showCategories' => $report->show_categories], )
         @endforeach
         <!-- Header Section -->
         {{-- @if (in_array('header', $components))

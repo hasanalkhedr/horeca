@@ -7,6 +7,7 @@ use App\Models\Settings\Category;
 use App\Models\Settings\Currency;
 use App\Models\Settings\PaymentRate;
 use App\Models\Settings\Price;
+use App\Models\SponsorPackage;
 use Vildanbina\LivewireWizard\WizardComponent;
 use App\Models\User;
 
@@ -23,6 +24,7 @@ class EventWizard extends WizardComponent
         General::class,
         SecondStep::class,
         ThirdStep::class,
+        FourthStep::class,
     ];
 
     // public function addPayment()
@@ -110,7 +112,7 @@ class EventWizard extends WizardComponent
             return new Category((array) $c);
         }, json_decode($this->categories, true));
         if ($isChecked) {
-           /// $event->Categories()->syncWithoutDetaching($category['id']);
+            /// $event->Categories()->syncWithoutDetaching($category['id']);
             // $this->categories[] = ($category);
             array_push($cats, Category::find($category['id']));
         } else {
@@ -118,7 +120,7 @@ class EventWizard extends WizardComponent
 
             $cats = $filtered_cs->toArray();
             //$this->categories = array_diff($this->categories,[$category]);
-           /// $event->Categories()->detach($category['id']);
+            /// $event->Categories()->detach($category['id']);
             //$this->categories = array_diff($this->categories, [$id]);
         }
         //dd($this->categories);
@@ -226,6 +228,31 @@ class EventWizard extends WizardComponent
             'description' => ''
         ];
     }
+
+    public function addPackageToEvent($package)
+    {
+        $event = $this->model();
+        $event->SponsorPackages()->syncWithoutDetaching($package['id']);
+        $ev_pa = $event->SponsorPackages()->pluck('id')->toArray();
+        $av = SponsorPackage::all()->whereNotIn('id', $ev_pa)->toArray();
+        $this->mergeState([
+            'all_packages' => $av,
+            'event_packages' => $event->SponsorPackages->toArray()
+        ]);
+    }
+    public function removePackageFromEvent($package)
+    {
+        $event = $this->model();
+        $event->SponsorPackages()->detach($package['id']);
+        $ev_pa = $event->SponsorPackages()->pluck('id')->toArray();
+        $av = SponsorPackage::all()->whereNotIn('id', $ev_pa)->toArray();
+        $this->mergeState([
+            'all_packages' => $av,
+            'event_packages' => $event->SponsorPackages->toArray()
+        ]);
+    }
+
+
     public $price;
     public function model()
     {

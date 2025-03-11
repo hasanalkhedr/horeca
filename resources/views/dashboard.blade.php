@@ -114,10 +114,11 @@
                                 </div>
                                 <div class="col-lg-5 ms-auto text-center mt-5 mt-lg-0">
                                     <div class="bg-gradient-primary border-radius-lg h-100">
-                                      <img src="{{asset('assets/event-logo.jpg')}}" class="position-absolute h-100 w-50 top-0 d-lg-block d-none" alt="waves">
+                                        <img src="{{ asset('assets/event-logo.jpg') }}"
+                                            class="position-absolute h-100 w-50 top-0 d-lg-block d-none" alt="waves">
 
                                     </div>
-                                  </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -377,7 +378,7 @@
     </div> --}}
     <div class="row my-4">
         <div class="col-lg-8 col-md-6 mb-md-0 mb-4">
-            <div class="card">
+            <div class="card mb-4">
                 <div class="card-header pb-0">
                     <div class="row">
                         <div class="col-lg-6 col-7">
@@ -731,6 +732,81 @@
                     </div>
                 </div>
             </div>
+            <div class="card mb-4">
+                <div class="card-header pb-0">
+                    <div class="row">
+                        <div class="col-lg-6 col-7">
+                            <h6>Best Sellers</h6>
+                            <p class="text-sm mb-0">
+                                <i class="fa fa-check text-info" aria-hidden="true"></i>
+                                <span class="font-weight-bold ms-1">=======</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body px-0 pb-2">
+                    <div class="table-responsive">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        Name</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
+                                        Roles</th>
+                                    <th
+                                        class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        No. Contracts</th>
+                                    <th
+                                        class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($users as $user)
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex px-2 py-1">
+                                                <img src="{{ $user->getProfilePictureUrlAttribute() }}"
+                                                    alt="Profile Picture" class="w-10 h-10 rounded-full">
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <h6 class="mb-0 text-sm">{{ $user->name }}</h6>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex px-2 py-1">
+
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <h6 class="mb-0 text-sm">{{ $user->getRoleNames() }}</h6>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="align-middle text-center text-sm">
+                                            <span class="text-xs font-weight-bold"> {{ $user->Contracts->Count() }}
+                                            </span>
+                                        </td>
+                                        <td class="align-middle">
+                                            <div class="progress-wrapper w-75 mx-auto">
+                                                <div class="progress-info">
+                                                    <div class="progress-percentage">
+                                                        <span
+                                                            class="text-xs font-weight-bold">{{ $user->Contracts()->sum('net_total') }}
+                                                            US$</span>
+                                                    </div>
+                                                </div>
+                                                <div class="progress">
+                                                    <div class="progress-bar bg-gradient-info w-60" role="progressbar"
+                                                        aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="col-lg-4 col-md-6">
             <div class="card h-100">
@@ -805,6 +881,7 @@
                 </div>
             </div>
         </div>
+
     </div>
 @endsection
 @push('dashboard')

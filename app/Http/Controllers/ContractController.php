@@ -12,6 +12,7 @@ use App\Models\Report;
 use App\Models\Settings\Price;
 use App\Models\SponsorPackage;
 use App\Models\Stand;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -28,7 +29,8 @@ class ContractController extends Controller
         $prices = $event->Prices()->where('currency_id', $report->Currency->id)->get();
         $categories = $event->Categories()->get();
         $sponsor_packages = SponsorPackage::all();
-        return view('contracts.create', compact('event', 'stands', 'prices', 'report', 'categories', 'sponsor_packages'));
+        $users = User::all();
+        return view('contracts.create', compact('event', 'stands', 'prices', 'report', 'categories', 'sponsor_packages', 'users'));
     }
     public function store(Request $request)
     {
@@ -68,6 +70,7 @@ class ContractController extends Controller
             'notes1' => $request->notes1,
             'notes2' => $request->notes2,
             'category_id' => $request->categories ? json_decode($request->categories[0])->id : null,
+            'seller' => $request->seller,
         ]);
         $stand->status = 'Sold';
         $stand->save();
@@ -81,7 +84,8 @@ class ContractController extends Controller
         $prices = $contract->event->Prices()->where('currency_id', $report->Currency->id)->get();
         $categories = $contract->event->Categories()->get();
         $sponsor_packages = SponsorPackage::all();
-        return view('contracts.edit', compact('contract', 'stands', 'prices', 'report', 'categories', 'sponsor_packages'));
+        $users = User::all();
+        return view('contracts.edit', compact('contract', 'stands', 'prices', 'report', 'categories', 'sponsor_packages', 'users'));
     }
     public function update(Request $request, Contract $contract)
     {
@@ -119,6 +123,7 @@ class ContractController extends Controller
             'notes1' => $request->notes1,
             'notes2' => $request->notes2,
             'category_id' => $request->categories ? json_decode($request->categories[0])->id : null,
+            'seller' => $request->seller,
         ]);
         if($newStand->id != $oldStand->id) {
             $oldStand->status = 'Available';

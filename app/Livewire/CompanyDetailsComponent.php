@@ -12,9 +12,10 @@ use Livewire\Component;
 
 class CompanyDetailsComponent extends Component
 {
+    public bool $showCategories;
     public Contract $contract;
 
-    public function mount($contract = null, $event = null)
+    public function mount($contract = null, $event = null, $showCategories = null)
     {
         if ($contract) {
             $this->contract = $contract;
@@ -42,6 +43,7 @@ class CompanyDetailsComponent extends Component
             $this->contract->ContactPerson = $p;
             $this->contract->ExhabitionCoordinator = $p1;
         }
+        $this->showCategories = $showCategories;
     }
     public function render()
     {

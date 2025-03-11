@@ -36,6 +36,7 @@ class ReportBuilder extends Component
             $this->swiftCode = $report->swift_code;
             $this->iban = $report->iban;
             $this->currency_id = $report->currency_id;
+            $this->showCategories = $report->show_categories;
         }
 
     }
@@ -66,7 +67,8 @@ class ReportBuilder extends Component
                 'iban' => $this->iban,
                 'with_logo' => $this->with_logo,
                 'logo_path' => $this->logo_path,
-                'currency_id' => $this->currency_id
+                'currency_id' => $this->currency_id,
+                'show_categories' => $this->showCategories,
             ]);
         } else {
             // Save the selected components and their order
@@ -81,7 +83,8 @@ class ReportBuilder extends Component
                 'iban' => $this->iban,
                 'with_logo' => $this->with_logo,
                 'logo_path' => $this->logo_path,
-                'currency_id' => $this->currency_id
+                'currency_id' => $this->currency_id,
+                'show_categories' => $this->showCategories,
             ]);
         }
         $this->message = 'Report template saved successfully! ID: ' . $this->report->id;
@@ -123,6 +126,7 @@ class ReportBuilder extends Component
     public string $iban = '';
 
     public bool $with_logo = false;
+    public bool $showCategories = false;
     // public function updateWithLogo() {
 
     //     $this->dispatch('updateEithLogo', $this->with_logo)->to('header-component');
