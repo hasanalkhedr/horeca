@@ -61,7 +61,6 @@
                                 </div>
                             </div>
                         </template>
-                        <span @click="console.log(all_packages); console.log(event_packages);">Hasan HAsan</span>
                     </div>
                 </div>
             </div>

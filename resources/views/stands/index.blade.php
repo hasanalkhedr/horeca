@@ -51,6 +51,7 @@
                                     <x-input-label for="deductable">Deductable</x-input-label>
                                     <x-select-input name="deductable" id="deductable" x-model="formData.deductable"
                                         required>
+                                        <option>-- Select Value--</option>
                                         <option value="1">Deductable</option>
                                         <option value="0">Not Deductable</option>
                                     </x-select-input>
