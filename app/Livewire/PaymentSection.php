@@ -16,8 +16,9 @@ class PaymentSection extends Component
     public string $swiftCode;
     public string $iban;
     public Currency $currency;
+    public $vat = 11;
     public function mount($contract = null,$paymentMethod = null, $bankAccount = null, $bankNameAddress = null,
-    $swiftCode=null, $iban=null, $currency = null) {
+    $swiftCode=null, $iban=null, $currency = null,$vat = 11) {
         if($contract) {
             $this->contract = $contract;
         } else {
@@ -31,6 +32,7 @@ class PaymentSection extends Component
         $this->swiftCode = $swiftCode;
         $this->iban = $iban;
         $this->currency = $currency;
+        $this->vat = $vat;
     }
     public function render()
     {

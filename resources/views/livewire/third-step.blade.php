@@ -110,7 +110,7 @@
                                         <div>
                                             <x-input-label for="amount">Amount</x-input-label>
                                             <x-text-input type="number" id="amount" x-model="price.amount"
-                                                x-required="isOpen? 'required': ''" />
+                                                x-required="isOpen? 'required': ''" onfocus="this.value=''"/>
                                         </div>
                                         <div>
                                             <x-input-label for="description">description</x-input-label>

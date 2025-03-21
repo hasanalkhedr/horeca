@@ -28,7 +28,7 @@ class ContractController extends Controller
         $report = Report::find($request->report_id);
         $prices = $event->Prices()->where('currency_id', $report->Currency->id)->get();
         $categories = $event->Categories()->get();
-        $sponsor_packages = SponsorPackage::all();
+        $sponsor_packages = $event->SponsorPackages;// SponsorPackage::all();
         $users = User::all();
         return view('contracts.create', compact('event', 'stands', 'prices', 'report', 'categories', 'sponsor_packages', 'users'));
     }
@@ -83,7 +83,7 @@ class ContractController extends Controller
         $report = $contract->Report;
         $prices = $contract->event->Prices()->where('currency_id', $report->Currency->id)->get();
         $categories = $contract->event->Categories()->get();
-        $sponsor_packages = SponsorPackage::all();
+        $sponsor_packages = $contract->event->SponsorPackages;// SponsorPackage::all();
         $users = User::all();
         return view('contracts.edit', compact('contract', 'stands', 'prices', 'report', 'categories', 'sponsor_packages', 'users'));
     }

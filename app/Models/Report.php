@@ -21,7 +21,8 @@ class Report extends Model
         'with_logo',
         'logo_path',
         'currency_id',
-        'show_categories'
+        'show_categories',
+        'with_options',
     ];
 
     protected $casts = [

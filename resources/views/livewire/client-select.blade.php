@@ -5,7 +5,9 @@
         <x-select-input wire:model="parentField" wire:change="myupdatedParentField" name="company_id" required>
             <option value="">{{ $placeholder }}</option>
             @foreach (app($model)->all() as $item)
-                <option value="{{ $item[$primaryKey] }}">{{ $item['name'] }}</option>
+                <option value="{{ $item[$primaryKey] }}" {{ $parentField == $item[$primaryKey] ? 'selected' : '' }}>
+                    {{ $item['name'] }}
+                </option>
             @endforeach
         </x-select-input>
     </div>
@@ -17,7 +19,9 @@
             {{ empty($options) ? 'disabled' : '' }}>
             <option value="">Select a value</option>
             @foreach ($options as $option)
-                <option value="{{ $option[$primaryKey] }}">{{ $option['name'] }}</option>
+                <option value="{{ $option[$primaryKey] }}" {{ $coordinatorId == $option[$primaryKey] ? 'selected' : '' }}>
+                    {{ $option['name'] }}
+                </option>
             @endforeach
         </select>
     </div>
@@ -29,7 +33,9 @@
             {{ empty($options) ? 'disabled' : '' }}>
             <option value="">Select a value</option>
             @foreach ($options as $option)
-                <option value="{{ $option[$primaryKey] }}">{{ $option['name'] }}</option>
+                <option value="{{ $option[$primaryKey] }}" {{ $contactPerson == $option[$primaryKey] ? 'selected' : '' }}>
+                    {{ $option['name'] }}
+                </option>
             @endforeach
         </select>
     </div>

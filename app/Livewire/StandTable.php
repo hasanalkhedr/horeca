@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Livewire;
 
 use App\Models\Event;
@@ -7,6 +8,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+
 class StandTable extends DataTableComponent
 {
     protected $model = Stand::class;
@@ -22,7 +24,6 @@ class StandTable extends DataTableComponent
                 return ['class' => 'text-red-500 bg-green-100'];
             });
     }
-
     public function columns(): array
     {
         return [
@@ -42,9 +43,12 @@ class StandTable extends DataTableComponent
             //     ->sortable(),
             // Column::make('Stand Type', 'standType.name')
             //   ->sortable(),
-            // Column::make('Category', 'category.name')
-            //     ->sortable()->collapseAlways(),
-            Column::make('Deductable', 'deductable')
+            Column::make('Category', 'category.name')
+                ->sortable(),
+            Column::make('Deductible', 'deductable')
+                ->format(fn($value, $row) => $row->deductable ? 'Deductible' : 'Not Deductible')
+                ->sortable(),
+            Column::make('Status', 'status')
                 ->sortable(),
             Column::make('Actions')
                 ->label(function ($row) {
@@ -58,18 +62,47 @@ class StandTable extends DataTableComponent
     {
         //dd($this->event);
         if ($this->event->id) {
-            return Stand::query()->where('event_id', $this->event->id)->select(['stands.id', 'no', 'stands.space', 'category_id', 'event_id', 'deductable', /*'stand_type_id'*/]);
+            return Stand::query()
+                ->where('event_id', $this->event->id)
+                ->select([
+                    'stands.id',
+                    'no',
+                    'stands.space',
+                    'category_id',
+                    'event_id',
+                    'deductable', /*'stand_type_id'*/
+                    'status',
+                ]);
         } else {
-            //dd('hhhh');
-            return Stand::query()->select(['stands.id', 'no', 'stands.space', 'category_id', 'event_id', 'deductable', /* 'stand_type_id'*/]);
+            return Stand::query()
+                ->select([
+                    'stands.id',
+                    'no',
+                    'stands.space',
+                    'category_id',
+                    'event_id',
+                    'deductable', /* 'stand_type_id'*/
+                    'status',
+                ]);
         }
     }
     public function filters(): array
     {
         if ($this->event->id) {
-            return [];
+            return [
+                SelectFilter::make('Status', 'status')
+                    ->options(['Available' => 'Available', 'Sold' => 'Sold', 'Reserved' => 'Reserved'])
+                    ->filter(function (Builder $builder, string $value) {
+                        $builder->where('status', $value);
+                    }),
+            ];
         } else {
             return [
+                SelectFilter::make('Status', 'status')
+                    ->options(['Available' => 'Available', 'Sold' => 'Sold', 'Reserved' => 'Reserved'])
+                    ->filter(function (Builder $builder, string $value) {
+                        $builder->where('status', $value);
+                    }),
                 SelectFilter::make('Event Stands', 'event_stands')
                     ->options(
                         Event::all()

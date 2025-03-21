@@ -115,12 +115,22 @@
                                             placeholder="choose logo">
                                     </div>
                                 @endif
-                                @if($component === 'company-details-component')
-                                <div class="space-y-2">
-                                    <input type="checkbox" wire:model.live="showCategories"
-                                        class="w-3 px-3 py-2 border rounded-md focus:ring focus:ring-blue-200 focus:outline-none">
-                                    <label class="text-gray-700 font-semibold">Show Categories Table</label>
-                                </div>
+                                @if ($component === 'company-details-component')
+                                    <div class="space-y-2">
+                                        <input type="checkbox" wire:model.live="showCategories"
+                                            class="w-3 px-3 py-2 border rounded-md focus:ring focus:ring-blue-200 focus:outline-none">
+                                        <label class="text-gray-700 font-semibold">Show Categories Table</label>
+                                    </div>
+                                @elseif($component === 'sponsor-section')
+                                    <div class="space-y-2">
+                                        <select
+                                            class="w-full px-3 py-2 border rounded-md focus:ring focus:ring-blue-200 focus:outline-none"
+                                            required wire:model.live="with_options" name="">
+                                            <option value="">-- Select Type --</option>
+                                            <option value="true">Sonsor with OPTIONS table</option>
+                                            <option value="false">Sonsor TITLE and specify text</option>
+                                        </select>
+                                    </div>
                                 @endif
                             </div>
 
@@ -143,7 +153,8 @@
                 @if ($messageType === 'success')
                     <div
                         class="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none">
-                        <a target="_blank" href="{{ route('reports.show', ['id' => $report->id]) }}">Preview Report</a>
+                        <a target="_blank" href="{{ route('reports.show', ['id' => $report->id]) }}">Preview
+                            Report</a>
                     </div>
                 @endif
             </div>
@@ -194,7 +205,7 @@
                             <div data-id="{{ $component }}"
                                 class="bg-white p-2 border rounded shadow-sm cursor-move flex justify-between items-center">
                                 @if ($component == 'payment-section')
-                                    @livewire($component, [null, $paymentMethod, $bankAccount, $bankNameAddress, $swiftCode, $iban, $currency], key($component . '-' . $index))
+                                    @livewire($component, [null, $paymentMethod, $bankAccount, $bankNameAddress, $swiftCode, $iban, $currency, $report->Event->vat_rate], key($component . '-' . $index))
                                 @elseif($component == 'header-component')
                                     @livewire($component, [null, $with_logo, $logo_path], key($component . '-' . $index))
                                 @elseif($component == 'price-section-component')
@@ -204,7 +215,7 @@
                                 @elseif($component == 'advertisement-section')
                                     @livewire($component, [null, $currency], key($component . '-' . $index))
                                 @elseif($component == 'sponsor-section')
-                                    @livewire($component, [null, $currency], key($component . '-' . $index))
+                                    @livewire($component, [null, $currency, $with_options], key($component . '-' . $index))
                                 @elseif($component == 'company-details-component')
                                     @livewire($component, [null, $event, $showCategories], key($component . '-' . $index))
                                 @else

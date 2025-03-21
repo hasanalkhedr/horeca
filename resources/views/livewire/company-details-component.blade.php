@@ -2,7 +2,7 @@
     <!-- Title Section -->
     <div class="flex justify-between items-center px-2">
         <h2 class="text-lg leading-none font-bold">1. COMPANY DETAILS</h2>
-        <span class="text-sm font-bold uppercase">PLEASE FILL IN CAPITAL LETTERS</span>
+        <span class="text-sm font-bold uppercase"></span>
     </div>
     <!-- Company Details Fields -->
     <div>

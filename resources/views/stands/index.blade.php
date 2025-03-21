@@ -155,14 +155,33 @@
                         </div>
                     </form>
                 </div>
-                <div x-show="action === 'import'">
-                    <form @submit.prevent="uploadFile">
-                        <label for="file">Upload Stands File: (file with 3 columns only, titled as: no, space, deductable)</label>
-                        <x-text-input type="file" id="file" @change="handleFileUpload" />
-                        <x-primary-button type="submit">Upload</x-primary-button>
+                <div x-show="action === 'import'" class="p-6 bg-white shadow-md rounded-lg">
+                    <p class="text-gray-700 mb-4">Please download the stands table template, fill it, and then upload it.</p>
+
+                    <div class="flex justify-center mb-6">
+                        <a href="/stands-template.xlsx" class="inline-block">
+                            <button class="px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600 transition duration-300">
+                                Download Stands Table Template
+                            </button>
+                        </a>
+                    </div>
+
+                    <form @submit.prevent="uploadFile" class="space-y-4">
+                        <label for="file" class="block text-gray-700 font-medium">
+                            Upload Stands File: (file with 4 columns only, titled as: no, space, deductible, category)
+                        </label>
+                        <div class="flex justify-center">
+                            <input type="file" id="file" @change="handleFileUpload" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                        </div>
+                        <div class="flex justify-center">
+                            <button type="submit" class="px-4 py-2 bg-green-500 text-white font-bold rounded hover:bg-green-600 transition duration-300">
+                                Upload
+                            </button>
+                        </div>
                     </form>
+
                     <!-- Display Messages -->
-                    <div x-show="message" x-text="message" style="margin-top: 10px;"></div>
+                    <div x-show="message" x-text="message" class="mt-4 text-center text-sm" :class="{'text-green-600': message.includes('success'), 'text-red-600': message.includes('error')}"></div>
                 </div>
             </div>
         </div>

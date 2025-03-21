@@ -5,19 +5,21 @@ namespace App\Livewire;
 use App\Models\Contract;
 use App\Models\Settings\Currency;
 use App\Models\SponsorPackage;
+use App\Models\SponsorOption;
 use Livewire\Component;
 
 class SponsorSection extends Component
 {
     public Contract $contract;
     public Currency $currency;
-    public function mount($contract = null, $currency = null)
+    public bool $with_options = false;
+    public function mount($contract = null, $currency = null, $with_options = false)
     {
         if($contract) {
             $this->contract = $contract;
         } else {
             $sp = new SponsorPackage([
-                'title' => 'GOLDEN USD Package',
+                'title' => 'Sponsor Package Title',
             ]);
             $this->contract = new Contract([
 
@@ -25,6 +27,7 @@ class SponsorSection extends Component
             $this->contract->SponsorPackage = $sp;
         }
         $this->currency = $currency;
+        $this->with_options = $with_options;
     }
     public function render()
     {

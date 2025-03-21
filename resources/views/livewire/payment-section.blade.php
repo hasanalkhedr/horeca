@@ -47,7 +47,7 @@
             <p>By signing the present application, we irrevocably undertake to pay the amount due as indicated above and formally agree to abide by the terms and conditions overleaf.</p>
         </div>
         <div class="w-1/3 flex justify-between">
-            <div class="w-1/2 text-right font-bold">+11% VAT</div>
+            <div class="w-1/2 text-right font-bold">+{{$vat}}% VAT</div>
             <div class="w-1/2 text-right font-bold border border-black mb-[2px]">
                 <p>{{$contract->vat_amount}} {{$currency->CODE}}</p>
             </div>
