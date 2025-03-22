@@ -113,4 +113,13 @@ class StandController extends Controller
         $stand->delete();
         return response()->json(null, 204);
     }
+    public function block(Stand $stand)
+    {
+        if ($stand->status == 'Available') {
+            $stand->update(['status' => 'Reserved']);
+            return response()->json($stand);
+        } else {
+            return response()->json(['error' => 'You can not block sold or preBlocked stand'], 422);
+        }
+    }
 }

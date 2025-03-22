@@ -1,14 +1,19 @@
 @extends('layouts.app')
 @section('content')
     <div x-data="standModal()" class="max-w-7xl mx-auto p-6">
-        <h1 class="text-3xl font-semibold mb-4">Stands {{ 'of event: ' . $event->name }}</h1>
+        <div class="flex">
+            <h1 class="w-1/2 text-3xl font-semibold mb-4">Stands {{ 'of event: ' . $event->name }}</h1>
+            <div class="w-1/2 justify-end text-right">
+                <!-- Button to Add Stand -->
+                <x-primary-button @click="openModal('add')" title="Add Stand"><i class="fas fa-plus"></i><i class="fas fa-cube"></i></x-primary-button>
+                @if ($event->id > 0)
+                    <x-primary-button @click="openModal('add-many')" title="Add Multiple Stands"><i class="fas fa-plus"></i><i class="fas fa-cubes"></i></x-primary-button>
+                    <x-primary-button @click="openModal('import')" title="Import stands from file"><i class="fas fa-file-upload"></i><i class="fas fa-cubes"></i></x-primary-button>
+                @endif
+            </div>
+        </div>
 
-        <!-- Button to Add Stand -->
-        <x-primary-button @click="openModal('add')">Add Stand</x-primary-button>
-        @if ($event->id > 0)
-            <x-primary-button @click="openModal('add-many')">Add Multiple Stands</x-primary-button>
-            <x-primary-button @click="openModal('import')">Import Stands</x-primary-button>
-        @endif
+
 
         <!-- Table of Stands -->
         @if ($event)
@@ -156,11 +161,13 @@
                     </form>
                 </div>
                 <div x-show="action === 'import'" class="p-6 bg-white shadow-md rounded-lg">
-                    <p class="text-gray-700 mb-4">Please download the stands table template, fill it, and then upload it.</p>
+                    <p class="text-gray-700 mb-4">Please download the stands table template, fill it, and then upload it.
+                    </p>
 
                     <div class="flex justify-center mb-6">
                         <a href="/stands-template.xlsx" class="inline-block">
-                            <button class="px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600 transition duration-300">
+                            <button
+                                class="px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600 transition duration-300">
                                 Download Stands Table Template
                             </button>
                         </a>
@@ -171,17 +178,25 @@
                             Upload Stands File: (file with 4 columns only, titled as: no, space, deductible, category)
                         </label>
                         <div class="flex justify-center">
-                            <input type="file" id="file" @change="handleFileUpload" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                            <input type="file" id="file" @change="handleFileUpload"
+                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
                         </div>
                         <div class="flex justify-center">
-                            <button type="submit" class="px-4 py-2 bg-green-500 text-white font-bold rounded hover:bg-green-600 transition duration-300">
+                            <button type="submit"
+                                class="px-4 py-2 bg-green-500 text-white font-bold rounded hover:bg-green-600 transition duration-300">
                                 Upload
                             </button>
                         </div>
                     </form>
 
                     <!-- Display Messages -->
-                    <div x-show="message" x-text="message" class="mt-4 text-center text-sm" :class="{'text-green-600': message.includes('success'), 'text-red-600': message.includes('error')}"></div>
+                    <div x-show="message" x-text="message" class="mt-4 text-center text-sm"
+                        :class="{ 'text-green-600': message.includes('success'), 'text-red-600': message.includes('error') }">
+                    </div>
+                </div>
+                <div x-show="action === 'block'">
+                    <p class="mb-4">Are you sure you want to BLOCK this stand?</p>
+                    <x-danger-button type="button" @click="confirmBlock()">BLOCK</x-danger-button>
                 </div>
             </div>
         </div>
@@ -229,8 +244,7 @@
                     const formData = new FormData();
                     formData.append('file', this.file);
                     try {
-                        const response = await fetch(`/stands/import/${this.event_id}`
-                        , {
+                        const response = await fetch(`/stands/import/${this.event_id}`, {
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -253,20 +267,23 @@
                 },
 
                 openModal(action, stand = null) {
-                    console.log(action);
                     this.action = action;
                     this.isOpen = true;
                     this.errors = null;
-                    this.modalTitle = action === 'add' ? 'Add Stand' : action === 'edit' ? 'Edit Stand' :
-                        action === 'delete' ? 'Delete Stand' : action === 'add-many' ? 'Add Multiple Stands' :
-                        'Import Stands data from excel file';
+                    this.modalTitle = action === 'add' ? 'Add Stand' :
+                        action === 'edit' ? 'Edit Stand' :
+                        action === 'delete' ? 'Delete Stand' :
+                        action === 'add-many' ? 'Add Multiple Stands' :
+                        action === 'import' ? 'Import Stands data from excel file' :
+                        action === 'block' ? 'BLOCK Stand ' : '';
                     if (stand) {
                         this.selectedStand = JSON.parse(stand);
                         this.selectedStandId = this.selectedStand.id;
-                        this.formData = {
-                            ...this.selectedStand
-                        };
+
                         if (action === 'edit') {
+                            this.formData = {
+                                ...this.selectedStand
+                            };
                             this.modalTitle = 'Edit Stand: ' + this.selectedStand.no + '|' + this.selectedStand.CODE;
                         } else if (action === 'delete') {
                             this.modalTitle = 'Delete Stand: ' + this.selectedStand.no + '|' + this.selectedStand.CODE;
@@ -306,7 +323,8 @@
                         `{{ route('stands.store') }}` : this.action === 'edit' ?
                         `{{ route('stands.update', '') }}/${this.selectedStandId}` :
                         `{{ route('stands.storeMany') }}`;
-                    const bodyData = this.action === 'add-many' ? JSON.stringify(this.formData.multi) : JSON.stringify(this.formData);
+                    const bodyData = this.action === 'add-many' ? JSON.stringify(this.formData.multi) : JSON.stringify(this
+                        .formData);
                     fetch(url, {
                             method: method,
                             headers: {
@@ -332,8 +350,6 @@
                         });
                 },
 
-
-
                 confirmDelete() {
                     fetch(`{{ route('stands.destroy', '') }}/${this.selectedStandId}`, {
                             method: 'DELETE',
@@ -344,6 +360,29 @@
                         .then(() => {
                             this.closeModal();
                             location.reload();
+                        });
+                },
+
+                confirmBlock() {
+                    fetch(`/stands/${this.selectedStandId}/block`, {
+                            method: 'PUT',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        }).then(response => {
+                            if (!response.ok) {
+                                return response.json().then(data => {
+                                    throw data;
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(() => {
+                            this.closeModal();
+                            location.reload();
+                        }).catch(error => {
+                            console.log(error);
+                            this.errors = error;
                         });
                 }
             };

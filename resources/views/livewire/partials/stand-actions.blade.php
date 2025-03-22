@@ -1,5 +1,6 @@
 <div class="flex space-x-2">
-    <x-primary-button @click="openModal('block', '{{ json_encode($stand) }}')">BLOCK</x-primary-button>
-    <x-secondary-button @click="openModal('edit', '{{ json_encode($stand) }}')">Edit</x-secondary-button>
-    <x-danger-button @click="openModal('delete', '{{ json_encode($stand) }}')">Delete</x-danger-button>
+    <x-secondary-button @click="openModal('edit', '{{ json_encode($stand) }}')"><i
+            class="fas fa-edit"></i></x-secondary-button>
+    <x-danger-button @click="openModal('delete', '{{ json_encode($stand) }}')"><i
+            class="fas fa-trash"></i></x-danger-button>
 </div>

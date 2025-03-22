@@ -57,6 +57,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('stands', StandController::class);
     Route::post('stands/add_many', [StandController::class, 'storeMany'])->name('stands.storeMany');
     Route::post('stands/import/{event_id}', [StandController::class, 'import'])->name('stands.import');
+    Route::put('stands/{stand}/block', [StandController::class, 'block'])->name('stands.block');
 
     // Sponsorship
     Route::resource('sponsor_packages', SponsorPackageController::class);

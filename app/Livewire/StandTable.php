@@ -13,16 +13,19 @@ class StandTable extends DataTableComponent
 {
     protected $model = Stand::class;
     public $event;
+    public $sum = 0;
     public function mount($event = null)
     {
         $this->event = $event;
+        $this->sum = $this->builder()->sum('space');
     }
     public function configure(): void
     {
         $this->setPrimaryKey('id')
             ->setSecondaryHeaderTdAttributes(function (Column $column, $rows) {
-                return ['class' => 'text-red-500 bg-green-100'];
-            });
+                return ['class' => 'text-red-500 bg-green-100'];})
+            ->setConfigurableAreas(['toolbar-right-start'=>
+            ['livewire.partials.sumOfSpace', ['sumOfSpace'=>$this->builder()->sum('space')]],]);
     }
     public function columns(): array
     {
@@ -37,7 +40,7 @@ class StandTable extends DataTableComponent
             Column::make('Space (sq. m)', 'space')
                 ->sortable()
                 ->secondaryHeader(function ($rows) {
-                    return " Sum of Space: " . $rows->sum('space');
+                    return " Partial Total space: " . $rows->sum('space');
                 }),
             // Column::make('Event', 'event.name')
             //     ->sortable(),
@@ -49,7 +52,10 @@ class StandTable extends DataTableComponent
                 ->format(fn($value, $row) => $row->deductable ? 'Deductible' : 'Not Deductible')
                 ->sortable(),
             Column::make('Status', 'status')
-                ->sortable(),
+                ->label(function($row){
+                    return view('livewire.partials.stand-status')
+                        ->with('stand',  $row);
+                })->sortable(),
             Column::make('Actions')
                 ->label(function ($row) {
                     return view('livewire.partials.stand-actions')
@@ -95,6 +101,11 @@ class StandTable extends DataTableComponent
                     ->filter(function (Builder $builder, string $value) {
                         $builder->where('status', $value);
                     }),
+                    SelectFilter::make('Deductable', 'deductable')
+                    ->options(['Not Deductable', 'Deductable'])
+                    ->filter(function (Builder $builder, string $value) {
+                        $builder->where('deductable', $value);
+                    }),
             ];
         } else {
             return [
@@ -115,7 +126,7 @@ class StandTable extends DataTableComponent
                     ->options(['Not Deductable', 'Deductable'])
                     ->filter(function (Builder $builder, string $value) {
                         $builder->where('deductable', $value);
-                    })
+                    }),
             ];
         }
     }
