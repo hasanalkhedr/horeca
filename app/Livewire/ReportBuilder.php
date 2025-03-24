@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Livewire;
 
 use App\Models\Settings\Currency;
@@ -11,12 +12,25 @@ class ReportBuilder extends Component
 {
     use WithFileUploads;
     public ?Report $report = null;
-    //public $selectedComponents = []; // Stores selected components
+    public $selectedComponents = [];
     public $reportName = ''; // Optional: Report name
     public $event_id;
     public Event $event;
+    public $message = '';
+    public $messageType = ''; // 'success' or 'error'
+    public string $paymentMethod = '';
+    public string $bankAccount = '';
+    public string $bankNameAddress = '';
+    public string $swiftCode = '';
+    public string $iban = '';
+    public bool $with_logo = false;
+    public bool $showCategories = false;
+    public string $with_options = '';
+    public string $logo_path = '';
+    public $logo_image;
+    public $currency_id;
+    public Currency $currency;
 
-    // public string $bankAccount;
     public function mount($report = null)
     {
         if ($report == null) {
@@ -39,12 +53,7 @@ class ReportBuilder extends Component
             $this->showCategories = $report->show_categories;
             $this->with_options = $report->with_options;
         }
-
     }
-    // Save the report template
-    public $message = '';
-    public $messageType = ''; // 'success' or 'error'
-
     public function saveReport()
     {
         $this->validate([
@@ -94,50 +103,37 @@ class ReportBuilder extends Component
         $this->messageType = 'success';
         return redirect()->route('reports.index');
     }
-
     public function render()
     {
         $events = Event::all();
         return view('livewire.report-builder', compact('events'))
             ->layout('components.layouts.builder'); // Use your custom layout
     }
-    public $selectedComponents = [
-
-    ];
-
     public function updateSort($order)
     {
         $this->selectedComponents = array_values($order);
         //        $order;
     }
-
     public function removeComponent($component)
     {
         $this->selectedComponents = array_values(array_diff($this->selectedComponents, [$component]));
     }
-
     public function addComponent($component)
     {
-        if (!in_array($component, $this->selectedComponents)) {
+        $index = 0;
+        if (in_array($component, $this->selectedComponents)) {
+            $index = array_search($component, $this->selectedComponents, true);
+            $this->selectedComponents = array_values(array_diff($this->selectedComponents, [$component]));
+            array_splice($this->selectedComponents, $index, 0, $component);
+            $this->selectedComponents = array_values($this->selectedComponents);
+        } else {
+            //if (!in_array($component, $this->selectedComponents)) {
             $this->selectedComponents[] = $component;
         }
+
+        $this->render();
+        //}
     }
-    public string $paymentMethod = '';
-    public string $bankAccount = '';
-    public string $bankNameAddress = '';
-    public string $swiftCode = '';
-    public string $iban = '';
-
-    public bool $with_logo = false;
-    public bool $showCategories = false;
-    public bool $with_options = false;
-    // public function updateWithLogo() {
-
-    //     $this->dispatch('updateEithLogo', $this->with_logo)->to('header-component');
-    // }
-
-    public string $logo_path = '';
-    public $logo_image;
     public function updatedLogoImage()
     {
         // Validate the uploaded file
@@ -153,19 +149,10 @@ class ReportBuilder extends Component
     }
     public function updatedEventId()
     {
-        $this->event = Event::where('id',$this->event_id)->first();
+        $this->event = Event::where('id', $this->event_id)->first();
     }
-
-    public $currency_id;
-    public Currency $currency;
     public function updatedCurrencyId()
     {
-        $this->currency = Currency::where('id',$this->currency_id)->first();
+        $this->currency = Currency::where('id', $this->currency_id)->first();
     }
 }
-
-
-
-
-
-

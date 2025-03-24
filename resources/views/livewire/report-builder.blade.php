@@ -123,13 +123,17 @@
                                     </div>
                                 @elseif($component === 'sponsor-section')
                                     <div class="space-y-2">
-                                        <select
+                                        <div class="flex flex-col">
+                                      <label><input type="radio" wire:model="with_options" value="options_table" class="mr-1">Sponsor with OPTIONS table</label>
+                                      <label><input type="radio" wire:model="with_options" value="package_title" class="mr-1">Sponsor TITLE and specify text</label>
+                                      <label><input type="radio" wire:model="with_options" value="packages_list" class="mr-1">Sponsor Package List</label>
+                                    </div> {{-- <select
                                             class="w-full px-3 py-2 border rounded-md focus:ring focus:ring-blue-200 focus:outline-none"
                                             required wire:model.live="with_options" name="">
                                             <option value="">-- Select Type --</option>
                                             <option value="true">Sonsor with OPTIONS table</option>
                                             <option value="false">Sonsor TITLE and specify text</option>
-                                        </select>
+                                        </select> --}}
                                     </div>
                                 @endif
                             </div>

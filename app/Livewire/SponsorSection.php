@@ -12,8 +12,8 @@ class SponsorSection extends Component
 {
     public Contract $contract;
     public Currency $currency;
-    public bool $with_options = false;
-    public function mount($contract = null, $currency = null, $with_options = false)
+    public string $with_options = '';
+    public function mount($contract = null, $currency = null, $with_options = '')
     {
         if($contract) {
             $this->contract = $contract;
