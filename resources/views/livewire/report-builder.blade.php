@@ -46,22 +46,26 @@
         <!-- Component Selection -->
         <div class="mb-6">
             <h2 class="text-lg font-semibold text-gray-800 mb-4">Select Components</h2>
-            <span class="text-xs text-gray-600"><strong>Note: </strong>you can't update section properties after add it
-                to the template, to acheive this you should remove the section first, then readd it with updated
-                properties, and reorder the sections.</span>
+            <span class="text-xs text-gray-600">
+                <strong>Note: </strong>
+                you can't update section properties after add it to the template, to acheive this you should remove the
+                section first, then readd it with updated properties, and reorder the sections.</span>
             <div class="space-y-2">
-                @foreach ([
-        'header-component' => 'Header',
-        'company-details-component' => 'Company Details',
-        'price-section-component' => 'Prices Section',
-        'water-section' => 'Water/Electricity Section',
-        'new-product-section' => 'New Product(s) Section',
-        'sponsor-section' => 'Sponsorship Section',
-        'advertisement-section' => 'Advertisement Section',
-        'payment-section' => 'Payment and Totals Section',
-        'notes-section' => 'Notes/Contact Person Section',
-        'signature-section' => 'Signature Section',
-    ] as $component => $label)
+                @php
+                    $components = [
+                        'header-component' => 'Header',
+                        'company-details-component' => 'Company Details',
+                        'price-section-component' => 'Prices Section',
+                        'water-section' => 'Water/Electricity Section',
+                        'new-product-section' => 'New Product(s) Section',
+                        'sponsor-section' => 'Sponsorship Section',
+                        'advertisement-section' => 'Advertisement Section',
+                        'payment-section' => 'Payment and Totals Section',
+                        'notes-section' => 'Notes/Contact Person Section',
+                        'signature-section' => 'Signature Section',
+                    ];
+                @endphp
+                @foreach ($components as $component => $label)
                     <div x-data="{ open: false }" class="border rounded-md">
                         <!-- Collapsible Header -->
                         <button @click="open = !open"
@@ -114,8 +118,7 @@
                                             class="w-full px-3 py-2 border rounded-md focus:ring focus:ring-blue-200 focus:outline-none"
                                             placeholder="choose logo">
                                     </div>
-                                @endif
-                                @if ($component === 'company-details-component')
+                                @elseif ($component === 'company-details-component')
                                     <div class="space-y-2">
                                         <input type="checkbox" wire:model.live="showCategories"
                                             class="w-3 px-3 py-2 border rounded-md focus:ring focus:ring-blue-200 focus:outline-none">
@@ -124,16 +127,20 @@
                                 @elseif($component === 'sponsor-section')
                                     <div class="space-y-2">
                                         <div class="flex flex-col">
-                                      <label><input type="radio" wire:model="with_options" value="options_table" class="mr-1">Sponsor with OPTIONS table</label>
-                                      <label><input type="radio" wire:model="with_options" value="package_title" class="mr-1">Sponsor TITLE and specify text</label>
-                                      <label><input type="radio" wire:model="with_options" value="packages_list" class="mr-1">Sponsor Package List</label>
-                                    </div> {{-- <select
-                                            class="w-full px-3 py-2 border rounded-md focus:ring focus:ring-blue-200 focus:outline-none"
-                                            required wire:model.live="with_options" name="">
-                                            <option value="">-- Select Type --</option>
-                                            <option value="true">Sonsor with OPTIONS table</option>
-                                            <option value="false">Sonsor TITLE and specify text</option>
-                                        </select> --}}
+                                            <label><input type="radio" wire:model="with_options" value="options_table"
+                                                    class="mr-1">Sponsor with OPTIONS table</label>
+                                            <label><input type="radio" wire:model="with_options" value="package_title"
+                                                    class="mr-1">Sponsor TITLE and specify text</label>
+                                            <label><input type="radio" wire:model="with_options"
+                                                    value="packages_list" class="mr-1">Sponsor Package List</label>
+                                        </div>
+                                    </div>
+                                @elseif($component === 'price-section-component')
+                                    <div class="space-y-2">
+                                        <input type="checkbox" wire:model.live="special_price"
+                                            class="w-3 px-3 py-2 border rounded-md focus:ring focus:ring-blue-200 focus:outline-none">
+                                        <label class="text-gray-700 font-semibold">Add Special Pavilion & Special
+                                            Condition</label>
                                     </div>
                                 @endif
                             </div>
@@ -151,8 +158,7 @@
 
         <!-- Flash Message -->
         @if ($message)
-            <div
-                class="p-4 @if ($messageType === 'success') bg-green-100 border-green-400 text-green-700 @else bg-red-100 border-red-400 text-red-700 @endif rounded">
+            <div class="p-4 @if ($messageType === 'success') bg-green-100 border-green-400 text-green-700 @else bg-red-100 border-red-400 text-red-700 @endif rounded">
                 {{ $message }}
                 @if ($messageType === 'success')
                     <div
@@ -209,17 +215,17 @@
                             <div data-id="{{ $component }}"
                                 class="bg-white p-2 border rounded shadow-sm cursor-move flex justify-between items-center">
                                 @if ($component == 'payment-section')
-                                    @livewire($component, [null, $paymentMethod, $bankAccount, $bankNameAddress, $swiftCode, $iban, $currency, $report->Event->vat_rate], key($component . '-' . $index))
+                                    @livewire($component, [null, $paymentMethod, $bankAccount, $bankNameAddress, $swiftCode, $iban, $currency, $report ? $report->Event->vat_rate : 11], key($component . '-' . $index))
                                 @elseif($component == 'header-component')
                                     @livewire($component, [null, $with_logo, $logo_path], key($component . '-' . $index))
                                 @elseif($component == 'price-section-component')
-                                    @livewire($component, [null, $currency, $event], key($component . '-' . $index))
+                                    @livewire($component, [null, $currency, $event, $special_price], key($component . '-' . $index))
                                 @elseif($component == 'water-section')
                                     @livewire($component, [null, $currency], key($component . '-' . $index))
                                 @elseif($component == 'advertisement-section')
-                                    @livewire($component, [null, $currency], key($component . '-' . $index))
+                                    @livewire($component, [null, $currency, $event], key($component . '-' . $index))
                                 @elseif($component == 'sponsor-section')
-                                    @livewire($component, [null, $currency, $with_options], key($component . '-' . $index))
+                                    @livewire($component, [null, $currency, $event, $with_options], key($component . '-' . $index))
                                 @elseif($component == 'company-details-component')
                                     @livewire($component, [null, $event, $showCategories], key($component . '-' . $index))
                                 @else

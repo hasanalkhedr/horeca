@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdsOption;
 use App\Models\Client;
 use App\Models\Company;
 use App\Models\Contract;
-use App\Models\ContractType;
-use App\Models\ContractValue;
 use App\Models\Event;
 use App\Models\Report;
 use App\Models\Settings\Price;
@@ -15,6 +14,7 @@ use App\Models\Stand;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ContractController extends Controller
 {
@@ -34,6 +34,7 @@ class ContractController extends Controller
     }
     public function store(Request $request)
     {
+        //dd($request->advertisment_amount);
         $event = Event::find($request->event_id);
         $report = Report::find($request->report_id);
         $cats = $request->categories;
@@ -71,11 +72,14 @@ class ContractController extends Controller
             'notes2' => $request->notes2,
             'category_id' => $request->categories ? json_decode($request->categories[0])->id : null,
             'seller' => $request->seller,
+            'ads_check' => $request->ads_check,
+            'advertisment_amount' => $request->advertisment_amount,
         ]);
         $stand->status = 'Sold';
         $stand->save();
 
-        return view('contracts.preview', compact('contract'))->layout('components.layouts.app');
+        return redirect()->route('contracts.index');
+        //return view('contracts.preview', compact('contract'))->layout('components.layouts.app');
     }
     public function edit(Contract $contract)
     {
@@ -124,6 +128,8 @@ class ContractController extends Controller
             'notes2' => $request->notes2,
             'category_id' => $request->categories ? json_decode($request->categories[0])->id : null,
             'seller' => $request->seller,
+            'ads_check' => $request->ads_check,
+            'advertisment_amount' => $request->advertisment_amount,
         ]);
         if($newStand->id != $oldStand->id) {
             $oldStand->status = 'Available';
@@ -132,7 +138,8 @@ class ContractController extends Controller
             $newStand->save();
         }
 
-        return view('contracts.preview', compact('contract'))->layout('components.layouts.app');
+        return redirect()->route('contracts.index');
+        //return view('contracts.preview', compact('contract'))->layout('components.layouts.app');
 
     }
     public function destroy(Contract $contract)

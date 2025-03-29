@@ -71,15 +71,16 @@
                                 Event Sponsorship Opportunities</th>
                         </thead>
                         <tbody>
-                            @if ($contract->Event)
-                                @forelse ($contract->Event->SponsorPackages as $package)
+                            @if ($event)
+                                @forelse ($event->SponsorPackages as $package)
                                     <tr>
                                         <td style="padding: 5px !important" class="w-1/2 text-left">
                                             <input type="checkbox" class="mr-2" @checked($package->id == $contract->sponsor_package_id)>
-                                            <label class="font-semibold">{{$package->title}}</label>
+                                            <label class="font-semibold">{{ $package->title }}</label>
                                         </td>
                                         <td style="padding: 5px !important" class="w-1/2 text-right">
-                                            <label class="font-semibold">{{$package->total_price}} {{$package->Currency->CODE}}</label>
+                                            <label class="font-semibold">{{ $package->currencies->where('id',$currency->id)->first()->pivot->total_price }}
+                                                {{ $currency->CODE }}</label>
                                         </td>
                                     </tr>
                                 @empty
@@ -125,7 +126,7 @@
                     </div>
                 </div>
             </div>
-            @break
+        @break
 
-        @endswitch
+    @endswitch
     </div>

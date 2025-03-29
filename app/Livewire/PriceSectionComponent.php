@@ -11,9 +11,10 @@ use Livewire\Component;
 
 class PriceSectionComponent extends Component
 {
+    public bool $special_price;
     public Contract $contract;
     public Currency $currency;
-    public function mount($contract = null, $currency = null, $event = null)
+    public function mount($contract = null, $currency = null, $event = null, $special_price = null)
     {
         if ($contract) {
             $this->contract = $contract;
@@ -37,6 +38,7 @@ class PriceSectionComponent extends Component
             $this->contract->Event = $event;
         }
         $this->currency = $currency;
+        $this->special_price = $special_price;
     }
     public function render()
     {

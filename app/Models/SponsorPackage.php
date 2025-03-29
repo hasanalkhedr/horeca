@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class SponsorPackage extends Model
 {
-    protected $fillable = ['id','title', 'currency_id', 'total_price'];
+    protected $fillable = ['id','title'];
     public function SponsorOptions() {
         return $this->belongsToMany(SponsorOption::class, 'sponsor_option_sponsor_package','package_id','option_id');
     }
-    public function Currency() {
-        return $this->belongsTo(Currency::class);
+    public function Currencies()
+    {
+        return $this->belongsToMany(Currency::class)
+            ->withPivot('total_price');
     }
     public function Contracts() {
         return $this->hasMany(Contract::class);

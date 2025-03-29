@@ -25,6 +25,7 @@ class ReportBuilder extends Component
     public string $iban = '';
     public bool $with_logo = false;
     public bool $showCategories = false;
+    public bool $special_price = false;
     public string $with_options = '';
     public string $logo_path = '';
     public $logo_image;
@@ -51,7 +52,10 @@ class ReportBuilder extends Component
             $this->iban = $report->iban;
             $this->currency_id = $report->currency_id;
             $this->showCategories = $report->show_categories;
+            $this->special_price = $report->special_price;
             $this->with_options = $report->with_options;
+            $this->with_logo = $report->with_logo;
+            $this->logo_path = $report->logo_path;
         }
     }
     public function saveReport()
@@ -79,6 +83,7 @@ class ReportBuilder extends Component
                 'logo_path' => $this->logo_path,
                 'currency_id' => $this->currency_id,
                 'show_categories' => $this->showCategories,
+                'special_price'=> $this->special_price,
                 'with_options' => $this->with_options,
             ]);
         } else {
@@ -96,6 +101,7 @@ class ReportBuilder extends Component
                 'logo_path' => $this->logo_path,
                 'currency_id' => $this->currency_id,
                 'show_categories' => $this->showCategories,
+                'special_price'=> $this->special_price,
                 'with_options' => $this->with_options,
             ]);
         }

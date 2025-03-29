@@ -2,10 +2,10 @@
 
 namespace App\Livewire;
 
+use App\Models\AdsPackage;
 use App\Models\Event;
 use App\Models\Settings\Category;
 use App\Models\Settings\Currency;
-use App\Models\Settings\PaymentRate;
 use App\Models\Settings\Price;
 use App\Models\SponsorPackage;
 use Vildanbina\LivewireWizard\WizardComponent;
@@ -14,7 +14,6 @@ use App\Models\User;
 class EventWizard extends WizardComponent
 {
     public $eventId;
-    //public $payment_rates;
     public $currencies;
     public $currency_id = 0;
     public $all_currencies;
@@ -26,60 +25,6 @@ class EventWizard extends WizardComponent
         ThirdStep::class,
         FourthStep::class,
     ];
-
-    // public function addPayment()
-    // {
-    //     $ps = array_map(function ($p) {
-    //         return new PaymentRate((array) $p);
-    //     }, json_decode($this->payment_rates, true));
-    //     //$ps = json_decode($this->payment_rates);
-    //     $p = new PaymentRate([
-    //         "id" => null,
-    //         "title" => '',
-    //         "rate" => 0,
-    //         "order" => 0,
-    //         "date_to_pay" => ''
-    //     ]);
-    //     array_push($ps, $p);
-    //     $this->payment_rates = json_encode($ps);
-    //     $this->mergeState([
-    //         'payment_rates' => $this->payment_rates,
-    //     ]);
-    // }
-    // public function editPayment($payment_rate)
-    // {
-    //     $ps = array_map(function ($p) {
-    //         return new PaymentRate((array) $p);
-    //     }, json_decode($this->payment_rates, true));
-    //     $p = new PaymentRate($payment_rate);
-    //     // if ($p->id) {
-    //     //     $p->update($payment_rate);
-    //     // } else {
-    //     //     $p = $p->create($payment_rate);
-    //     // }
-    //     $filtered_ps = collect($ps)->reject(fn($p) => $p->id === $payment_rate['id']);
-    //     $ps = $filtered_ps->toArray();
-    //     array_push($ps, $p->toArray());
-    //     $this->payment_rates = json_encode($ps);
-    //     $this->mergeState([
-    //         'payment_rates' => $this->payment_rates,
-    //     ]);
-    // }
-    // public function deletePayment($id)
-    // {
-    //     $ps = array_map(function ($p) {
-    //         return new PaymentRate((array) $p);
-    //     }, json_decode($this->payment_rates, true));
-    //     // if ($id) {
-    //     //     PaymentRate::find($id)->first()->delete();
-    //     // }
-    //     $filtered_ps = collect($ps)->reject(fn($p) => $p->id === $id);
-    //     //array_pop($ps);
-    //     $this->payment_rates = json_encode($filtered_ps);
-    //     $this->mergeState([
-    //         'payment_rates' => $this->payment_rates,
-    //     ]);
-    // }
 
     public function relateCurrency($id)
     {
@@ -245,12 +190,12 @@ class EventWizard extends WizardComponent
         $this->all_packages = array_map(function ($p) {
             return new SponsorPackage((array) $p);
         }, json_decode($this->state['all_packages'], true));
-        $this->event_packages = array_map(function($p){
+        $this->event_packages = array_map(function ($p) {
             return new SponsorPackage((array) $p);
         }, json_decode($this->state['event_packages'], true));
         // dd($this->all_packages, $this->event_packages);
         array_push($this->event_packages, $package);
-        $this->all_packages = collect($this->all_packages)->reject(fn($p)=>$p->id === $package['id']);
+        $this->all_packages = collect($this->all_packages)->reject(fn($p) => $p->id === $package['id']);
         $this->mergeState([
             'all_packages' => json_encode($this->all_packages),
             'event_packages' => json_encode($this->event_packages),
@@ -269,15 +214,54 @@ class EventWizard extends WizardComponent
         $this->all_packages = array_map(function ($p) {
             return new SponsorPackage((array) $p);
         }, json_decode($this->state['all_packages'], true));
-        $this->event_packages = array_map(function($p){
+        $this->event_packages = array_map(function ($p) {
             return new SponsorPackage((array) $p);
         }, json_decode($this->state['event_packages'], true));
         // dd($this->all_packages, $this->event_packages);
         array_push($this->all_packages, $package);
-        $this->event_packages = collect($this->event_packages)->reject(fn($p)=>$p->id === $package['id']);
+        $this->event_packages = collect($this->event_packages)->reject(fn($p) => $p->id === $package['id']);
         $this->mergeState([
             'all_packages' => json_encode($this->all_packages),
             'event_packages' => json_encode($this->event_packages),
+        ]);
+    }
+
+
+    public $all_ads_packages = [];
+    public $event_ads_packages = [];
+    public function addAdsPackageToEvent($package)
+    {
+        $this->all_ads_packages = array_map(function ($p) {
+            return new AdsPackage((array) $p);
+        }, json_decode($this->state['all_ads_packages'], true));
+
+        $this->event_ads_packages = array_map(function ($p) {
+            return new AdsPackage((array) $p);
+        }, json_decode($this->state['event_ads_packages'], true));
+
+        array_push($this->event_ads_packages, $package);
+
+        $this->all_ads_packages = collect($this->all_ads_packages)
+            ->reject(fn($p) => $p->id === $package['id'])->toArray();
+
+        $this->mergeState([
+            'all_ads_packages' => json_encode($this->all_ads_packages),
+            'event_ads_packages' => json_encode($this->event_ads_packages),
+        ]);
+    }
+    public function removeAdsPackageFromEvent($package)
+    {
+        $this->all_ads_packages = array_map(function ($p) {
+            return new AdsPackage((array) $p);
+        }, json_decode($this->state['all_ads_packages'], true));
+        $this->event_ads_packages = array_map(function ($p) {
+            return new AdsPackage((array) $p);
+        }, json_decode($this->state['event_ads_packages'], true));
+        array_push($this->all_ads_packages, $package);
+        $this->event_ads_packages = collect($this->event_ads_packages)->reject(fn($p) => $p->id === $package['id']);
+        $this->mergeState([
+            'all_ads_packages' => json_encode($this->all_ads_packages),
+            'event_ads_packages' => json_encode($this->event_ads_packages),
         ]);
     }
 

@@ -22,6 +22,7 @@ class Report extends Model
         'logo_path',
         'currency_id',
         'show_categories',
+        'special_price',
         'with_options',
     ];
 

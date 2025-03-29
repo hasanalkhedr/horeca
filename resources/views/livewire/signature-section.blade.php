@@ -1,11 +1,15 @@
 <div class="pt-[1px]">
     <div class="flex justify-between">
         <div class="w-7/12 mr-6">
-            <label class="block font-semibold text-sm">Additional Contact Person <span class="font-bold underline">{{$contract->ContactPerson->name}}</span></label>
+            <label class="block font-semibold text-sm">Additional Contact Person <span
+                    class="font-bold underline">{{ $contract->ContactPerson->name }}</span></label>
             <label class="font-bold text-sm">For and on behalf of the exhibiting company</label>
-            <label class="block font-semibold text-sm">Date <span class="font-bold underline">{{$contract->contract_date}}</span></label>
-            <label class="block font-semibold text-sm">Name <span class="font-bold underline">{{$contract->ExhabitionCoordinator->name}}</span></label>
-            <label class="block font-semibold text-sm">Position in company <span class="font-bold underline">{{$contract->ExhabitionCoordinator->position}}</span></label>
+            <label class="block font-semibold text-sm">Date <span
+                    class="font-bold underline">{{ $contract->contract_date }}</span></label>
+            <label class="block font-semibold text-sm">Name <span
+                    class="font-bold underline">{{ $contract->ExhabitionCoordinator->name }}</span></label>
+            <label class="block font-semibold text-sm">Position in company <span
+                    class="font-bold underline">{{ $contract->ExhabitionCoordinator->position }}</span></label>
 
             <label class="font-semibold text-xs mt-2 pt-2">For Organizers use only</label>
             <table class="w-full">

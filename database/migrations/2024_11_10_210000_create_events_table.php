@@ -27,20 +27,8 @@ return new class extends Migration
             $table->decimal('remaining_free_space');
             $table->decimal('vat_rate');
             $table->text('payment_method')->nullable();
-            //$table->foreignId('bank_account_id')->nullable()->constrained('bank_accounts');
-
             $table->timestamps();
         });
-        Schema::table('payment_rates', function (Blueprint $table) {
-            $table->foreignId('event_id')->nullable()->constrained('events')->onDelete('cascade');
-        });
-        Schema::table('bank_accounts', function (Blueprint $table) {
-            $table->foreignId('event_id')->nullable()->constrained('events')->onDelete('cascade');
-        });
-
-        // Schema::table('pricing_strategies', function (Blueprint $table) {
-        //     $table->foreignId('event_id')->nullable()->constrained('events');
-        // });
 
         Schema::create('category_event',function(Blueprint $table){
             $table->foreignId('event_id')->constrained('events')->onDelete('cascade');
@@ -57,12 +45,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('events');
-        Schema::table('bank_accounts', function (Blueprint $table) {
-            $table->dropColumn('event_id');
-        });
-
         Schema::dropIfExists('category_event');
         Schema::dropIfExists('currency_event');
+        Schema::dropIfExists('events');
+
     }
 };

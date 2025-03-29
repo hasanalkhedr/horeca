@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('contract_fields', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('contract_type_id')->constrained('contract_types')->cascadeOnDelete();
-            $table->string('field_name');
-            $table->string('field_type');
-            $table->timestamps();
+        Schema::table('contracts', function (Blueprint $table) {
+            $table->json('ads_check')->nullable();
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('contract_fields');
+        Schema::table('contracts', function (Blueprint $table) {
+            $table->dropColumn('ads_check');
+        });
     }
 };

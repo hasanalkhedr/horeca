@@ -16,7 +16,9 @@ class Contract extends Model
             $contract->contract_no = Contract::generateContractNumber($contract);
         });
         static::created(function (Contract $contract) {
-            $contract->sponsor_amount = $contract->SponsorPackage? $contract->SponsorPackage->total_price : 0;
+            $contract->sponsor_amount = $contract->SponsorPackage ?
+                $contract->SponsorPackage->currencies->where('id', $contract->Report->Currency->id)->first() ?
+                $contract->SponsorPackage->currencies->where('id', $contract->Report->Currency->id)->first()->pivot->total_price : 0 : 0;
             $contract->special_design_amount = $contract->special_design_price * $contract->Stand->space;
             $contract->sub_total_1 = $contract->space_amount + $contract->sponsor_amount +
                 $contract->advertisment_amount + $contract->special_design_amount +
@@ -29,7 +31,9 @@ class Contract extends Model
         });
         static::updated(function (Contract $contract) {
             if (!$contract->wasRecentlyUpdated) {
-                $contract->sponsor_amount = $contract->SponsorPackage? $contract->SponsorPackage->total_price : 0;
+                $contract->sponsor_amount = $contract->SponsorPackage ?
+                    $contract->SponsorPackage->currencies->where('id', $contract->Report->Currency->id)->first() ?
+                    $contract->SponsorPackage->currencies->where('id', $contract->Report->Currency->id)->first()->pivot->total_price : 0 : 0;
                 $contract->special_design_amount = $contract->special_design_price * $contract->Stand->space;
                 $contract->sub_total_1 = $contract->space_amount + $contract->sponsor_amount +
                     $contract->advertisment_amount + $contract->special_design_amount +
@@ -67,7 +71,6 @@ class Contract extends Model
         'stand_id',
         'price_id',
         'event_id',
-        'contract_type_id',
         'space_amount',
         'sponsor_amount',
         'advertisment_amount',
@@ -96,10 +99,12 @@ class Contract extends Model
         'vat_amount',
         'net_total',
         'category_id',
-        'seller'
+        'seller',
+        'ads_check'
     ];
     protected $casts = [
         'contrat_date' => 'date',
+        'ads_check' => 'array',
     ];
     public function Company()
     {
@@ -138,13 +143,20 @@ class Contract extends Model
     {
         return $this->belongsTo(Client::class, 'exhabition_coordinator');
     }
-    public function SponsorPackage() {
+    public function SponsorPackage()
+    {
         return $this->belongsTo(SponsorPackage::class);
     }
-    public function Category() {
+    public function Category()
+    {
         return $this->belongsTo(Category::class);
     }
-    public function Seller()  {
+    public function Seller()
+    {
         return $this->belongsTo(User::class);
+    }
+    public function AdsPackage()
+    {
+        return $this->belongsTo(AdsPackage::class);
     }
 }

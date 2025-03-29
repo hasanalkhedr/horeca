@@ -16,6 +16,7 @@
                 'currency' => $report->Currency,
                 'event' => $report->Event,
                 'showCategories' => $report->show_categories,
+                'special_price' => $report->special_price,
                 'with_options' => $report->with_options,
                 'vat' => $report->Event->vat_rate,
             ])

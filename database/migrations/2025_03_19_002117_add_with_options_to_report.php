@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('reports', function (Blueprint $table) {
             $table->string('with_options');
+            $table->boolean('special_price')->default(false);
         });
     }
 
@@ -22,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('reports', function (Blueprint $table) {
-            $table->dropColumn('with_options');
+            $table->dropColumn(['with_options','special_price']);
         });
     }
 };

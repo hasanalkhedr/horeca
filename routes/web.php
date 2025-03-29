@@ -4,23 +4,22 @@
 // <?php
 
 use App\Http\Controllers\{
+    AdsOptionController,
+    AdsPackageController,
     BrandController,
     ClientController,
     CompanyController,
     ContractController,
     EventController,
-    Settings\BankAccountController,
     Settings\CategoryController,
     Settings\CurrencyController,
 
-    Settings\PaymentRateController,
     Settings\PriceController,
     SponsorOptionController,
     SponsorPackageController,
     StandController,
     HomeController
 };
-use App\Http\Controllers\Auth\PermissionController;
 use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\Auth\UserController;
 use App\Http\Controllers\ReportController;
@@ -47,8 +46,6 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Payment settings
-    Route::resource('payment_rates', PaymentRateController::class);
-    Route::resource('bank_accounts', BankAccountController::class);
     Route::resource('currencies', CurrencyController::class);
     Route::resource('categories', CategoryController::class);
     Route::resource('prices', PriceController::class);
@@ -60,12 +57,33 @@ Route::middleware(['auth'])->group(function () {
     Route::put('stands/{stand}/block', [StandController::class, 'block'])->name('stands.block');
 
     // Sponsorship
-    Route::resource('sponsor_packages', SponsorPackageController::class);
+    //Route::resource('sponsor_packages', SponsorPackageController::class);
     Route::resource('sponsor_options', SponsorOptionController::class);
-    Route::get('sponsor_packages/{id}/options', [SponsorPackageController::class, 'getRelatedOptions']);
-    Route::post('sponsor_packages/{id}/options', [SponsorPackageController::class, 'relateOption']);
-    Route::delete('sponsor_packages/{id}/options/{optionId}', [SponsorPackageController::class, 'unrelateOption']);
+    //Route::get('sponsor_packages/{id}/options', [SponsorPackageController::class, 'getRelatedOptions']);
+    //Route::post('sponsor_packages/{id}/options', [SponsorPackageController::class, 'relateOption']);
+    //Route::delete('sponsor_packages/{id}/options/{optionId}', [SponsorPackageController::class, 'unrelateOption']);
 
+    //SponsorPackage Routes
+    Route::group(['prefix' => 'sponsor_packages', 'as' => 'sponsor_packages.'], function () {
+        // Basic CRUD routes
+        Route::get('/', [SponsorPackageController::class, 'index'])->name('index');
+        Route::post('/', [SponsorPackageController::class, 'store'])->name('store');
+        Route::get('/{sponsorPackage}', [SponsorPackageController::class, 'show'])->name('show');
+        Route::put('/{sponsorPackage}', [SponsorPackageController::class, 'update'])->name('update');
+        Route::delete('/{sponsorPackage}', [SponsorPackageController::class, 'destroy'])->name('destroy');
+
+        // Currency management routes
+        Route::post('/{sponsorPackage}/add-currency', [SponsorPackageController::class, 'addCurrency'])
+            ->name('add-currency');
+        Route::delete('/{sponsorPackage}/remove-currency/{currency}', [SponsorPackageController::class, 'removeCurrency'])
+            ->name('remove-currency');
+
+        // Option management routes
+        Route::post('/{sponsorPackage}/attach-option', [SponsorPackageController::class, 'attachOption'])
+            ->name('attach-option');
+        Route::delete('/{sponsorPackage}/detach-option/{sponsorOption}', [SponsorPackageController::class, 'detachOption'])
+            ->name('detach-option');
+    });
     // Events
     Route::resource('events', EventController::class);
     Route::get('events/{event}/stands', [StandController::class, 'index'])->name('events.stands');
@@ -97,6 +115,44 @@ Route::get('/reports/{id}', [ReportController::class, 'show'])->name('reports.sh
 Route::get('events/{event}/reports', [ReportController::class, 'index'])->name('events.reports');
 Route::delete('/reports/{report}', [ReportController::class, 'destroy'])->name('reports.destroy');
 
+// AdsPackage Routes
+Route::group(['prefix' => 'ads-packages', 'as' => 'ads-packages.'], function () {
+    // Basic CRUD routes
+    Route::get('/', [AdsPackageController::class, 'index'])->name('index');
+    Route::post('/', [AdsPackageController::class, 'store'])->name('store');
+    Route::get('/{adsPackage}', [AdsPackageController::class, 'show'])->name('show');
+    Route::put('/{adsPackage}', [AdsPackageController::class, 'update'])->name('update');
+    Route::delete('/{adsPackage}', [AdsPackageController::class, 'destroy'])->name('destroy');
+
+    // Currency management routes
+    Route::post('/{adsPackage}/add-currency', [AdsPackageController::class, 'addCurrency'])
+        ->name('add-currency');
+    Route::delete('/{adsPackage}/remove-currency/{currency}', [AdsPackageController::class, 'removeCurrency'])
+        ->name('remove-currency');
+
+    // Option management routes
+    Route::post('/{adsPackage}/attach-option', [AdsPackageController::class, 'attachOption'])
+        ->name('attach-option');
+    Route::delete('/{adsPackage}/detach-option/{adsOption}', [AdsPackageController::class, 'detachOption'])
+        ->name('detach-option');
+});
+// AdsOption Routes
+Route::group(['prefix' => 'ads-options', 'as' => 'ads-options.'], function () {
+    // Basic CRUD routes
+    Route::get('/', [AdsOptionController::class, 'index'])->name('index');
+    Route::post('/', [AdsOptionController::class, 'store'])->name('store');
+    Route::get('/{adsOption}', [AdsOptionController::class, 'show'])->name('show');
+    Route::put('/{adsOption}', [AdsOptionController::class, 'update'])->name('update');
+    Route::delete('/{adsOption}', [AdsOptionController::class, 'destroy'])->name('destroy');
+
+    // Additional currency routes
+    Route::post('ads-options/{adsOption}/add-currency', [AdsOptionController::class, 'addCurrency'])
+        ->name('add-currency');
+
+    Route::delete('ads-options/{adsOption}/remove-currency/{currency}', [AdsOptionController::class, 'removeCurrency'])
+        ->name('remove-currency');
+});
+
 // Auth routes
 //Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
 Route::resource('users', UserController::class);
@@ -114,4 +170,3 @@ Route::post('roles/{role}/give-permission', [RoleController::class, 'givePermiss
 Route::delete('roles/{role}/remove-permission/{permission}', [RoleController::class, 'removePermission'])
     ->name('roles.removePermission');
 require __DIR__ . '/auth.php';
-

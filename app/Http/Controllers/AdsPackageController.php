@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SponsorPackage;
-use App\Models\SponsorOption;
+use App\Models\AdsPackage;
+use App\Models\AdsOption;
 use App\Models\Settings\Currency;
 use Illuminate\Http\Request;
 use Validator;
 
-class SponsorPackageController extends Controller
+class AdsPackageController extends Controller
 {
     public function index(Request $request) {
-        $packages = SponsorPackage::query();
+        $packages = AdsPackage::query();
 
         // Search by title
         if ($request->has('search')) {
@@ -26,14 +26,15 @@ class SponsorPackageController extends Controller
             $packages->orderBy($sort, $direction);
         }
 
-        $packages = $packages->with(['currencies', 'sponsorOptions'])->paginate(10);
+        $packages = $packages->with(['currencies', 'adsOptions'])->paginate(10);
 
-        return view('sponsor_packages.index', compact('packages'));
+        return view('ads-packages.index', compact('packages'));
     }
 
     public function store(Request $request) {
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'currencies' => 'nullable|array',
             'currencies.*.id' => 'exists:currencies,id',
             'currencies.*.price' => 'numeric|min:0',
@@ -43,7 +44,7 @@ class SponsorPackageController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $package = SponsorPackage::create($request->only(['title']));
+        $package = AdsPackage::create($request->only(['title', 'description']));
 
         // Sync currencies with prices
         if ($request->has('currencies')) {
@@ -57,29 +58,30 @@ class SponsorPackageController extends Controller
         return response()->json(['message' => 'Ads package created successfully']);
     }
 
-    public function show(SponsorPackage $sponsorPackage) {
-        $sponsorPackage->load(['currencies', 'sponsorOptions']);
+    public function show(AdsPackage $adsPackage) {
+        $adsPackage->load(['currencies', 'adsOptions']);
         $currencies = Currency::all();
 
         // Get currencies not already assigned
-        $assignedCurrencyIds = $sponsorPackage->currencies->pluck('id')->toArray();
+        $assignedCurrencyIds = $adsPackage->currencies->pluck('id')->toArray();
         $availableCurrencies = Currency::whereNotIn('id', $assignedCurrencyIds)->get();
 
         // Get options not already assigned
-        $assignedOptionIds = $sponsorPackage->sponsorOptions->pluck('id')->toArray();
-        $availableOptions = SponsorOption::whereNotIn('id', $assignedOptionIds)->get();
+        $assignedOptionIds = $adsPackage->adsOptions->pluck('id')->toArray();
+        $availableOptions = AdsOption::whereNotIn('id', $assignedOptionIds)->get();
 
-        return view('sponsor_packages.show', compact(
-            'sponsorPackage',
+        return view('ads-packages.show', compact(
+            'adsPackage',
             'currencies',
             'availableCurrencies',
             'availableOptions'
         ));
     }
 
-    public function update(Request $request, SponsorPackage $sponsorPackage) {
+    public function update(Request $request, AdsPackage $adsPackage) {
         $validator = Validator::make($request->all(), [
             'title' => 'sometimes|string|max:255',
+            'description' => 'nullable|string',
             'currencies' => 'nullable|array',
             'currencies.*.id' => 'exists:currencies,id',
             'currencies.*.price' => 'numeric|min:0',
@@ -89,7 +91,7 @@ class SponsorPackageController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $sponsorPackage->update($request->only(['title']));
+        $adsPackage->update($request->only(['title', 'description']));
 
         // Sync currencies with prices
         if ($request->has('currencies')) {
@@ -97,48 +99,48 @@ class SponsorPackageController extends Controller
             foreach ($request->currencies as $currency) {
                 $currenciesWithPrices[$currency['id']] = ['total_price' => $currency['price']];
             }
-            $sponsorPackage->currencies()->sync($currenciesWithPrices);
+            $adsPackage->currencies()->sync($currenciesWithPrices);
         }
 
         return response()->json(['message' => 'Ads package updated successfully']);
     }
 
-    public function destroy(SponsorPackage $sponsorPackage) {
-        $sponsorPackage->delete();
+    public function destroy(AdsPackage $adsPackage) {
+        $adsPackage->delete();
         return response()->json(['message' => 'Ads package deleted successfully']);
     }
 
-    public function attachOption(Request $request, SponsorPackage $sponsorPackage) {
+    public function attachOption(Request $request, AdsPackage $adsPackage) {
         $request->validate([
-            'sponsor_option_id' => 'required|exists:sponsor_options,id'
+            'ads_option_id' => 'required|exists:ads_options,id'
         ]);
 
-        $sponsorPackage->sponsorOptions()->syncWithoutDetaching([$request->sponsor_option_id]);
+        $adsPackage->adsOptions()->syncWithoutDetaching([$request->ads_option_id]);
 
         return response()->json(['message' => 'Option added to package successfully']);
     }
 
-    public function detachOption(SponsorPackage $sponsorPackage, SponsorOption $sponsorOption) {
-        $sponsorPackage->sponsorOptions()->detach($sponsorOption->id);
+    public function detachOption(AdsPackage $adsPackage, AdsOption $adsOption) {
+        $adsPackage->adsOptions()->detach($adsOption->id);
 
         return response()->json(['message' => 'Option removed from package successfully']);
     }
 
-    public function addCurrency(Request $request, SponsorPackage $sponsorPackage) {
+    public function addCurrency(Request $request, AdsPackage $adsPackage) {
         $request->validate([
             'currency_id' => 'required|exists:currencies,id',
             'price' => 'required|numeric|min:0'
         ]);
 
-        $sponsorPackage->currencies()->syncWithoutDetaching([
+        $adsPackage->currencies()->syncWithoutDetaching([
             $request->currency_id => ['total_price' => $request->price]
         ]);
 
         return response()->json(['message' => 'Currency added to package successfully']);
     }
 
-    public function removeCurrency(SponsorPackage $sponsorPackage, Currency $currency) {
-        $sponsorPackage->currencies()->detach($currency->id);
+    public function removeCurrency(AdsPackage $adsPackage, Currency $currency) {
+        $adsPackage->currencies()->detach($currency->id);
         return response()->json(['message' => 'Currency removed from package successfully']);
     }
 }

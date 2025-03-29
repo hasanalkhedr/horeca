@@ -30,7 +30,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sponsor_options');
         Schema::dropIfExists('sponsor_option_sponsor_package');
+        Schema::dropIfExists('sponsor_options');
     }
 };

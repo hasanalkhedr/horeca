@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-
+use App\Models\AdsPackage;
 use App\Models\Settings\Category;
 use App\Models\Settings\Price;
 use App\Models\SponsorPackage;
@@ -20,9 +20,15 @@ class FourthStep extends Step
         $event = $this->model;
         $ev_pa = $event->SponsorPackages()->pluck('id')->toArray();
         $av = SponsorPackage::with('SponsorOptions')->whereNotIn('id', $ev_pa)->get();
+
+        $ev_ads_pa = $event->AdsPackages()->pluck('ads_packages.id')->toArray();
+        $ads_av = AdsPackage::with('AdsOptions')->whereNotIn('id', $ev_ads_pa)->get();
         $this->mergeState([
             'all_packages' => json_encode($av->toArray() ?? []),
             'event_packages' => json_encode($event->SponsorPackages()->with('SponsorOptions')->get()->toArray() ?? []),
+
+            'all_ads_packages' => json_encode($ads_av->toArray() ?? []),
+            'event_ads_packages' => json_encode($event->AdsPackages()->with('AdsOptions')->get()->toArray() ?? []),
         ]);
     }
     /*
@@ -42,9 +48,17 @@ class FourthStep extends Step
         $event_packages = array_map(function ($p) {
             return new SponsorPackage((array) $p);
         }, json_decode($state['event_packages'], true));
+
+        $event_ads_packages = array_map(function ($p) {
+            return new AdsPackage((array) $p);
+        }, json_decode($state['event_ads_packages'], true));
         $event = $this->model;
         $event->SponsorPackages()->sync(array_map(function ($p) {
-            return $p->id; }, $event_packages));
+            return $p->id;
+        }, $event_packages));
+        $event->AdsPackages()->sync(array_map(function ($p) {
+            return $p->id;
+        }, $event_ads_packages));
         redirect(route('events.index'));
     }
     /*
@@ -52,8 +66,7 @@ class FourthStep extends Step
      */
     public function validate()
     {
-        return [
-        ];
+        return [];
     }
     /*
      * Step Title
@@ -62,5 +75,4 @@ class FourthStep extends Step
     {
         return __('Sponsor&Advertisement');
     }
-
 }

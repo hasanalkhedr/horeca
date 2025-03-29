@@ -47,7 +47,7 @@ class StandController extends Controller
     }
     public function storeMany(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validator = validator::make($request->all(), [
             'prefix' => 'required|string',
             'num' => 'required|numeric|min:0',
             'space' => 'required|decimal:0,3',

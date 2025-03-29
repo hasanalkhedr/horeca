@@ -115,4 +115,8 @@ class Event extends Model
     {
         return $this->belongsToMany(SponsorPackage::class);
     }
+    public function AdsPackages()
+    {
+        return $this->belongsToMany(AdsPackage::class);
+    }
 }

@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
         Currency::create([
             'CODE' => 'EURO',
             'name' => 'Euro',
-            'rate_to_usd' => '0.9',
+            'rate_to_usd' => '1.08',
             'country' => 'Europe'
         ]);
 

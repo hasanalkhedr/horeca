@@ -14,11 +14,9 @@ class ContractTable extends DataTableComponent
 {
     protected $model = Contract::class;
     public $event;
-    public $contractType;
-    public function mount($event = null, $contractType = null)
+    public function mount($event = null)
     {
         $this->event = $event;
-        $this->contractType = $contractType;
     }
     public function configure(): void
     {
@@ -64,7 +62,6 @@ class ContractTable extends DataTableComponent
                 'stand_id',
                 'price_id',
                 'contracts.event_id',
-                'contract_type_id',
                 'space_amount',
                 'sponsor_amount',
                 'advertisment_amount',
@@ -101,7 +98,6 @@ class ContractTable extends DataTableComponent
                 'stand_id',
                 'price_id',
                 'contracts.event_id',
-                'contract_type_id',
                 'space_amount',
                 'sponsor_amount',
                 'advertisment_amount',

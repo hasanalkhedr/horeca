@@ -1,5 +1,5 @@
 <!-- resources/views/components/sidebar-large.blade.php -->
-<div x-data="{ sideOpen: true, userSubMenuOpen: false, settingsMenu: false, spaceManagementMenu: false, sponsorshipManagementMenu: false, clientsMenu: false, contractsMenu: false, usersMenu: false }"
+<div x-data="{ sideOpen: true, userSubMenuOpen: false, settingsMenu: false, spaceManagementMenu: false, sponsorshipManagementMenu: false, clientsMenu: false, contractsMenu: false, usersMenu: false, adsManagementMenu: false }"
     class="hidden lg:flex flex-shrink-0 bg-gray-100 shadow-md h-full border-r border-gray-100 pb-20"
     x-bind:class="{ 'w-30': !sideOpen, 'w-1/6': sideOpen }">
     <!-- Sidebar links -->
@@ -52,6 +52,21 @@
                     icon="fa-solid fa-cube" />
                 <x-sidebar-link href="{{ route('sponsor_options.index') }}" label="Sponsorship Options"
                     icon="fa-solid fa-filter-circle-dollar" />
+            </div>
+        </x-sidebar-link>
+        <x-sidebar-link href="" icon="fas fa-ad" label="Advertisement Management"
+            @click.prevent="adsManagementMenu=!adsManagementMenu">
+            <x-slot name="subIcon">
+                <svg x-bind:class="{ 'rotate-180': adsManagementMenu }"
+                    class="ml-auto mr-2 transition-transform h-6 w-6" fill="currentColor">
+                    <path d="M6 15l6-6 6 6H6z" />
+                </svg>
+            </x-slot>
+            <div x-show="adsManagementMenu" x-transition class="pl-4">
+                <x-sidebar-link href="{{ route('ads-packages.index') }}" label="Advertisement Packages"
+                    icon="fa-solid fa-box-open" />
+                <x-sidebar-link href="{{ route('ads-options.index') }}" label="Advertisement Options"
+                    icon="fa-solid fa-check-to-slot" />
             </div>
         </x-sidebar-link>
         <x-sidebar-link href="" icon="fas fa-file-contract" label="Contracts"

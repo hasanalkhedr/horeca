@@ -79,8 +79,9 @@
                                 @else
                                     <div>
                                         <x-input-label for="event_id">Event</x-input-label>
+
                                         <x-select-input name="event_id" id="event_id" x-model="formData.event_id" required>
-                                            <option value="">-- Select Event --</option>
+                                            {{-- <option value="">-- Select Event --</option> --}}
                                             <option selected value="{{ $event->id }}">{{ $event->name }}</option>
                                         </x-select-input>
                                     </div>
@@ -205,7 +206,7 @@
     <script>
         function standModal() {
             return {
-                event_id: {{ $event->id ?? 0 }},
+                //event_id: {{ $event->id ?? 0 }},
                 isOpen: false,
                 action: '',
                 modalTitle: '',
@@ -227,14 +228,15 @@
                     },
 
                 },
-
                 selectedStandId: null,
                 selectedStand: null,
                 file: null,
                 message: '',
+
                 handleFileUpload(event) {
                     this.file = event.target.files[0];
                 },
+
                 async uploadFile() {
                     if (!this.file) {
                         this.message = 'Please select a file.';
@@ -244,7 +246,7 @@
                     const formData = new FormData();
                     formData.append('file', this.file);
                     try {
-                        const response = await fetch(`/stands/import/${this.event_id}`, {
+                        const response = await fetch(`/stands/import/${this.formData.event_id}`, {
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -279,7 +281,6 @@
                     if (stand) {
                         this.selectedStand = JSON.parse(stand);
                         this.selectedStandId = this.selectedStand.id;
-
                         if (action === 'edit') {
                             this.formData = {
                                 ...this.selectedStand
@@ -301,7 +302,7 @@
                     this.formData = {
                         no: '',
                         space: '',
-                        event_id: '',
+                        event_id: {{ $event->id ?? 0 }},
                         category_id: '',
                         //   stand_type_id: '',
                         deductable: '',
@@ -309,7 +310,7 @@
                             prefix: '',
                             num: '',
                             space: '',
-                            event_id: '',
+                            event_id: {{ $event->id ?? 0 }},
                             category_id: '',
                             deductable: ''
                         }
