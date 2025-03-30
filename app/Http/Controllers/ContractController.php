@@ -34,30 +34,21 @@ class ContractController extends Controller
     }
     public function store(Request $request)
     {
-        //dd($request->advertisment_amount);
-        $event = Event::find($request->event_id);
-        $report = Report::find($request->report_id);
-        $cats = $request->categories;
         $stand = Stand::find($request->stand_id);
-        $company = Company::find($request->company_id);
-        $price = Price::find($request->price_id);
-        $price_amount = $price ? $price->amount : $request->special_price_amount;
-        $coordinator = Client::find($request->coordinator_id);
-        $contact_person = Client::find($request->contact_person);
-
         $contract = Contract::create([
             'contract_no' => $request->contract_no,
             'contract_date' => Carbon::parse($request->contract_date),
             'company_id' => $request->company_id,
+            'exhabition_coordinator' => $request->coordinator_id,
+            'contact_person' => $request->contact_person,
+            'category_id' => $request->categories ? json_decode($request->categories[0])->id : null,
             'stand_id' => $request->stand_id,
             'price_id' => $request->price_id == 0 ? null : $request->price_id,
             'price_amount' => $request->price_id == 0 ? $request->special_price_amount : null,
             'event_id' => $request->event_id,
             'report_id' => $request->report_id,
             'status' => 'draft',
-            'space_amount' => $stand->space * $price_amount,
-            'contact_person' => $request->contact_person,
-            'exhabition_coordinator' => $request->coordinator_id,
+            'space_amount' => $request->space_amount,
             'special_design_text' => $request->special_design_text,
             'special_design_price' => $request->special_design_price ? $request->special_design_price : 0,
             'if_water' => $request->if_water ? $request->if_water : 0,
@@ -65,19 +56,33 @@ class ContractController extends Controller
             'electricity_text' => $request->electricity_text,
             'water_electricity_amount' => ($request->if_water || $request->if_electricity) ? $request->water_electricity_amount : 0,
             'new_product' => $request->new_product,
-            //'advertisment_amount' => '',
             'sponsor_package_id' => $request->sponsor_package_id,
+            'sponsor_amount' => $request->sponsor_amount,
             'specify_text' => $request->specify_text,
             'notes1' => $request->notes1,
             'notes2' => $request->notes2,
-            'category_id' => $request->categories ? json_decode($request->categories[0])->id : null,
             'seller' => $request->seller,
             'ads_check' => $request->ads_check,
             'advertisment_amount' => $request->advertisment_amount,
+            'space_discount' => $request->space_discount,
+            'space_net' => $request->space_net,
+            'sponsor_discount' => $request->sponsor_discount,
+            'sponsor_net' => $request->sponsor_net,
+            'ads_discount' => $request->ads_discount,
+            'ads_net' => $request->ads_net,
+            'sub_total_1' => $request->sub_total_1,
+            'd_i_a' => $request->d_i_a,
+            'sub_total_2' => $request->sub_total_2,
+            'vat_amount' => $request->vat_amount,
+            'net_total' => $request->net_total,
         ]);
         $stand->status = 'Sold';
         $stand->save();
-
+        $contract->d_i_a = $request->d_i_a;
+        $contract->sub_total_2 = $request->sub_total_2;
+        $contract->vat_amount = $request->vat_amount;
+        $contract->net_total = $request->net_total;
+        $contract->save();
         return redirect()->route('contracts.index');
         //return view('contracts.preview', compact('contract'))->layout('components.layouts.app');
     }
@@ -95,25 +100,19 @@ class ContractController extends Controller
     {
         $newStand = Stand::find($request->stand_id);
         $oldStand = $contract->Stand;
-        $company = Company::find($request->company_id);
-        $price = Price::find($request->price_id);
-        $price_amount = $price ? $price->amount : $request->special_price_amount;
-        $coordinator = Client::find($request->coordinator_id);
-        $contact_person = Client::find($request->contact_person);
 
         $contract->update([
-            //'contract_no' => $request->contract_no,
-            //'contract_date' => Carbon::parse($request->contract_date),
+
             'company_id' => $request->company_id,
+            'exhabition_coordinator' => $request->coordinator_id,
+            'contact_person' => $request->contact_person,
+            'category_id' => $request->categories ? json_decode($request->categories[0])->id : null,
             'stand_id' => $request->stand_id,
             'price_id' => $request->price_id == 0 ? null : $request->price_id,
             'price_amount' => $request->price_id == 0 ? $request->special_price_amount : null,
-            //'event_id' => $request->event_id,
-            //'report_id' => $request->report_id,
+
             'status' => 'draft',
-            'space_amount' => $newStand->space * $price_amount,
-            'contact_person' => $request->contact_person,
-            'exhabition_coordinator' => $request->coordinator_id,
+            'space_amount' => $request->space_amount,
             'special_design_text' => $request->special_design_text,
             'special_design_price' => $request->special_design_price ? $request->special_design_price : 0,
             'if_water' => $request->if_water ? $request->if_water : 0,
@@ -121,17 +120,32 @@ class ContractController extends Controller
             'electricity_text' => $request->electricity_text,
             'water_electricity_amount' => ($request->if_water || $request->if_electricity) ? $request->water_electricity_amount : 0,
             'new_product' => $request->new_product,
-            //'advertisment_amount' => '',
             'sponsor_package_id' => $request->sponsor_package_id,
+            'sponsor_amount' => $request->sponsor_amount,
             'specify_text' => $request->specify_text,
             'notes1' => $request->notes1,
             'notes2' => $request->notes2,
-            'category_id' => $request->categories ? json_decode($request->categories[0])->id : null,
             'seller' => $request->seller,
             'ads_check' => $request->ads_check,
             'advertisment_amount' => $request->advertisment_amount,
+            'space_discount' => $request->space_discount,
+            'space_net' => $request->space_net,
+            'sponsor_discount' => $request->sponsor_discount,
+            'sponsor_net' => $request->sponsor_net,
+            'ads_discount' => $request->ads_discount,
+            'ads_net' => $request->ads_net,
+            'sub_total_1' => $request->sub_total_1,
+            'd_i_a' => $request->d_i_a,
+            'sub_total_2' => $request->sub_total_2,
+            'vat_amount' => $request->vat_amount,
+            'net_total' => $request->net_total,
         ]);
-        if($newStand->id != $oldStand->id) {
+        // $contract->d_i_a = $request->d_i_a;
+        // $contract->sub_total_2 = $request->sub_total_2;
+        // $contract->vat_amount = $request->vat_amount;
+        // $contract->net_total = $request->net_total;
+        // $contract->save();
+        if ($newStand->id != $oldStand->id) {
             $oldStand->status = 'Available';
             $oldStand->save();
             $newStand->status = 'Sold';

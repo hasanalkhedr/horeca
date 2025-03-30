@@ -30,6 +30,9 @@
                 'special_price' => $contract->Report->special_price,
                 'with_options'=>$contract->Report->with_options,
                 'vat'=>$contract->Event->vat_rate,])
+                @if(!$loop->last && !$loop->first)
+                    <div class="w-full"><hr class="h-1 my-[2px] bg-blue-900 border-3 dark:bg-gray-700"></div>
+                @endif
         @endforeach
     </div>
     <!-- Page 2: Terms and Conditions -->

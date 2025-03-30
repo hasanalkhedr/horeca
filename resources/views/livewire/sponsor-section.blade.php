@@ -40,30 +40,29 @@
 
         @case('package_title')
             <div class="flex justify-between">
-                <div class="border border-black w-5/6 mr-6">
+                <div class="border border-black w-3/4 mr-6">
                     <label class="font-bold">Sponsorship / Effective Advertising <span
                             class="underline">{{ $contract->SponsorPackage ? $contract->SponsorPackage->title : '' }}</span></label>
-                </div>
-                <div class="w-1/6">
-                    <div class="text-right font-bold border border-black mb-[2px]">
-                        <p>{{ $contract->sponsor_amount }} {{ $currency->CODE }}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="flex justify-between text-xs font-bold">
-                <div class="w-5/6 mr-6">
                     <label class="font-semibold underline">Specify <span
                             class="font-bold">{{ $contract->specify_text }}</span></label>
                 </div>
-                <div class="w-1/6">
-
+                <div class="w-1/4">
+                    <div class="text-right font-bold border border-black mb-[2px]">
+                        <p>Total: {{ $contract->sponsor_amount }} {{ $currency->CODE }}</p>
+                    </div>
+                    <div class="text-right font-bold border border-black mb-[2px]">
+                        <p>Discount: {{ $contract->sponsor_discount }} {{ $currency->CODE }}</p>
+                    </div>
+                    <div class="text-right font-bold border border-black mb-[2px]">
+                        <p>Net: {{ $contract->sponsor_net }} {{ $currency->CODE }}</p>
+                    </div>
                 </div>
             </div>
         @break
 
         @case('packages_list')
             <div class="flex justify-between">
-                <div class="border border-black w-5/6 mr-6">
+                <div class="border border-black w-3/4 mr-6">
                     <table class="border border-gray-800 w-full">
                         <thead>
                             <th colspan="2" style="padding: 5px !important"
@@ -79,7 +78,10 @@
                                             <label class="font-semibold">{{ $package->title }}</label>
                                         </td>
                                         <td style="padding: 5px !important" class="w-1/2 text-right">
-                                            <label class="font-semibold">{{ $package->currencies->where('id',$currency->id)->first()->pivot->total_price }}
+                                            <label
+                                                class="font-semibold">{{ $package->currencies->where('id', $currency->id)->first()
+                                                    ? $package->currencies->where('id', $currency->id)->first()->pivot->total_price
+                                                    : 0 }}
                                                 {{ $currency->CODE }}</label>
                                         </td>
                                     </tr>
@@ -120,13 +122,19 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="w-1/6">
-                    <div class="text-right font-bold border border-black mb-[2px] pb-1">
-                        <p>{{ $contract->sponsor_amount }} {{ $currency->CODE }}</p>
+                <div class="w-1/4">
+                    <div class="text-right font-bold border border-black mb-[2px]">
+                        <p>Total: {{ $contract->sponsor_amount }} {{ $currency->CODE }}</p>
+                    </div>
+                    <div class="text-right font-bold border border-black mb-[2px]">
+                        <p>Discount: {{ $contract->sponsor_discount }} {{ $currency->CODE }}</p>
+                    </div>
+                    <div class="text-right font-bold border border-black mb-[2px]">
+                        <p>Net: {{ $contract->sponsor_net }} {{ $currency->CODE }}</p>
                     </div>
                 </div>
             </div>
-        @break
+            @break
 
-    @endswitch
+        @endswitch
     </div>

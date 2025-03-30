@@ -16,34 +16,30 @@ class Contract extends Model
             $contract->contract_no = Contract::generateContractNumber($contract);
         });
         static::created(function (Contract $contract) {
-            $contract->sponsor_amount = $contract->SponsorPackage ?
-                $contract->SponsorPackage->currencies->where('id', $contract->Report->Currency->id)->first() ?
-                $contract->SponsorPackage->currencies->where('id', $contract->Report->Currency->id)->first()->pivot->total_price : 0 : 0;
-            $contract->special_design_amount = $contract->special_design_price * $contract->Stand->space;
-            $contract->sub_total_1 = $contract->space_amount + $contract->sponsor_amount +
-                $contract->advertisment_amount + $contract->special_design_amount +
-                $contract->water_electricity_amount;
-            $contract->d_i_a = 0;// $contract->sub_total_1;
-            $contract->sub_total_2 = $contract->sub_total_1 - $contract->d_i_a;
-            $contract->vat_amount = $contract->sub_total_2 * $contract->Event->vat_rate / 100;
-            $contract->net_total = $contract->sub_total_2 + $contract->vat_amount;
-            $contract->save();
+            // $contract->sponsor_amount = $contract->SponsorPackage ? $contract->SponsorPackage->currencies->where('id', $contract->Report->Currency->id)->first() ? $contract->SponsorPackage->currencies->where('id', $contract->Report->Currency->id)->first()->pivot->total_price : 0 : 0;
+//$contract->special_design_amount = $contract->special_design_price * $contract->Stand->space;
+           // $contract->sub_total_1 = $contract->space_amount + $contract->sponsor_amount + $contract->advertisment_amount +             $contract->special_design_amount + $contract->water_electricity_amount;
+           // $contract->d_i_a = 0;// $contract->sub_total_1;
+           // $contract->sub_total_2 = $contract->sub_total_1 - $contract->d_i_a;
+           // $contract->vat_amount = $contract->sub_total_2 * $contract->Event->vat_rate / 100;
+           // $contract->net_total = $contract->sub_total_2 + $contract->vat_amount;
+// $contract->save();
         });
         static::updated(function (Contract $contract) {
             if (!$contract->wasRecentlyUpdated) {
-                $contract->sponsor_amount = $contract->SponsorPackage ?
-                    $contract->SponsorPackage->currencies->where('id', $contract->Report->Currency->id)->first() ?
-                    $contract->SponsorPackage->currencies->where('id', $contract->Report->Currency->id)->first()->pivot->total_price : 0 : 0;
-                $contract->special_design_amount = $contract->special_design_price * $contract->Stand->space;
-                $contract->sub_total_1 = $contract->space_amount + $contract->sponsor_amount +
-                    $contract->advertisment_amount + $contract->special_design_amount +
-                    $contract->water_electricity_amount;
-                $contract->d_i_a = 0;//$contract->sub_total_1;
-                $contract->sub_total_2 = $contract->sub_total_1 - $contract->d_i_a;
-                $contract->vat_amount = $contract->sub_total_2 * $contract->Event->vat_rate / 100;
-                $contract->net_total = $contract->sub_total_2 + $contract->vat_amount;
-                $contract->wasRecentlyUpdated = true;
-                $contract->save();
+                // $contract->sponsor_amount = $contract->SponsorPackage ?
+                //     $contract->SponsorPackage->currencies->where('id', $contract->Report->Currency->id)->first() ?
+                //     $contract->SponsorPackage->currencies->where('id', $contract->Report->Currency->id)->first()->pivot->total_price : 0 : 0;
+//                 $contract->special_design_amount = $contract->special_design_price * $contract->Stand->space;
+                // $contract->sub_total_1 = $contract->space_amount + $contract->sponsor_amount +
+                //     $contract->advertisment_amount + $contract->special_design_amount +
+                //     $contract->water_electricity_amount;
+                // $contract->d_i_a = 0;//$contract->sub_total_1;
+                // $contract->sub_total_2 = $contract->sub_total_1 - $contract->d_i_a;
+                // $contract->vat_amount = $contract->sub_total_2 * $contract->Event->vat_rate / 100;
+                // $contract->net_total = $contract->sub_total_2 + $contract->vat_amount;
+                // $contract->wasRecentlyUpdated = true;
+ //               $contract->save();
             }
         });
         static::deleting(function ($document) {
@@ -100,7 +96,13 @@ class Contract extends Model
         'net_total',
         'category_id',
         'seller',
-        'ads_check'
+        'ads_check',
+        'space_discount',
+        'space_net',
+        'sponsor_discount',
+        'sponsor_net',
+        'ads_discount',
+        'ads_net',
     ];
     protected $casts = [
         'contrat_date' => 'date',
@@ -121,14 +123,6 @@ class Contract extends Model
     public function Stand()
     {
         return $this->belongsTo(Stand::class);
-    }
-    public function ContractType()
-    {
-        return $this->belongsTo(ContractType::class);
-    }
-    public function ContractValues()
-    {
-        return $this->hasMany(ContractValue::class);
     }
     public function Report()
     {

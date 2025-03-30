@@ -20,6 +20,9 @@
                 'with_options' => $report->with_options,
                 'vat' => $report->Event->vat_rate,
             ])
+            @if(!$loop->last && !$loop->first)
+            <div class="w-full"><hr class="h-1 my-[2px] bg-blue-900 border-3 dark:bg-gray-700"></div>
+        @endif
         @endforeach
     </div>
     <!-- Terms and Conditions -->
