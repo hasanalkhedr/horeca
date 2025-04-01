@@ -250,7 +250,7 @@
                 },
 
                 addCurrency() {
-                    this.formData.currencies.push({ id: '', price: 0 });
+                    this.formData.currencies.push({ id: '', price: '' });
                 },
 
                 removeCurrency(index) {

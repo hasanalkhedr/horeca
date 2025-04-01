@@ -259,7 +259,7 @@
                 },
                 newCurrency: {
                     id: '',
-                    price: 0
+                    price: ''
                 },
                 newOption: {
                     id: ''

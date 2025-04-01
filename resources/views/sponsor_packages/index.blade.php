@@ -152,7 +152,7 @@
                                                 @endforeach
                                             </select>
                                             <input type="number" step="0.01" x-model="currency.price"
-                                                placeholder="Price"
+                                                placeholder="Price" value=""
                                                 class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                             <button type="button" @click="removeCurrency(index)"
                                                 class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
@@ -247,7 +247,7 @@
                 addCurrency() {
                     this.formData.currencies.push({
                         id: '',
-                        price: 0
+                        price: ''
                     });
                 },
 
