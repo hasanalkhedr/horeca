@@ -13,10 +13,15 @@ class Currency extends Model
     protected $fillable = ['id', 'CODE', 'name', 'rate_to_usd', 'country'];
 
     public function Events(){
-        return $this->belongsToMany(Currency::class);
+        return $this->belongsToMany(Currency::class)
+            ->withPivot('min_price');
     }
     public function Reports() {
         return $this->hasMany(Report::class);
+    }
+    public function Prices(){
+        return $this->belongsToMany(Price::class)
+            ->withPivot('amount');
     }
     public function AdsPackages()
     {

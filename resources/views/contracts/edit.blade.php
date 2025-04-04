@@ -68,8 +68,8 @@
                         @foreach ($prices as $price)
                             <div class="block">
                                 <input type="radio" name="price_id" value="{{ $price->id }}"
-                                    data-price="{{ $price->amount }}" x-model="priceId" @change="calculateTotal()"/> {{ $price->name }} |
-                                {{ $price->Currency->CODE }} | {{ $price->amount }}
+                                    data-price="{{ $price->Currencies()->where('currencies.id', $report->Currency->id)->first()->pivot->amount }}" x-model="priceId" @change="calculateTotal()"/> {{ $price->name }} | {{ $report->Currency->CODE }} |
+                                    {{ $price->Currencies()->where('currencies.id', $report->Currency->id)->first()->pivot->amount }}}
                             </div>
                         @endforeach
                         @if ($report->special_price)
@@ -95,7 +95,7 @@
                             Discount: <input
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm w-1/2"
                                 type="number" name="space_discount" x-model="spaceDiscount" step="0.01"
-                                @input="calculateTotal()">{{ $report->Currency->CODE ?? 'USD' }}
+                                @blur="checkMinPrice()">{{ $report->Currency->CODE ?? 'USD' }}
                         </div>
                         Net Space Amount: <span x-text="formatCurrency(spaceNet)"></span>
                         {{ $report->Currency->CODE ?? 'USD' }}
@@ -365,6 +365,30 @@
                         this.waterElectricityAmount = 0;
                     }
                     this.calculateTotal();
+                },
+
+                checkMinPrice() {
+                    if (this.standId) {
+                        const standSelect = document.getElementById('stand_id');
+                        const selectedOption = standSelect.options[standSelect.selectedIndex];
+                        const space = parseFloat(selectedOption.getAttribute('data-space')) || 0;
+                        if (this.priceId && this.priceId !== "0") {
+                            const priceRadios = document.querySelector(`input[name="price_id"][value="${this.priceId}"]`);
+                            const price = parseFloat(priceRadios.getAttribute('data-price')) || 0;
+                            this.spaceTotal = space * price;
+                        } else if (this.priceId === "0") {
+                            this.spaceTotal = space * parseFloat(this.specialPriceAmount || 0);
+                        }
+                        this.spaceNet = this.spaceTotal - parseFloat(this.spaceDiscount || 0);
+                        console.log(this.spaceDiscount, this.spaceNet);
+                        if (this.spaceNet / space <
+                            {{ $contract->Event->Currencies()->where('currencies.id', $report->Currency->id)->first()->pivot->min_price }}
+                        ) {
+                            this.spaceDiscount = '';
+                            alert('sdflj kasdfh iasdfu shdf ico');
+                        }
+                        this.calculateTotal();
+                    }
                 },
 
                 calculateTotal() {

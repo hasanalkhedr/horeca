@@ -48,7 +48,6 @@ class Event extends Model
         'remaining_space_to_sell',
         'remaining_free_space',
         'vat_rate',
-        'payment_method',
         'country',
         'city',
         'address'
@@ -59,21 +58,14 @@ class Event extends Model
         'apply_start_date' => 'date',
         'apply_deadline_date' => 'date',
     ];
-    public function BankAccount()
-    {
-        return $this->hasOne(BankAccount::class);
-    }
     public function Categories()
     {
         return $this->belongsToMany(Category::class);
     }
     public function Currencies()
     {
-        return $this->belongsToMany(Currency::class);
-    }
-    public function PaymentRates()
-    {
-        return $this->hasMany(PaymentRate::class);
+        return $this->belongsToMany(Currency::class)
+            ->withPivot('min_price');
     }
 
     public function Stands()
@@ -94,14 +86,6 @@ class Event extends Model
         return $this->hasMany(Price::class);
     }
 
-    public function ContractTypes()
-    {
-        return $this->hasMany(ContractType::class);
-    }
-    public function ContractFields()
-    {
-        return $this->hasManyThrough(ContractField::class, ContractType::class, 'event_id', 'contract_type_id', 'id', 'id');
-    }
     public function Contracts()
     {
         return $this->hasMany(Contract::class);

@@ -5,8 +5,7 @@
     <p class="text-center text-gray-600">Fill out the contract form with the required details.</p>
 
     <form action="{{ route('contracts.store') }}" method="POST"
-        class="w-full mx-auto bg-white shadow-lg rounded-lg px-2 py-1 space-y-1"
-        x-data="contractForm()"
+        class="w-full mx-auto bg-white shadow-lg rounded-lg px-2 py-1 space-y-1" x-data="contractForm()"
         x-init="init()">
         @csrf
         <h2 class="text-xl font-semibold text-gray-800">Contract Basic Information</h2>
@@ -58,7 +57,8 @@
                 <div class="flex flex-wrap -mx-3 mb-2 w-3/4">
                     <div class="w-full px-3">
                         <x-input-label for="stand_id">Stand:</x-input-label>
-                        <x-select-input name="stand_id" id="stand_id" required x-model="standId" @change="calculateTotal()">
+                        <x-select-input name="stand_id" id="stand_id" required x-model="standId"
+                            @change="calculateTotal()">
                             <option value="">-- Select Value --</option>
                             @foreach ($stands as $stand)
                                 <option value="{{ $stand->id }}" data-space="{{ $stand->space }}">
@@ -71,24 +71,23 @@
                         @foreach ($prices as $price)
                             <div class="block">
                                 <input type="radio" name="price_id" value="{{ $price->id }}"
-                                    data-price="{{ $price->amount }}"
-                                    x-model="priceId"
-                                    @change="calculateTotal()" />
-                                {{ $price->name }} | {{ $price->Currency->CODE }} | {{ $price->amount }}
+                                    data-price="{{ $price->Currencies()->where('currencies.id', $report->Currency->id)->first()->pivot->amount }}"
+                                    x-model="priceId" @change="calculateTotal()" />
+                                {{-- {{ $price->name }} | {{ $price->Currency->CODE }} | {{ $price->amount }} --}}
+
+                                {{ $price->name }} | {{ $report->Currency->CODE }} |
+                                {{ $price->Currencies()->where('currencies.id', $report->Currency->id)->first()->pivot->amount }}
                             </div>
                         @endforeach
                         @if ($report->special_price)
                             <div class="block">
                                 <input type="radio" name="price_id" value="0" id="special_price_radio"
-                                    x-model="priceId"
-                                    @click="toggleSpecialPrice()" />
+                                    x-model="priceId" @click="toggleSpecialPrice()" />
                                 Special pavilion specify
                                 <input
                                     class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                     name="special_price_amount" id="special_price_amount" type="number" step="0.01"
-                                    x-model="specialPriceAmount"
-                                    :disabled="priceId != 0"
-                                    @input="calculateTotal()" />
+                                    x-model="specialPriceAmount" :disabled="priceId != 0" @input="calculateTotal()" />
                             </div>
                         @endif
                     </div>
@@ -102,7 +101,7 @@
                             Discount: <input
                                 class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm w-1/2"
                                 type="number" name="space_discount" x-model="spaceDiscount" step="0.01"
-                                @input="calculateTotal()">{{ $report->Currency->CODE ?? 'USD' }}
+                                @blur="checkMinPrice()">{{ $report->Currency->CODE ?? 'USD' }}
                         </div>
                         Net Space Amount: <span x-text="formatCurrency(spaceNet)"></span>
                         {{ $report->Currency->CODE ?? 'USD' }}
@@ -116,15 +115,13 @@
             <x-form-divider>Extra Water/Electricity:</x-form-divider>
             <label class="inline-flex items-center">
                 <input type="checkbox" name="if_water" value="1"
-                    class="text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                    x-model="ifWater"
+                    class="text-indigo-600 focus:ring-indigo-500 border-gray-300" x-model="ifWater"
                     @change="calculateTotal(); resetWaterElectricityAmount()">
                 <span class="ml-2 text-sm text-gray-700"> Water point needed (if available)</span>
             </label>
             <label class="inline-flex items-center">
                 <input type="checkbox" name="if_electricity" class="text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                    value="1" id="if_electricity"
-                    x-model="ifElectricity"
+                    value="1" id="if_electricity" x-model="ifElectricity"
                     @change="calculateTotal(); resetWaterElectricityAmount()" />
                 Extra electricity
                 <input
@@ -133,9 +130,8 @@
                     :disabled="!ifElectricity" />
                 <input
                     class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                    name="water_electricity_amount" placeholder="Water & electricity Amount" type="number" step="0.01"
-                    x-model="waterElectricityAmount"
-                    @input="calculateTotal()" />
+                    name="water_electricity_amount" placeholder="Water & electricity Amount" type="number"
+                    step="0.01" x-model="waterElectricityAmount" @input="calculateTotal()" />
             </label>
         @endif
 
@@ -153,8 +149,7 @@
                 <div class="flex flex-wrap -mx-3 mb-2 w-3/4">
                     <div class="w-full px-3">
                         <x-input-label for="sponsor_package_id">Choose Sponsor Package:</x-input-label>
-                        <x-select-input name="sponsor_package_id" id="sponsor_package_id"
-                            x-model="sponsorPackageId"
+                        <x-select-input name="sponsor_package_id" id="sponsor_package_id" x-model="sponsorPackageId"
                             @change="calculateTotal()">
                             <option value="">-- Select Value --</option>
                             @foreach ($sponsor_packages as $package)
@@ -289,11 +284,16 @@
             <!-- Total Cost Display -->
             <div class="w-1/2 total pt-4 py-3 text-right justify-between">
                 <div class="text-2xl font-bold  bg-gray-200">
-                    <p> Total Amount: <span class="text-red-400" x-text="formatCurrency(sub_total_1)"></span> {{ $report->Currency->CODE ?? 'USD' }}</p>
-                    <p> Total Discount (-): <span class="text-red-400" x-text="formatCurrency(d_i_a)"></span> {{ $report->Currency->CODE ?? 'USD' }}</p>
-                    <p> Net Total: <span class="text-red-400" x-text="formatCurrency(sub_total_2)"></span> {{ $report->Currency->CODE ?? 'USD' }}</p>
-                    <p> VAT (+{{$event->vat_rate}}%): <span class="text-red-400" x-text="formatCurrency(vat_amount)"></span> {{ $report->Currency->CODE ?? 'USD' }}</p>
-                    <p> Final Amount: <span class="text-red-400" x-text="formatCurrency(net_total)"></span> {{ $report->Currency->CODE ?? 'USD' }}</p>
+                    <p> Total Amount: <span class="text-red-400" x-text="formatCurrency(sub_total_1)"></span>
+                        {{ $report->Currency->CODE ?? 'USD' }}</p>
+                    <p> Total Discount (-): <span class="text-red-400" x-text="formatCurrency(d_i_a)"></span>
+                        {{ $report->Currency->CODE ?? 'USD' }}</p>
+                    <p> Net Total: <span class="text-red-400" x-text="formatCurrency(sub_total_2)"></span>
+                        {{ $report->Currency->CODE ?? 'USD' }}</p>
+                    <p> VAT (+{{ $event->vat_rate }}%): <span class="text-red-400"
+                            x-text="formatCurrency(vat_amount)"></span> {{ $report->Currency->CODE ?? 'USD' }}</p>
+                    <p> Final Amount: <span class="text-red-400" x-text="formatCurrency(net_total)"></span>
+                        {{ $report->Currency->CODE ?? 'USD' }}</p>
                     <input type="hidden" name="sub_total_1" x-model="sub_total_1">
                     <input type="hidden" name="d_i_a" x-model="d_i_a">
                     <input type="hidden" name="sub_total_2" x-model="sub_total_2">
@@ -338,6 +338,7 @@
                 vat_amount: 0,
                 net_total: 0,
 
+
                 init() {
                     this.calculateTotal();
                 },
@@ -370,6 +371,30 @@
                     this.calculateTotal();
                 },
 
+                checkMinPrice() {
+                    if (this.standId) {
+                        const standSelect = document.getElementById('stand_id');
+                        const selectedOption = standSelect.options[standSelect.selectedIndex];
+                        const space = parseFloat(selectedOption.getAttribute('data-space')) || 0;
+                        if (this.priceId && this.priceId !== "0") {
+                            const priceRadios = document.querySelector(`input[name="price_id"][value="${this.priceId}"]`);
+                            const price = parseFloat(priceRadios.getAttribute('data-price')) || 0;
+                            this.spaceTotal = space * price;
+                        } else if (this.priceId === "0") {
+                            this.spaceTotal = space * parseFloat(this.specialPriceAmount || 0);
+                        }
+                        this.spaceNet = this.spaceTotal - parseFloat(this.spaceDiscount || 0);
+                        console.log(this.spaceDiscount, this.spaceNet);
+                        if (this.spaceNet / space <
+                            {{ $event->Currencies()->where('currencies.id', $report->Currency->id)->first()->pivot->min_price }}
+                        ) {
+                            this.spaceDiscount = '';
+                            alert('sdflj kasdfh iasdfu shdf ico');
+                        }
+                        this.calculateTotal();
+                    }
+                },
+
                 calculateTotal() {
                     this.spaceTotal = 0;
                     this.spaceNet = 0;
@@ -378,11 +403,11 @@
                     this.adsTotal = 0;
                     this.adsNet = 0;
 
-                    this.sub_total_1= 0;
-                    this.d_i_a= 0;
-                    this.sub_total_2= 0;
-                    this.vat_amount= 0;
-                    this.net_total= 0;
+                    this.sub_total_1 = 0;
+                    this.d_i_a = 0;
+                    this.sub_total_2 = 0;
+                    this.vat_amount = 0;
+                    this.net_total = 0;
 
                     // Calculate space total
                     if (this.standId) {
@@ -398,7 +423,6 @@
                             this.spaceTotal = space * parseFloat(this.specialPriceAmount || 0);
                         }
                     }
-
                     // Calculate net space amount
                     this.spaceNet = this.spaceTotal - parseFloat(this.spaceDiscount || 0);
 
@@ -426,11 +450,13 @@
                     this.adsNet = this.adsTotal - parseFloat(this.adsDiscount || 0);
 
                     // Calculate final total
-                   this.sub_total_1 = this.spaceTotal + this.sponsorTotal + this.adsTotal + parseFloat(this.waterElectricityAmount || 0);
-                   this.d_i_a = parseFloat(this.spaceDiscount || 0) + parseFloat(this.sponsorDiscount || 0) + parseFloat(this.adsDiscount || 0);
-                   this.sub_total_2 = this.sub_total_1 - this.d_i_a;
-                   this.vat_amount =this.sub_total_2 * {{$event->vat_rate}} / 100;
-                   this.net_total = this.sub_total_2 + this.vat_amount;
+                    this.sub_total_1 = this.spaceTotal + this.sponsorTotal + this.adsTotal + parseFloat(this
+                        .waterElectricityAmount || 0);
+                    this.d_i_a = parseFloat(this.spaceDiscount || 0) + parseFloat(this.sponsorDiscount || 0) + parseFloat(
+                        this.adsDiscount || 0);
+                    this.sub_total_2 = this.sub_total_1 - this.d_i_a;
+                    this.vat_amount = this.sub_total_2 * {{ $event->vat_rate }} / 100;
+                    this.net_total = this.sub_total_2 + this.vat_amount;
                 }
             }
         }

@@ -26,27 +26,31 @@ class EventWizard extends WizardComponent
         FourthStep::class,
     ];
 
-    public function relateCurrency($id)
+    public function relateCurrency($id, $min_price)
     {
-        $cs = array_map(function ($c) {
-            return new Currency((array) $c);
-        }, json_decode($this->currencies, true));
-        //$cs = json_decode($this->currencies);
-        $c = Currency::find($id);
-        array_push($cs, $c);
-        $this->currencies = json_encode($cs);
+        $av_cs = json_decode($this->state['avilable_currencies']);
+        $cs = json_decode($this->state['currencies']);
+        $cu = (array) (collect($av_cs)->firstWhere('id', $id));
+
+        array_push($cs, array_merge($cu, ['min_price' => $min_price]));
+        $av_cs = collect($av_cs)->reject(fn($c) => $c->id == $id)->toArray();
+
         $this->mergeState([
-            'currencies' => $this->currencies,
+            'currencies' => json_encode($cs ?? []),
+            'avilable_currencies' => json_encode(array_values($av_cs) ?? [])
         ]);
     }
     public function unrelateCurrency($currency)
     {
-        $cs = json_decode($this->currencies);
-        $filtered_cs = collect($cs)->reject(fn($c) => $c->id === $currency['id']);
-        $cs = $filtered_cs->values()->toArray();
-        $this->currencies = json_encode($cs);
+        $av_cs = json_decode($this->state['avilable_currencies']);
+        $cs = json_decode($this->state['currencies']);
+
+        array_push($av_cs, $currency);
+        $cs = collect($cs)->reject(fn($c) => $c->id == $currency['id'])->toArray();
+
         $this->mergeState([
-            'currencies' => $this->currencies,
+            'currencies' => json_encode(array_values($cs) ?? []),
+            'avilable_currencies' => json_encode($av_cs ?? [])
         ]);
     }
     public function toogleCategory($category, $isChecked)
@@ -75,103 +79,46 @@ class EventWizard extends WizardComponent
         //dd($cats);
     }
 
+    public $tempPrice;
     public function addPrice($price)
     {
-        $price['currency_code'] = Currency::find($price['currency_id'])->CODE;
-        $state = $this->getState();
-        $prices = json_decode($state['prices'] ?? '[]');
+        $prices = json_decode($this->state['prices']);
+        $currencies = json_decode($this->state['currencies']);
+        $price['index'] = count($prices);
+        foreach ($price['currencies'] as $index => $curr) {
+            $curr['currency_code'] = collect($currencies)->where('id', $curr['currency_id'])->first()->CODE;
+            $price['currencies'][$index] = $curr;
+        }
         array_push($prices, $price);
         $this->mergeState([
-            //'prices' => json_encode($prices),
             'prices' => json_encode($prices),
         ]);
-
-        // if($price['id'] == 0) {
-        //     $event->Prices()->create($price);
-        // } else {
-        //     $p = Price::find($price['id']);
-        //     if($p) {
-        //         $p->update($price);
-        //     }
-        // }
-
-        // $this->mergeState([
-        //     'prices' => Price::with('Currency')->where('event_id', $event->id)->get()->map(function ($price) {
-        //         return [
-        //             'id' => $price->id,
-        //             'name' => $price->name,
-        //             'amount' => $price->amount,
-        //             'currency_id' => $price->currency_id,
-        //             'event_id' => $price->event_id ?? 0,
-        //             'currency_code' => $price->Currency->CODE ?? null,
-        //         ];
-        //     }),
-        // ]);
-        $this->price = [
-            'id' => 0,
-            'name' => '',
-            'amount' => 0,
-            'currency_id' => 0,
-            'currency_code' => '',
-            'event_id' => 0,
-            'description' => ''
-        ];
-    }
-
-    public $tempPrice;
-    public function editPrice($price)
-    {
-        $this->price = $price;
-        $this->tempPrice = $price;
     }
     public function updatePrice($price)
     {
-        // dd($this->tempPrice, $price);
-        $price['currency_code'] = Currency::find($price['currency_id'])->CODE;
-        $state = $this->getState();
-        $prices = json_decode($state['prices'] ?? '[]');
-        $p = collect($prices)->reject(fn($p) => $p->id == $this->tempPrice['id'] && $p->amount == $this->tempPrice['amount']);
-
-        $prices = $p->values()->toArray();
-        array_push($prices, $price);
+        $prices = json_decode($this->state['prices']);
+        $currencies = json_decode($this->state['currencies']);
+        foreach ($price['currencies'] as $index => $curr) {
+            $curr['currency_code'] = collect($currencies)->where('id', $curr['currency_id'])->first()->CODE;
+            $price['currencies'][$index] = $curr;
+        }
+        $prices = collect($prices)->map(function ($pr) use ($price) {
+            return ((array) $pr)['index'] == $price['index'] ? $price : $pr;
+        })->toArray();
         $this->mergeState([
-            //'prices' => json_encode($prices),
             'prices' => json_encode($prices),
         ]);
-        $this->price = [
-            'id' => 0,
-            'name' => '',
-            'amount' => 0,
-            'currency_id' => 0,
-            'currency_code' => '',
-            'event_id' => 0,
-            'description' => ''
-        ];
     }
 
     public function deletePrice($price)
     {
-        if ($price['id'] > 0) {
-            $p = Price::find($price['id']);
-            $p->delete();
-        }
-        $state = $this->getState();
-        $prices = json_decode($state['prices'] ?? '[]');
-        $p = collect($prices)->reject(fn($p) => $p->id == $price['id'] && $p->amount == $price['amount']);
-        $prices = $p->values()->toArray();
+        $prices = json_decode($this->state['prices']);
+        $prices = collect($prices)->filter(function ($pr) use ($price) {
+            return ((array) $pr)['index'] != $price['index'];
+        })->toArray();
         $this->mergeState([
-            //'prices' => json_encode($prices),
             'prices' => json_encode($prices),
         ]);
-        $this->price = [
-            'id' => 0,
-            'name' => '',
-            'amount' => 0,
-            'currency_id' => 0,
-            'currency_code' => '',
-            'event_id' => 0,
-            'description' => ''
-        ];
     }
 
     public $all_packages = [];
@@ -270,39 +217,46 @@ class EventWizard extends WizardComponent
     public function model()
     {
         $event = Event::findOrNew($this->eventId);
-        //$this->payment_rates = json_encode($event->PaymentRates()->get());
-        $this->currencies = json_encode($event->Currencies()->get());
-        $this->mergeState([
-            'currencies' => $this->currencies,
-            //  'payment_rates' => $this->payment_rates,
-        ]);
-        $this->all_currencies = json_encode(Currency::all());
+        $currencies = $event->Currencies()->get()->map(function ($currency) {
+            return [
+                'id' => $currency->id,
+                'name' => $currency->name,
+                'CODE' => $currency->CODE,
+                'min_price' => $currency->pivot->min_price
+            ];
+        })->toArray();
+
+        $availableCurrencies = Currency::select('id', 'name', 'CODE')->whereNotIn('id', array_column($currencies, 'id'))->get();
+
         $this->categories = json_encode($event->Categories->toArray() ?? []);
-        //()->get(['id'])->pluck('id')
+
+        $price_currencies = [];
+        foreach ($event->Prices as $index => $price) {
+            $temp_curr = [];
+            foreach ($price->Currencies as $currency) {
+                $temp_curr[] = [
+                    'currency_id' => $currency->id,
+                    'currency_code' => $currency->CODE,
+                    'amount' => $currency->pivot->amount,
+                ];
+            }
+            $price_currencies[] = [
+                'index' => $index,
+                'id' => $price->id,
+                'name' => $price->name,
+                'description' => $price->description,
+                'currencies' => $temp_curr,
+            ];
+        }
         $this->mergeState([
             'categories' => $this->categories,
-            // 'prices' => Price::with('Currency')->where('event_id', $event->id)->get()->map(function ($price)  {
-            //     return [
-            //         'id' => $price->id,
-            //         'name' => $price->name,
-            //         'amount' => $price->amount,
-            //         'currency_id' => $price->currency_id,
-            //         'currency_code' => $price->Currency->CODE ?? null,
-            //         'event_id' => $price->event_id ?? 0,
-            //     ];
-            // }),
+            'all_categories' => Category::all()->toArray(),
+            'currencies' => json_encode($currencies ?? []),
+            'avilable_currencies' => json_encode($availableCurrencies ?? []),
+            'vat_rate' => $event->vat_rate,
+            'prices' => json_encode($price_currencies),
         ]);
-        $this->price = [
-            'id' => 0,
-            'name' => '',
-            'amount' => 0,
-            'currency_id' => 0,
-            'currency_code' => '',
-            'event_id' => 0,
-            'description' => ''
-        ];
 
-        //dd($this->price);
         return $event;
     }
 }

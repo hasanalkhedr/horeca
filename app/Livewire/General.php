@@ -57,7 +57,7 @@ class General extends Step
         $event->free_space = 0;
         $event->remaining_space_to_sell = 0;
         $event->remaining_free_space = 0;
-//        $event->save();
+        //$event->save();
     }
 
     public function validate()

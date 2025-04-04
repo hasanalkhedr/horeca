@@ -26,7 +26,8 @@ class ContractController extends Controller
     {
         $stands = $event->availableStands()->get();
         $report = Report::find($request->report_id);
-        $prices = $event->Prices()->where('currency_id', $report->Currency->id)->get();
+        //$prices = $event->Prices()->where('currency_id', $report->Currency->id)->get();
+        $prices = $event->Prices()->get();
         $categories = $event->Categories()->get();
         $sponsor_packages = $event->SponsorPackages;// SponsorPackage::all();
         $users = User::all();
@@ -48,7 +49,7 @@ class ContractController extends Controller
             'event_id' => $request->event_id,
             'report_id' => $request->report_id,
             'status' => 'draft',
-            'space_amount' => $request->space_amount,
+            'space_amount' => $request->space_amount ?? 0,
             'special_design_text' => $request->special_design_text,
             'special_design_price' => $request->special_design_price ? $request->special_design_price : 0,
             'if_water' => $request->if_water ? $request->if_water : 0,
@@ -57,19 +58,19 @@ class ContractController extends Controller
             'water_electricity_amount' => ($request->if_water || $request->if_electricity) ? $request->water_electricity_amount : 0,
             'new_product' => $request->new_product,
             'sponsor_package_id' => $request->sponsor_package_id,
-            'sponsor_amount' => $request->sponsor_amount,
+            'sponsor_amount' => $request->sponsor_amount ?? 0,
             'specify_text' => $request->specify_text,
             'notes1' => $request->notes1,
             'notes2' => $request->notes2,
             'seller' => $request->seller,
             'ads_check' => $request->ads_check,
-            'advertisment_amount' => $request->advertisment_amount,
-            'space_discount' => $request->space_discount,
-            'space_net' => $request->space_net,
-            'sponsor_discount' => $request->sponsor_discount,
-            'sponsor_net' => $request->sponsor_net,
-            'ads_discount' => $request->ads_discount,
-            'ads_net' => $request->ads_net,
+            'advertisment_amount' => $request->advertisment_amount ?? 0,
+            'space_discount' => $request->space_discount ?? 0,
+            'space_net' => $request->space_net ?? 0,
+            'sponsor_discount' => $request->sponsor_discount ?? 0,
+            'sponsor_net' => $request->sponsor_net ?? 0,
+            'ads_discount' => $request->ads_discount ?? 0,
+            'ads_net' => $request->ads_net ?? 0,
             'sub_total_1' => $request->sub_total_1,
             'd_i_a' => $request->d_i_a,
             'sub_total_2' => $request->sub_total_2,
@@ -90,7 +91,8 @@ class ContractController extends Controller
     {
         $stands = $contract->event->Stands()->get();
         $report = $contract->Report;
-        $prices = $contract->event->Prices()->where('currency_id', $report->Currency->id)->get();
+        //$prices = $contract->event->Prices()->where('currency_id', $report->Currency->id)->get();
+        $prices = $contract->event->Prices()->get();
         $categories = $contract->event->Categories()->get();
         $sponsor_packages = $contract->event->SponsorPackages;// SponsorPackage::all();
         $users = User::all();
@@ -112,7 +114,7 @@ class ContractController extends Controller
             'price_amount' => $request->price_id == 0 ? $request->special_price_amount : null,
 
             'status' => 'draft',
-            'space_amount' => $request->space_amount,
+            'space_amount' => $request->space_amount ?? 0,
             'special_design_text' => $request->special_design_text,
             'special_design_price' => $request->special_design_price ? $request->special_design_price : 0,
             'if_water' => $request->if_water ? $request->if_water : 0,
@@ -121,19 +123,19 @@ class ContractController extends Controller
             'water_electricity_amount' => ($request->if_water || $request->if_electricity) ? $request->water_electricity_amount : 0,
             'new_product' => $request->new_product,
             'sponsor_package_id' => $request->sponsor_package_id,
-            'sponsor_amount' => $request->sponsor_amount,
+            'sponsor_amount' => $request->sponsor_amount ?? 0,
             'specify_text' => $request->specify_text,
             'notes1' => $request->notes1,
             'notes2' => $request->notes2,
             'seller' => $request->seller,
             'ads_check' => $request->ads_check,
-            'advertisment_amount' => $request->advertisment_amount,
-            'space_discount' => $request->space_discount,
-            'space_net' => $request->space_net,
-            'sponsor_discount' => $request->sponsor_discount,
-            'sponsor_net' => $request->sponsor_net,
-            'ads_discount' => $request->ads_discount,
-            'ads_net' => $request->ads_net,
+            'advertisment_amount' => $request->advertisment_amount ?? 0,
+            'space_discount' => $request->space_discount ?? 0,
+            'space_net' => $request->space_net ?? 0,
+            'sponsor_discount' => $request->sponsor_discount ?? 0,
+            'sponsor_net' => $request->sponsor_net ?? 0,
+            'ads_discount' => $request->ads_discount ?? 0,
+            'ads_net' => $request->ads_net ?? 0,
             'sub_total_1' => $request->sub_total_1,
             'd_i_a' => $request->d_i_a,
             'sub_total_2' => $request->sub_total_2,
