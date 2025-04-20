@@ -32,7 +32,7 @@
             <x-form-divider>Client Info:</x-form-divider>
             <livewire:client-select model="App\Models\Company" dependentModel="App\Models\Client" foreignKey="company_id"
                 placeholder="Choose a Company" parentLabel="Company" childLabel="Exhibition Co-ordinator"
-                child2Label="Daily Contact Person" :parentField="$contract->company_id ?? null" :coordinatorId="$contract->exhabition_coordinator ?? null" :contactPerson="$contract->contact_person ?? null" />
+                child2Label="Daily Contact Person" :selectedCompany="$contract->company_id ?? null" :coordinatorId="$contract->exhabition_coordinator ?? null" :contactPerson="$contract->contact_person ?? null" />
             <x-form-divider>Categories:</x-form-divider>
             <div class="space-y-2 grid grid-cols-3 gap-2">
                 @foreach ($categories as $category)
@@ -385,7 +385,7 @@
                             {{ $contract->Event->Currencies()->where('currencies.id', $report->Currency->id)->first()->pivot->min_price }}
                         ) {
                             this.spaceDiscount = '';
-                            alert('sdflj kasdfh iasdfu shdf ico');
+                            alert('Net amount is less than space * minimum price, so this discount cannot be applied');
                         }
                         this.calculateTotal();
                     }

@@ -389,7 +389,7 @@
                             {{ $event->Currencies()->where('currencies.id', $report->Currency->id)->first()->pivot->min_price }}
                         ) {
                             this.spaceDiscount = '';
-                            alert('sdflj kasdfh iasdfu shdf ico');
+                            alert('Net amount is less than space * minimum price, so this discount cannot be applied!');
                         }
                         this.calculateTotal();
                     }

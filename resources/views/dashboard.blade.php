@@ -98,27 +98,38 @@
                     <div class="card">
                         <div class="card-body p-3">
                             <div class="row">
-                                <div class="col-lg-6">
-                                    <div class="d-flex flex-column h-100">
-                                        <p class="mb-1 pt-2 text-bold">{{ $event->name }}</p>
-                                        <h5 class="font-weight-bolder">{{ $event->start_date }} -
-                                            {{ $event->end_date }}</h5>
-                                        <p class="mb-5">{{ $event->description }}</p>
-                                        <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto"
+                                <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto"
+                                    href="{{ route('events.dashboard', [$event->id]) }}">
+                                    <div class="col-lg-6">
+                                        <div class="d-flex flex-column h-100">
+                                            <p class="mb-1 pt-2 text-bold">{{ $event->name }}</p>
+                                            <h5 class="font-weight-bolder">{{ $event->start_date }} -
+                                                {{ $event->end_date }}</h5>
+                                            <p class="mb-5">{{ $event->description }}</p>
+                                            @foreach ($event->Reports as $report)
+                                                <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto"
+                                                    href="/contracts/create/{{ $event->id }}?report_id={{ $report->id }}">
+                                                    <x-secondary-button>Add {{ $report->name }} Contract
+                                                        <i class="fas fa-arrow-right text-sm ms-1"
+                                                            aria-hidden="true"></i></x-secondary-button>
+                                                </a>
+                                            @endforeach
+                                            {{-- <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto"
                                             href="{{ route('events.dashboard', [$event->id]) }}">
                                             <x-primary-button>Event Dashboard
                                                 <i class="fas fa-arrow-right text-sm ms-1"
                                                     aria-hidden="true"></i></x-primary-button>
-                                        </a>
+                                        </a> --}}
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-lg-5 ms-auto text-center mt-5 mt-lg-0">
-                                    <div class="bg-gradient-primary border-radius-lg h-100">
-                                        <img src="{{ asset('assets/event-logo.jpg') }}"
-                                            class="position-absolute h-100 w-50 top-0 d-lg-block d-none" alt="waves">
+                                    <div class="col-lg-5 ms-auto text-center mt-5 mt-lg-0">
+                                        <div class="bg-gradient-primary border-radius-lg h-100">
+                                            <img src="{{ asset('assets/event-logo.jpg') }}"
+                                                class="position-absolute h-100 w-50 top-0 d-lg-block d-none" alt="waves">
 
+                                        </div>
                                     </div>
-                                </div>
+                                </a>
                             </div>
                         </div>
                     </div>

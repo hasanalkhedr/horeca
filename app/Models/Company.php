@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Company extends Model
 {
     protected $fillable=[
+        'pipe_id',
     'name',
     'CODE',
     'commerical_registry_number',

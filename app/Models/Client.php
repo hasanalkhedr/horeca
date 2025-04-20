@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Client extends Model
 {
-    protected $fillable = ['name', 'position', 'mobile', 'phone', 'email', 'company_id'];
+    protected $fillable = ['pipe_id', 'name', 'position', 'mobile', 'phone', 'email', 'company_id'];
     public function Company() {
         return $this->belongsTo(Company::class);
     }

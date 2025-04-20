@@ -175,7 +175,7 @@
         </div>
         <hr class="h-0.5 my-1 bg-gray-500 w-full mx-4" />
         <div class="w-full">
-        <h2>Prices of Event</h2>
+            <h2>Prices of Event</h2>
         </div>
         <div x-data="{
             prices: @entangle('state.prices'),
@@ -189,16 +189,28 @@
                 description: '',
                 currencies: []
             },
-            checkMinPrice(currency_id, amount) {
-                console.log(currency_id, amount);
+            checkMinPrice(element, currency_id, amount) {
+                if (currency_id) {
+                    c = typeof this.currencies !== 'object' ? JSON.parse(this.currencies) : this.currencies;
+                    const currency = c.find(item => item.id == currency_id);
+                    const am = document.getElementById('AddEditButton');
+                    const amI = element
+                    if (parseFloat(amount) < parseFloat(currency.min_price)) {
+                        alert('SQM price cannot be less than Minimum Price for this currency');
+                        am.disabled = true;
+                        amI.style.cssText = 'border: solid red;';
+                    } else {
+                        am.disabled = false;
+                        amI.style.cssText = 'border: none;';
+                    }
+                }
             }
         }">
             <div class="w-full mb-4">
                 <table class="w-full border border-gray-300 rounded-lg shadow-lg">
                     <thead class="bg-gray-100">
                         <tr>
-                            <th class="border border-gray-300 px-1 py-0.5 text-left">
-                                Name</th>
+                            <th class="border border-gray-300 px-1 py-0.5 text-left">Name</th>
                             <th class="border border-gray-300 px-1 py-0.5 text-left">Price in Currencies</th>
                             <th class="border border-gray-300 px-1 py-0.5 text-left">Description</th>
                             <th class="border border-gray-300 px-1 py-0.5 text-left">Actions</th>
@@ -216,11 +228,10 @@
                                         </div>
                                     </template>
                                 </td>
-                                <td class="border border-gray-300 px-1 py-0.5 text-xs" style="width: 80px;"
-                                    x-text="ps.description"></td>
+                                <td class="border border-gray-300 px-1 py-0.5 text-xs" style="width: 80px;" x-text="ps.description"></td>
                                 <td class="border border-gray-300 px-1 py-0.5 space-x-2">
                                     <x-secondary-button type="button"
-                                        @click="price = {...ps, currencies: ps.currencies ? [...ps.currencies] : []}; openModal=true; act='Edit';console.log(price,act,openModal)">Edit</x-secondary-button>
+                                        @click="price = {...ps, currencies: ps.currencies ? [...ps.currencies] : []}; openModal=true; act='Edit';">Edit</x-secondary-button>
                                     <x-danger-button type="button"
                                         @click="$wire.deletePrice(ps)">Delete</x-danger-button>
                                 </td>
@@ -235,13 +246,16 @@
                         Price</x-primary-button>
                 </div>
             </div>
-            <div x-show="openModal==true" @click.away="openModal=false;act='';price={index: '',id: '',name: '',description: '',currencies: []}"
-                @keydown.escape.window="openModal=false;act='';price={index: '',id: '',name: '',description: '',currencies: []}" x-cloak
-                class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" x-transition>
+            <div x-show="openModal==true"
+                @click.away="openModal=false;act='';price={index: '',id: '',name: '',description: '',currencies: []}"
+                @keydown.escape.window="openModal=false;act='';price={index: '',id: '',name: '',description: '',currencies: []}"
+                x-cloak class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" x-transition>
                 <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-semibold" x-text="act + ' Price'"></h2>
-                        <button @click="openModal=false;act='';price={index: '',id: '',name: '',description: '',currencies: []}" type="button"
+                        <button
+                            @click="openModal=false;act='';price={index: '',id: '',name: '',description: '',currencies: []}"
+                            type="button"
                             class="text-gray-600 text-3xl hover:text-gray-800 transition-colors duration-200">
                             <i class="fas fa-times"></i>
                         </button>
@@ -254,7 +268,8 @@
                                     x-required="openModal? 'required': ''" />
                             </div>
                             <div>
-                                <x-input-label for="description">description</x-input-label>
+                                <x-input-label @click="console.log(currencies, price.currencies)"
+                                    for="description">description</x-input-label>
                                 <x-text-input type="text" id="description" x-model="price.description" />
                             </div>
                             <table>
@@ -265,18 +280,18 @@
                                                 x-required="openModal? 'required': ''">
                                                 <option value="">-- Select Currency --</option>
                                                 <template x-for="currency in JSON.parse(currencies)">
-                                                    <template x-if="curr.currency_id==currency.id">
-                                                        <option x-model="currency.id" x-text="currency.CODE" selected/>
-                                                    </template>
-                                                    <template x-if="curr.currency_id!=currency.id">
+                                                    {{-- <template x-if="curr.currency_id==currency.id"> --}}
+                                                        <option x-model="currency.id" x-text="currency.CODE" x-bind:selected="curr.currency_id==currency.id" />
+                                                    {{-- </template>
+                                                    <template x-if="curr.currency_id<>currency.id">
                                                         <option x-model="currency.id" x-text="currency.CODE" />
-                                                    </template>
+                                                    </template> --}}
                                                 </template>
                                             </x-select-input>
                                         </td>
                                         <td>
-                                            <x-text-input type="number" x-model="curr.amount"
-                                                @blur="checkMinPrice(curr.currency_id, curr.amount)"
+                                            <x-text-input type="number" x-model="curr.amount" name="amountInput"
+                                                @blur="checkMinPrice($el, curr.currency_id, curr.amount);"
                                                 x-required="openModal? 'required': ''" />
                                         </td>
                                     </tr>
@@ -289,7 +304,7 @@
                         <div class="mt-4 w-full text-center">
                             <x-primary-button type="button"
                                 @click="act == 'Add' ?$wire.addPrice(price): $wire.updatePrice(price);openModal=false;act=''"
-                                x-text="act"></x-primary-button>
+                                x-text="act" id="AddEditButton"></x-primary-button>
                         </div>
                     </div>
                 </div>
