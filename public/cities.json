@@ -1,0 +1,1774 @@
+[
+  {
+    "id": 5269,
+    "label": ""
+  },
+  {
+    "id": 840,
+    "label": "AALSMEER"
+  },
+  {
+    "id": 4914,
+    "label": "ABHA"
+  },
+  {
+    "id": 841,
+    "label": "ABU ALANDA"
+  },
+  {
+    "id": 842,
+    "label": "ABU DHABI"
+  },
+  {
+    "id": 843,
+    "label": "ACHKOUT"
+  },
+  {
+    "id": 844,
+    "label": "ADMA"
+  },
+  {
+    "id": 845,
+    "label": "ADONIS"
+  },
+  {
+    "id": 846,
+    "label": "AIN EL REMMANEH"
+  },
+  {
+    "id": 847,
+    "label": "AIN SAADEH"
+  },
+  {
+    "id": 848,
+    "label": "AIN ZHELTA"
+  },
+  {
+    "id": 849,
+    "label": "AINTOURA"
+  },
+  {
+    "id": 850,
+    "label": "AJALTOUN"
+  },
+  {
+    "id": 851,
+    "label": "AJLOUN"
+  },
+  {
+    "id": 852,
+    "label": "AJMAN"
+  },
+  {
+    "id": 853,
+    "label": "AKKAR"
+  },
+  {
+    "id": 854,
+    "label": "AL AHSA"
+  },
+  {
+    "id": 4913,
+    "label": "AL AHSSA"
+  },
+  {
+    "id": 855,
+    "label": "AL AIN"
+  },
+  {
+    "id": 856,
+    "label": "AL ARZ"
+  },
+  {
+    "id": 857,
+    "label": "AL DAFNA"
+  },
+  {
+    "id": 858,
+    "label": "AL DASMAN"
+  },
+  {
+    "id": 859,
+    "label": "AL FUHAES"
+  },
+  {
+    "id": 860,
+    "label": "AL HUDAYDA"
+  },
+  {
+    "id": 861,
+    "label": "AL JEZA"
+  },
+  {
+    "id": 862,
+    "label": "AL KAMISHLI"
+  },
+  {
+    "id": 863,
+    "label": "AL KHOBAR"
+  },
+  {
+    "id": 864,
+    "label": "AL KHOR"
+  },
+  {
+    "id": 4912,
+    "label": "AL MADEINH"
+  },
+  {
+    "id": 865,
+    "label": "AL MADINAH"
+  },
+  {
+    "id": 866,
+    "label": "AL MAFRAQ"
+  },
+  {
+    "id": 867,
+    "label": "AL MANSOURA"
+  },
+  {
+    "id": 5270,
+    "label": "AL OLAYA"
+  },
+  {
+    "id": 868,
+    "label": "AL RAKEEM"
+  },
+  {
+    "id": 869,
+    "label": "AL SOUFOUH"
+  },
+  {
+    "id": 870,
+    "label": "AL ZARQA"
+  },
+  {
+    "id": 5406,
+    "label": "AL-SHARQIYA KHOBAR"
+  },
+  {
+    "id": 871,
+    "label": "ALBERTON"
+  },
+  {
+    "id": 872,
+    "label": "ALEPPO"
+  },
+  {
+    "id": 873,
+    "label": "ALEXANDRIA"
+  },
+  {
+    "id": 874,
+    "label": "ALEY"
+  },
+  {
+    "id": 5408,
+    "label": "ALKHARJ"
+  },
+  {
+    "id": 875,
+    "label": "AMCHIT"
+  },
+  {
+    "id": 876,
+    "label": "AMESTERDAM"
+  },
+  {
+    "id": 877,
+    "label": "AMMAN"
+  },
+  {
+    "id": 878,
+    "label": "AMYOUN"
+  },
+  {
+    "id": 879,
+    "label": "ANFEH"
+  },
+  {
+    "id": 880,
+    "label": "ANJAR"
+  },
+  {
+    "id": 881,
+    "label": "ANKARA"
+  },
+  {
+    "id": 882,
+    "label": "ANNAYA"
+  },
+  {
+    "id": 883,
+    "label": "ANTALYA"
+  },
+  {
+    "id": 884,
+    "label": "ANTELIAS"
+  },
+  {
+    "id": 885,
+    "label": "ANTWERP"
+  },
+  {
+    "id": 886,
+    "label": "AQABA"
+  },
+  {
+    "id": 887,
+    "label": "AQOURA"
+  },
+  {
+    "id": 888,
+    "label": "ARAMOUN"
+  },
+  {
+    "id": 889,
+    "label": "ARAYA"
+  },
+  {
+    "id": 890,
+    "label": "ASWAN"
+  },
+  {
+    "id": 891,
+    "label": "ATHENS"
+  },
+  {
+    "id": 892,
+    "label": "AWAJAN"
+  },
+  {
+    "id": 893,
+    "label": "AWKAR"
+  },
+  {
+    "id": 894,
+    "label": "BAABDA"
+  },
+  {
+    "id": 895,
+    "label": "BAABDAT"
+  },
+  {
+    "id": 896,
+    "label": "BAAKLINE"
+  },
+  {
+    "id": 897,
+    "label": "BAALBECK"
+  },
+  {
+    "id": 898,
+    "label": "BAB TOUMA"
+  },
+  {
+    "id": 899,
+    "label": "BADARO"
+  },
+  {
+    "id": 900,
+    "label": "BAGHDAD"
+  },
+  {
+    "id": 901,
+    "label": "BAKAATA"
+  },
+  {
+    "id": 902,
+    "label": "BALLOUNEH"
+  },
+  {
+    "id": 903,
+    "label": "BANGKOK"
+  },
+  {
+    "id": 904,
+    "label": "BARCELONA"
+  },
+  {
+    "id": 905,
+    "label": "BAROUK"
+  },
+  {
+    "id": 906,
+    "label": "BASKINTA"
+  },
+  {
+    "id": 907,
+    "label": "BATROUN"
+  },
+  {
+    "id": 908,
+    "label": "BCHAMOUN"
+  },
+  {
+    "id": 909,
+    "label": "BCHARRE"
+  },
+  {
+    "id": 910,
+    "label": "BEIRUT"
+  },
+  {
+    "id": 911,
+    "label": "BEIT CHABAB"
+  },
+  {
+    "id": 912,
+    "label": "BEIT ED DINE"
+  },
+  {
+    "id": 913,
+    "label": "BEIT EL CHAAR"
+  },
+  {
+    "id": 914,
+    "label": "BEIT EL KIKKO"
+  },
+  {
+    "id": 915,
+    "label": "BEIT MERY"
+  },
+  {
+    "id": 916,
+    "label": "BEKAA"
+  },
+  {
+    "id": 917,
+    "label": "BENONI"
+  },
+  {
+    "id": 918,
+    "label": "BENT JBEIL"
+  },
+  {
+    "id": 919,
+    "label": "BHAMDOUN"
+  },
+  {
+    "id": 920,
+    "label": "BHORSAF"
+  },
+  {
+    "id": 921,
+    "label": "BIKFAYA"
+  },
+  {
+    "id": 922,
+    "label": "BINT JBEIL"
+  },
+  {
+    "id": 923,
+    "label": "BOHSAS"
+  },
+  {
+    "id": 924,
+    "label": "BOLOGNA"
+  },
+  {
+    "id": 925,
+    "label": "BOLOGNIA"
+  },
+  {
+    "id": 926,
+    "label": "BORJ HAMMOUD"
+  },
+  {
+    "id": 927,
+    "label": "BOSTON"
+  },
+  {
+    "id": 928,
+    "label": "BOUAR"
+  },
+  {
+    "id": 929,
+    "label": "BOURGET DU LAC"
+  },
+  {
+    "id": 930,
+    "label": "BRAY"
+  },
+  {
+    "id": 931,
+    "label": "BREIJ"
+  },
+  {
+    "id": 932,
+    "label": "BROUMANA"
+  },
+  {
+    "id": 933,
+    "label": "BRUSSELS"
+  },
+  {
+    "id": 934,
+    "label": "BSALIM"
+  },
+  {
+    "id": 935,
+    "label": "BSOUS"
+  },
+  {
+    "id": 936,
+    "label": "BTEGHRINE"
+  },
+  {
+    "id": 937,
+    "label": "BUCHAREST"
+  },
+  {
+    "id": 938,
+    "label": "BUDAPEST"
+  },
+  {
+    "id": 939,
+    "label": "BUENOS AIRES"
+  },
+  {
+    "id": 940,
+    "label": "BUNSCHOTEN"
+  },
+  {
+    "id": 5271,
+    "label": "BURAYDAH"
+  },
+  {
+    "id": 941,
+    "label": "BURSA"
+  },
+  {
+    "id": 942,
+    "label": "BZOUMMAR"
+  },
+  {
+    "id": 943,
+    "label": "CADONEGHE"
+  },
+  {
+    "id": 944,
+    "label": "CAIRO"
+  },
+  {
+    "id": 945,
+    "label": "CALIFORNIA"
+  },
+  {
+    "id": 946,
+    "label": "CAPE TOWN"
+  },
+  {
+    "id": 947,
+    "label": "CEDEX"
+  },
+  {
+    "id": 948,
+    "label": "CHADRA"
+  },
+  {
+    "id": 949,
+    "label": "CHARLE DE GAULE"
+  },
+  {
+    "id": 950,
+    "label": "CHBANNIEH"
+  },
+  {
+    "id": 951,
+    "label": "CHEKKA"
+  },
+  {
+    "id": 952,
+    "label": "CHIYAH"
+  },
+  {
+    "id": 953,
+    "label": "CHOUEIFAT"
+  },
+  {
+    "id": 954,
+    "label": "CHOURANE"
+  },
+  {
+    "id": 955,
+    "label": "CHTAURA"
+  },
+  {
+    "id": 956,
+    "label": "CHUNG HO CITY"
+  },
+  {
+    "id": 957,
+    "label": "CHYAH"
+  },
+  {
+    "id": 958,
+    "label": "COLOMBO"
+  },
+  {
+    "id": 959,
+    "label": "COLORADO"
+  },
+  {
+    "id": 960,
+    "label": "COPENHAGENA"
+  },
+  {
+    "id": 961,
+    "label": "CORNET CHAHWAN"
+  },
+  {
+    "id": 962,
+    "label": "CORNICHE DE FLEUVE"
+  },
+  {
+    "id": 963,
+    "label": "DAHR EL SAWAN"
+  },
+  {
+    "id": 964,
+    "label": "DAMASCUS"
+  },
+  {
+    "id": 965,
+    "label": "DAMMAM"
+  },
+  {
+    "id": 966,
+    "label": "DAMOUR"
+  },
+  {
+    "id": 967,
+    "label": "DARAA"
+  },
+  {
+    "id": 968,
+    "label": "DBAYEH"
+  },
+  {
+    "id": 969,
+    "label": "DEAD SEA"
+  },
+  {
+    "id": 970,
+    "label": "DEEK EL MEHDE"
+  },
+  {
+    "id": 971,
+    "label": "DEIR AMES"
+  },
+  {
+    "id": 972,
+    "label": "DEIR AZ-ZOR"
+  },
+  {
+    "id": 973,
+    "label": "DEIR EL KAMAR"
+  },
+  {
+    "id": 974,
+    "label": "DEKWANEH"
+  },
+  {
+    "id": 975,
+    "label": "DENVER"
+  },
+  {
+    "id": 976,
+    "label": "DEUTSCHLAND"
+  },
+  {
+    "id": 977,
+    "label": "DHOUR EL CHOUAIR"
+  },
+  {
+    "id": 978,
+    "label": "DOHA"
+  },
+  {
+    "id": 979,
+    "label": "DORA"
+  },
+  {
+    "id": 980,
+    "label": "DOUMA"
+  },
+  {
+    "id": 981,
+    "label": "DUBAI"
+  },
+  {
+    "id": 982,
+    "label": "EDIRNE"
+  },
+  {
+    "id": 983,
+    "label": "EHDEN"
+  },
+  {
+    "id": 984,
+    "label": "EHMEJ"
+  },
+  {
+    "id": 985,
+    "label": "EIN AAR"
+  },
+  {
+    "id": 986,
+    "label": "EL CHOUF"
+  },
+  {
+    "id": 987,
+    "label": "EL MECHTEL"
+  },
+  {
+    "id": 988,
+    "label": "ELISSAR"
+  },
+  {
+    "id": 989,
+    "label": "FAHAHEEL"
+  },
+  {
+    "id": 990,
+    "label": "FALOUGHA"
+  },
+  {
+    "id": 991,
+    "label": "FANAR"
+  },
+  {
+    "id": 992,
+    "label": "FAQRA"
+  },
+  {
+    "id": 993,
+    "label": "FARAYA"
+  },
+  {
+    "id": 994,
+    "label": "FARWANIYA"
+  },
+  {
+    "id": 995,
+    "label": "FAYADIEH"
+  },
+  {
+    "id": 996,
+    "label": "FEYTROUN"
+  },
+  {
+    "id": 997,
+    "label": "FIDAR"
+  },
+  {
+    "id": 998,
+    "label": "FLORIANA"
+  },
+  {
+    "id": 999,
+    "label": "FLORIDA"
+  },
+  {
+    "id": 1000,
+    "label": "FOURZOL"
+  },
+  {
+    "id": 1001,
+    "label": "FRANKFURT"
+  },
+  {
+    "id": 1002,
+    "label": "FTOUH KESERWAN"
+  },
+  {
+    "id": 1003,
+    "label": "FUJAIRAH"
+  },
+  {
+    "id": 1004,
+    "label": "FURN EL CHEBBAK"
+  },
+  {
+    "id": 1005,
+    "label": "GENEVE"
+  },
+  {
+    "id": 1006,
+    "label": "GHADIR"
+  },
+  {
+    "id": 1007,
+    "label": "GHAZIR"
+  },
+  {
+    "id": 1008,
+    "label": "GHEDRESS"
+  },
+  {
+    "id": 1009,
+    "label": "GIZA"
+  },
+  {
+    "id": 1010,
+    "label": "HADATH"
+  },
+  {
+    "id": 5272,
+    "label": "HAIL"
+  },
+  {
+    "id": 1011,
+    "label": "HALAT"
+  },
+  {
+    "id": 1012,
+    "label": "HALBA"
+  },
+  {
+    "id": 1013,
+    "label": "HAMA"
+  },
+  {
+    "id": 1014,
+    "label": "HAMBURG"
+  },
+  {
+    "id": 1015,
+    "label": "HAMMANAH"
+  },
+  {
+    "id": 1016,
+    "label": "HARET SAKHER"
+  },
+  {
+    "id": 1017,
+    "label": "HARISSA"
+  },
+  {
+    "id": 1018,
+    "label": "HASROUN"
+  },
+  {
+    "id": 1019,
+    "label": "HAWALI"
+  },
+  {
+    "id": 1020,
+    "label": "HAZMIEH"
+  },
+  {
+    "id": 1021,
+    "label": "HELSINGBORG"
+  },
+  {
+    "id": 1022,
+    "label": "HELSINKI"
+  },
+  {
+    "id": 4915,
+    "label": "HEMLEYA"
+  },
+  {
+    "id": 1023,
+    "label": "HERMEL"
+  },
+  {
+    "id": 1024,
+    "label": "HIMLAYA"
+  },
+  {
+    "id": 1025,
+    "label": "HOMS"
+  },
+  {
+    "id": 1026,
+    "label": "HORCH TABET"
+  },
+  {
+    "id": 1027,
+    "label": "HOSRAEL"
+  },
+  {
+    "id": 1028,
+    "label": "HRAJEL"
+  },
+  {
+    "id": 1029,
+    "label": "HURGHADA"
+  },
+  {
+    "id": 1030,
+    "label": "IKLIM AL KHARROUB"
+  },
+  {
+    "id": 1031,
+    "label": "IRBID"
+  },
+  {
+    "id": 1032,
+    "label": "IRBIL"
+  },
+  {
+    "id": 1033,
+    "label": "ISFAHAN"
+  },
+  {
+    "id": 1034,
+    "label": "ISTANBUL"
+  },
+  {
+    "id": 1035,
+    "label": "JAL EL DIB"
+  },
+  {
+    "id": 1036,
+    "label": "JAMHOUR"
+  },
+  {
+    "id": 1037,
+    "label": "JBEIL"
+  },
+  {
+    "id": 1038,
+    "label": "JDEIDET EL METN"
+  },
+  {
+    "id": 1039,
+    "label": "JDITA"
+  },
+  {
+    "id": 1040,
+    "label": "JEBEL ALI"
+  },
+  {
+    "id": 1041,
+    "label": "JEDDAH"
+  },
+  {
+    "id": 1042,
+    "label": "JEITA"
+  },
+  {
+    "id": 1043,
+    "label": "JERASH"
+  },
+  {
+    "id": 1044,
+    "label": "JERUSALEM"
+  },
+  {
+    "id": 1045,
+    "label": "JEZZINE"
+  },
+  {
+    "id": 1046,
+    "label": "JIB JANNIN"
+  },
+  {
+    "id": 1047,
+    "label": "JIEH"
+  },
+  {
+    "id": 1048,
+    "label": "JISR EL BACHA"
+  },
+  {
+    "id": 1049,
+    "label": "JISR EL WATI"
+  },
+  {
+    "id": 1050,
+    "label": "JOUNIEH"
+  },
+  {
+    "id": 1051,
+    "label": "JUFFAIR"
+  },
+  {
+    "id": 1052,
+    "label": "KABRECHMOUN"
+  },
+  {
+    "id": 1053,
+    "label": "KAHALE"
+  },
+  {
+    "id": 1054,
+    "label": "KAIFAN"
+  },
+  {
+    "id": 1055,
+    "label": "KALAMOUN"
+  },
+  {
+    "id": 1056,
+    "label": "KANAT BAKISH"
+  },
+  {
+    "id": 1057,
+    "label": "KARAJ"
+  },
+  {
+    "id": 1058,
+    "label": "KARAK"
+  },
+  {
+    "id": 1059,
+    "label": "KARASHI"
+  },
+  {
+    "id": 1060,
+    "label": "KARTABA"
+  },
+  {
+    "id": 1061,
+    "label": "KASLIK"
+  },
+  {
+    "id": 1062,
+    "label": "KEB ELIAS"
+  },
+  {
+    "id": 1063,
+    "label": "KENT"
+  },
+  {
+    "id": 1064,
+    "label": "KFARCHIMA"
+  },
+  {
+    "id": 1065,
+    "label": "KFARHBAB"
+  },
+  {
+    "id": 1066,
+    "label": "KFARHIM"
+  },
+  {
+    "id": 1067,
+    "label": "KFERZEBIAN"
+  },
+  {
+    "id": 1068,
+    "label": "KFOUR"
+  },
+  {
+    "id": 1069,
+    "label": "KHAIZARANE"
+  },
+  {
+    "id": 1070,
+    "label": "KHALDA"
+  },
+  {
+    "id": 1071,
+    "label": "KHALDEH"
+  },
+  {
+    "id": 1072,
+    "label": "KHINSHARA"
+  },
+  {
+    "id": 1073,
+    "label": "KHIRBIT ANAFAR"
+  },
+  {
+    "id": 4911,
+    "label": "KHOBAR"
+  },
+  {
+    "id": 1074,
+    "label": "KHRAIZAT"
+  },
+  {
+    "id": 1075,
+    "label": "KLEIAT"
+  },
+  {
+    "id": 1076,
+    "label": "KONYA"
+  },
+  {
+    "id": 1077,
+    "label": "KORNET EL HAMRA"
+  },
+  {
+    "id": 5405,
+    "label": "KOSSEIM"
+  },
+  {
+    "id": 1078,
+    "label": "KOURA"
+  },
+  {
+    "id": 1079,
+    "label": "KOUSBA"
+  },
+  {
+    "id": 1080,
+    "label": "KSARA"
+  },
+  {
+    "id": 1081,
+    "label": "KUWAIT CITY"
+  },
+  {
+    "id": 1082,
+    "label": "LAGOS"
+  },
+  {
+    "id": 1083,
+    "label": "LAKLOUK"
+  },
+  {
+    "id": 1084,
+    "label": "LARNACA"
+  },
+  {
+    "id": 1085,
+    "label": "LATTAKIA"
+  },
+  {
+    "id": 1086,
+    "label": "LAUSANNE"
+  },
+  {
+    "id": 1087,
+    "label": "LEEUWARDEN"
+  },
+  {
+    "id": 5465,
+    "label": "LEHFED"
+  },
+  {
+    "id": 1088,
+    "label": "LIMASSOL"
+  },
+  {
+    "id": 1089,
+    "label": "LIUBLJANA"
+  },
+  {
+    "id": 1090,
+    "label": "LONDON"
+  },
+  {
+    "id": 1091,
+    "label": "LOUAIZE"
+  },
+  {
+    "id": 1092,
+    "label": "LUXAMBOURG"
+  },
+  {
+    "id": 1093,
+    "label": "LYON"
+  },
+  {
+    "id": 1094,
+    "label": "MAADI"
+  },
+  {
+    "id": 1095,
+    "label": "MAAMELTEIN"
+  },
+  {
+    "id": 1096,
+    "label": "MAAN"
+  },
+  {
+    "id": 1097,
+    "label": "MAARAB"
+  },
+  {
+    "id": 1098,
+    "label": "MADABA"
+  },
+  {
+    "id": 1099,
+    "label": "MADRID"
+  },
+  {
+    "id": 1100,
+    "label": "MAGHDOUCHE"
+  },
+  {
+    "id": 1101,
+    "label": "MAKKA"
+  },
+  {
+    "id": 1102,
+    "label": "MALMO"
+  },
+  {
+    "id": 1103,
+    "label": "MANAMA"
+  },
+  {
+    "id": 5524,
+    "label": "MANDINAT AL SULTAN QABOOS"
+  },
+  {
+    "id": 1104,
+    "label": "MANISA"
+  },
+  {
+    "id": 1105,
+    "label": "MANSOURIET EL METN"
+  },
+  {
+    "id": 1106,
+    "label": "MARJAAYOUN"
+  },
+  {
+    "id": 1107,
+    "label": "MARSEILLE"
+  },
+  {
+    "id": 1108,
+    "label": "MAYROUBA"
+  },
+  {
+    "id": 1109,
+    "label": "MAZRAAT YACHOUH"
+  },
+  {
+    "id": 1110,
+    "label": "MECHREF"
+  },
+  {
+    "id": 1111,
+    "label": "MELBOURNE"
+  },
+  {
+    "id": 1112,
+    "label": "MERSIN"
+  },
+  {
+    "id": 1113,
+    "label": "MEULAN"
+  },
+  {
+    "id": 1114,
+    "label": "MILANO"
+  },
+  {
+    "id": 1115,
+    "label": "MKALLES"
+  },
+  {
+    "id": 1116,
+    "label": "MOITA"
+  },
+  {
+    "id": 1117,
+    "label": "MONT PELLIER"
+  },
+  {
+    "id": 1118,
+    "label": "MONTE - CARLO"
+  },
+  {
+    "id": 1119,
+    "label": "MONTE VERDE"
+  },
+  {
+    "id": 5460,
+    "label": "MONTRÉAL"
+  },
+  {
+    "id": 1120,
+    "label": "MOSCOW"
+  },
+  {
+    "id": 1121,
+    "label": "MOUKHTARA"
+  },
+  {
+    "id": 1122,
+    "label": "MTEIN"
+  },
+  {
+    "id": 1123,
+    "label": "MU'TAH"
+  },
+  {
+    "id": 1124,
+    "label": "MURCIA"
+  },
+  {
+    "id": 1125,
+    "label": "MUSCAT"
+  },
+  {
+    "id": 1126,
+    "label": "MUTTRAH"
+  },
+  {
+    "id": 1127,
+    "label": "NABATIEH"
+  },
+  {
+    "id": 1128,
+    "label": "NABAY"
+  },
+  {
+    "id": 1129,
+    "label": "NACCACHE"
+  },
+  {
+    "id": 1130,
+    "label": "NAHR EL KALB"
+  },
+  {
+    "id": 1131,
+    "label": "NAHR EL MOTT"
+  },
+  {
+    "id": 1132,
+    "label": "NAHR IBRAHIM"
+  },
+  {
+    "id": 1133,
+    "label": "NANJING"
+  },
+  {
+    "id": 1134,
+    "label": "NEW DELHI"
+  },
+  {
+    "id": 1135,
+    "label": "NEW SHAYLEH"
+  },
+  {
+    "id": 1136,
+    "label": "NEW YORK"
+  },
+  {
+    "id": 1137,
+    "label": "NICOSIA"
+  },
+  {
+    "id": 1138,
+    "label": "NORTH CAROLINA"
+  },
+  {
+    "id": 1139,
+    "label": "NORTHABURI"
+  },
+  {
+    "id": 1140,
+    "label": "OKAIBE"
+  },
+  {
+    "id": 1141,
+    "label": "OMAN"
+  },
+  {
+    "id": 5530,
+    "label": "ONTARIO"
+  },
+  {
+    "id": 1142,
+    "label": "OUYOUNE EL SIMAN"
+  },
+  {
+    "id": 1143,
+    "label": "OYARZUN"
+  },
+  {
+    "id": 1144,
+    "label": "PAHANG"
+  },
+  {
+    "id": 1145,
+    "label": "PAPHOS"
+  },
+  {
+    "id": 1146,
+    "label": "PARIS"
+  },
+  {
+    "id": 1147,
+    "label": "PASAY"
+  },
+  {
+    "id": 1148,
+    "label": "PETRA"
+  },
+  {
+    "id": 1149,
+    "label": "PHILADELPHIA"
+  },
+  {
+    "id": 1150,
+    "label": "PORT VICTORIA"
+  },
+  {
+    "id": 1151,
+    "label": "POZNAN"
+  },
+  {
+    "id": 1152,
+    "label": "PUJAUDRAN"
+  },
+  {
+    "id": 1153,
+    "label": "QANA"
+  },
+  {
+    "id": 5407,
+    "label": "QASSIM MAKKAH"
+  },
+  {
+    "id": 1154,
+    "label": "QOUBAIYAT"
+  },
+  {
+    "id": 1155,
+    "label": "QUEBEC"
+  },
+  {
+    "id": 1156,
+    "label": "RABAT"
+  },
+  {
+    "id": 1157,
+    "label": "RABIEH"
+  },
+  {
+    "id": 1158,
+    "label": "RABWEH"
+  },
+  {
+    "id": 1159,
+    "label": "RAHBE"
+  },
+  {
+    "id": 1160,
+    "label": "RAS AL KHAIMAH"
+  },
+  {
+    "id": 1161,
+    "label": "RAS EL MATN"
+  },
+  {
+    "id": 1162,
+    "label": "RASHAYA"
+  },
+  {
+    "id": 1163,
+    "label": "RAWDA"
+  },
+  {
+    "id": 1164,
+    "label": "RED SEA"
+  },
+  {
+    "id": 1165,
+    "label": "REGGIO EMILIA"
+  },
+  {
+    "id": 1166,
+    "label": "REWESHID"
+  },
+  {
+    "id": 1167,
+    "label": "REYFOUN"
+  },
+  {
+    "id": 1168,
+    "label": "RICHARDSON"
+  },
+  {
+    "id": 1169,
+    "label": "RIMINI"
+  },
+  {
+    "id": 1170,
+    "label": "RIYADH"
+  },
+  {
+    "id": 1171,
+    "label": "RMEIL"
+  },
+  {
+    "id": 1172,
+    "label": "RMEILEH"
+  },
+  {
+    "id": 1173,
+    "label": "ROLLINGERGRUND"
+  },
+  {
+    "id": 1174,
+    "label": "ROME"
+  },
+  {
+    "id": 1175,
+    "label": "ROTTERDAM"
+  },
+  {
+    "id": 1176,
+    "label": "ROUMIEH"
+  },
+  {
+    "id": 1177,
+    "label": "SAADIAT"
+  },
+  {
+    "id": 1178,
+    "label": "SABTIEH"
+  },
+  {
+    "id": 1179,
+    "label": "SAFAT"
+  },
+  {
+    "id": 1180,
+    "label": "SAFRA"
+  },
+  {
+    "id": 1181,
+    "label": "SAGHBINE"
+  },
+  {
+    "id": 1182,
+    "label": "SAHAB"
+  },
+  {
+    "id": 1183,
+    "label": "SAHEL ALMA"
+  },
+  {
+    "id": 1184,
+    "label": "SAIDA"
+  },
+  {
+    "id": 1185,
+    "label": "SAINT CHAMOND"
+  },
+  {
+    "id": 1186,
+    "label": "SALALAH"
+  },
+  {
+    "id": 1187,
+    "label": "SALMIYA"
+  },
+  {
+    "id": 1188,
+    "label": "SALT"
+  },
+  {
+    "id": 1189,
+    "label": "SALWA"
+  },
+  {
+    "id": 1190,
+    "label": "SAN FRANCISCO"
+  },
+  {
+    "id": 1191,
+    "label": "SANAA"
+  },
+  {
+    "id": 1192,
+    "label": "SANAYEH"
+  },
+  {
+    "id": 1193,
+    "label": "SANOK"
+  },
+  {
+    "id": 1194,
+    "label": "SAO PAULO"
+  },
+  {
+    "id": 1195,
+    "label": "SARAFAND"
+  },
+  {
+    "id": 1196,
+    "label": "SARBA"
+  },
+  {
+    "id": 1197,
+    "label": "SAYDNAIA"
+  },
+  {
+    "id": 1198,
+    "label": "SED EL BOUCHRIEH"
+  },
+  {
+    "id": 1199,
+    "label": "SENIGALLIA"
+  },
+  {
+    "id": 1200,
+    "label": "SENOKO"
+  },
+  {
+    "id": 1201,
+    "label": "SHAMIA"
+  },
+  {
+    "id": 5529,
+    "label": "SHANGHAI"
+  },
+  {
+    "id": 1202,
+    "label": "SHARJAH"
+  },
+  {
+    "id": 1203,
+    "label": "SHARKIA"
+  },
+  {
+    "id": 1204,
+    "label": "SHARM EL SHEIKH"
+  },
+  {
+    "id": 1205,
+    "label": "SHARQ"
+  },
+  {
+    "id": 4910,
+    "label": "SHARQIYA"
+  },
+  {
+    "id": 1206,
+    "label": "SHENTON"
+  },
+  {
+    "id": 1207,
+    "label": "SHIBAA"
+  },
+  {
+    "id": 1208,
+    "label": "SHINSA-DONG"
+  },
+  {
+    "id": 1209,
+    "label": "SHUWAIKH"
+  },
+  {
+    "id": 1210,
+    "label": "SIBLINE"
+  },
+  {
+    "id": 1211,
+    "label": "SIN EL FIL"
+  },
+  {
+    "id": 1212,
+    "label": "SINGH GATE"
+  },
+  {
+    "id": 1213,
+    "label": "SIR EL DONNIYYE"
+  },
+  {
+    "id": 1214,
+    "label": "SOFAR"
+  },
+  {
+    "id": 1215,
+    "label": "SOUR"
+  },
+  {
+    "id": 1216,
+    "label": "STOCKHOLM"
+  },
+  {
+    "id": 1217,
+    "label": "SURRAH"
+  },
+  {
+    "id": 1218,
+    "label": "SWEIDA"
+  },
+  {
+    "id": 1219,
+    "label": "SWEIFIEH"
+  },
+  {
+    "id": 1220,
+    "label": "SWEILEH"
+  },
+  {
+    "id": 1221,
+    "label": "SYDNEY"
+  },
+  {
+    "id": 1222,
+    "label": "TAANAYEL"
+  },
+  {
+    "id": 1223,
+    "label": "TABARJA"
+  },
+  {
+    "id": 1224,
+    "label": "TAHWITA"
+  },
+  {
+    "id": 1225,
+    "label": "TALA'A ALALI"
+  },
+  {
+    "id": 1226,
+    "label": "TANNOURINE"
+  },
+  {
+    "id": 1227,
+    "label": "TARTOUS"
+  },
+  {
+    "id": 1228,
+    "label": "TAYBET ZAMAN"
+  },
+  {
+    "id": 1229,
+    "label": "TAYOUNEH"
+  },
+  {
+    "id": 1230,
+    "label": "TEBNIN"
+  },
+  {
+    "id": 1231,
+    "label": "TEHRAN"
+  },
+  {
+    "id": 1232,
+    "label": "TOKYO"
+  },
+  {
+    "id": 1233,
+    "label": "TORINO"
+  },
+  {
+    "id": 1234,
+    "label": "TORONTO"
+  },
+  {
+    "id": 1235,
+    "label": "TRIPOLI"
+  },
+  {
+    "id": 1236,
+    "label": "TUNIS"
+  },
+  {
+    "id": 1237,
+    "label": "UMM AL QUWAIN "
+  },
+  {
+    "id": 1238,
+    "label": "URMIA"
+  },
+  {
+    "id": 1239,
+    "label": "VIA FLAVIA"
+  },
+  {
+    "id": 1240,
+    "label": "VIA G. VERGA"
+  },
+  {
+    "id": 1241,
+    "label": "VIA GAGGIO"
+  },
+  {
+    "id": 1242,
+    "label": "VIROFLAY"
+  },
+  {
+    "id": 1243,
+    "label": "WADI CHAHROUR"
+  },
+  {
+    "id": 1244,
+    "label": "WADI KABIR"
+  },
+  {
+    "id": 1245,
+    "label": "WADI MOUSSA"
+  },
+  {
+    "id": 1246,
+    "label": "WADI RUM"
+  },
+  {
+    "id": 1247,
+    "label": "WADI SAQRA"
+  },
+  {
+    "id": 1248,
+    "label": "WANCHAI"
+  },
+  {
+    "id": 1249,
+    "label": "WASHINGTON"
+  },
+  {
+    "id": 1250,
+    "label": "WATA EL JOZ"
+  },
+  {
+    "id": 1251,
+    "label": "WEHDAT"
+  },
+  {
+    "id": 1252,
+    "label": "WELLINGTON"
+  },
+  {
+    "id": 1253,
+    "label": "WIEDNER HAUPTSTRASS"
+  },
+  {
+    "id": 5404,
+    "label": "YANBAA AL BAHR"
+  },
+  {
+    "id": 1254,
+    "label": "YARZE"
+  },
+  {
+    "id": 1255,
+    "label": "YEREVAN"
+  },
+  {
+    "id": 1256,
+    "label": "ZAAROUR"
+  },
+  {
+    "id": 1257,
+    "label": "ZAHLE"
+  },
+  {
+    "id": 1258,
+    "label": "ZALKA"
+  },
+  {
+    "id": 1259,
+    "label": "ZGHORTA"
+  },
+  {
+    "id": 1260,
+    "label": "ZIKRIT"
+  },
+  {
+    "id": 1261,
+    "label": "ZOUK MIKAEL"
+  },
+  {
+    "id": 1262,
+    "label": "ZOUK MOSBEH"
+  }
+]

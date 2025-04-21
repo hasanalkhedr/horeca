@@ -100,7 +100,7 @@
         <ul x-show="showList" class="bg-white border mt-1 rounded shadow max-h-60 overflow-y-auto z-10 relative">
             @forelse($companyResults as $company)
                 <li class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    wire:click="selectCompany('{{ $company['item']['id'] }}', '{{ $company['item']['name'] }}')">
+                    wire:click="selectCompany('{{ $company['item']['id'] }}', '{{ $company['item']['name'] }}'); showList= false;">
                     {{ $company['item']['name'] }}
                 </li>
             @empty

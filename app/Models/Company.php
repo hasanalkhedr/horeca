@@ -6,36 +6,39 @@ use Illuminate\Database\Eloquent\Model;
 
 class Company extends Model
 {
-    protected $fillable=[
+    protected $fillable = [
         'pipe_id',
-    'name',
-    'CODE',
-    'commerical_registry_number',
-    'vat_number',
-    'country',
-    'city',
-    'street',
-    'po_box',
-    'mobile',
-    'phone',
-    'additional_number',
-    'fax',
-    'email',
-    'website',
-    'facebook_link',
-    'instagram_link',
-    'x_link',
-    'stand_name',
-    'logo',
+        'name',
+        'CODE',
+        'commerical_registry_number',
+        'vat_number',
+        'country',
+        'city',
+        'street',
+        'po_box',
+        'mobile',
+        'phone',
+        'additional_number',
+        'fax',
+        'email',
+        'website',
+        'facebook_link',
+        'instagram_link',
+        'x_link',
+        'stand_name',
+        'logo',
     ];
 
-    public function Brands(){
+    public function Brands()
+    {
         return $this->hasMany(Brand::class);
     }
-    public function Clients() {
+    public function Clients()
+    {
         return $this->hasMany(Client::class);
     }
-    public function Contracts() {
+    public function Contracts()
+    {
         return $this->hasMany(Contract::class);
     }
 }

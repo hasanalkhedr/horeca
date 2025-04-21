@@ -1,0 +1,366 @@
+[
+  {
+    "id": 5252,
+    "label": ""
+  },
+  {
+    "id": 762,
+    "label": "ALGERIA"
+  },
+  {
+    "id": 763,
+    "label": "ARGENTINA"
+  },
+  {
+    "id": 764,
+    "label": "ARMENIA"
+  },
+  {
+    "id": 765,
+    "label": "AUSTRALIA"
+  },
+  {
+    "id": 766,
+    "label": "AUSTRIA"
+  },
+  {
+    "id": 767,
+    "label": "BELGIUM"
+  },
+  {
+    "id": 768,
+    "label": "BRAZIL"
+  },
+  {
+    "id": 769,
+    "label": "BULGARIA"
+  },
+  {
+    "id": 770,
+    "label": "CANADA"
+  },
+  {
+    "id": 771,
+    "label": "CHINA"
+  },
+  {
+    "id": 6327,
+    "label": "COLOMBIA"
+  },
+  {
+    "id": 772,
+    "label": "CYPRUS"
+  },
+  {
+    "id": 773,
+    "label": "CZECH REPUBLIC"
+  },
+  {
+    "id": 774,
+    "label": "DENMARK"
+  },
+  {
+    "id": 775,
+    "label": "EGYPT"
+  },
+  {
+    "id": 776,
+    "label": "FINLAND"
+  },
+  {
+    "id": 777,
+    "label": "FRANCE"
+  },
+  {
+    "id": 778,
+    "label": "GERMANY"
+  },
+  {
+    "id": 5251,
+    "label": "GHANA"
+  },
+  {
+    "id": 779,
+    "label": "GREECE"
+  },
+  {
+    "id": 780,
+    "label": "HOLLAND"
+  },
+  {
+    "id": 781,
+    "label": "HONG KONG"
+  },
+  {
+    "id": 782,
+    "label": "HUNGARY"
+  },
+  {
+    "id": 783,
+    "label": "ICELAND"
+  },
+  {
+    "id": 784,
+    "label": "INDIA"
+  },
+  {
+    "id": 785,
+    "label": "INDONESIA"
+  },
+  {
+    "id": 786,
+    "label": "IRAN"
+  },
+  {
+    "id": 787,
+    "label": "IRAQ"
+  },
+  {
+    "id": 788,
+    "label": "IRELAND"
+  },
+  {
+    "id": 789,
+    "label": "ITALY"
+  },
+  {
+    "id": 790,
+    "label": "IVORY COAST"
+  },
+  {
+    "id": 791,
+    "label": "JAPAN"
+  },
+  {
+    "id": 792,
+    "label": "JORDAN"
+  },
+  {
+    "id": 6304,
+    "label": "KAZAKHSTAN"
+  },
+  {
+    "id": 793,
+    "label": "KENYA"
+  },
+  {
+    "id": 794,
+    "label": "KINGDOM OF BAHRAIN"
+  },
+  {
+    "id": 795,
+    "label": "KINGDOM OF SAUDI ARABIA"
+  },
+  {
+    "id": 796,
+    "label": "KOREA"
+  },
+  {
+    "id": 797,
+    "label": "KUWAIT"
+  },
+  {
+    "id": 798,
+    "label": "LEBANON"
+  },
+  {
+    "id": 5253,
+    "label": "LIBERIA"
+  },
+  {
+    "id": 799,
+    "label": "LITHUANIA"
+  },
+  {
+    "id": 800,
+    "label": "LUXEMBOURG"
+  },
+  {
+    "id": 801,
+    "label": "LYBIA"
+  },
+  {
+    "id": 6496,
+    "label": "MADAGASCAR"
+  },
+  {
+    "id": 802,
+    "label": "MALAYSIA"
+  },
+  {
+    "id": 803,
+    "label": "MALTA"
+  },
+  {
+    "id": 5254,
+    "label": "MAURITIUS"
+  },
+  {
+    "id": 804,
+    "label": "MEXICO"
+  },
+  {
+    "id": 805,
+    "label": "MONACO"
+  },
+  {
+    "id": 806,
+    "label": "MOROCCO"
+  },
+  {
+    "id": 5255,
+    "label": "NAMIBIA"
+  },
+  {
+    "id": 807,
+    "label": "NETHERLANDS"
+  },
+  {
+    "id": 808,
+    "label": "NEW ZEALAND"
+  },
+  {
+    "id": 809,
+    "label": "NIGERIA"
+  },
+  {
+    "id": 810,
+    "label": "NORWAY"
+  },
+  {
+    "id": 811,
+    "label": "PAKISTAN"
+  },
+  {
+    "id": 812,
+    "label": "PALESTINE"
+  },
+  {
+    "id": 5542,
+    "label": "PERU"
+  },
+  {
+    "id": 813,
+    "label": "PHILIPPINES"
+  },
+  {
+    "id": 814,
+    "label": "POLAND"
+  },
+  {
+    "id": 815,
+    "label": "PORTUGAL"
+  },
+  {
+    "id": 816,
+    "label": "QATAR"
+  },
+  {
+    "id": 817,
+    "label": "ROMANIA"
+  },
+  {
+    "id": 818,
+    "label": "RUSSIA"
+  },
+  {
+    "id": 819,
+    "label": "SCOTLAND"
+  },
+  {
+    "id": 820,
+    "label": "SEYCHELLES"
+  },
+  {
+    "id": 821,
+    "label": "SINGAPORE"
+  },
+  {
+    "id": 822,
+    "label": "SLOVENIA"
+  },
+  {
+    "id": 823,
+    "label": "SOUTH AFRICA"
+  },
+  {
+    "id": 824,
+    "label": "SPAIN"
+  },
+  {
+    "id": 825,
+    "label": "SRI LANKA"
+  },
+  {
+    "id": 826,
+    "label": "SULTANATE OF OMAN"
+  },
+  {
+    "id": 827,
+    "label": "SWEDEN"
+  },
+  {
+    "id": 828,
+    "label": "SWITZERLAND"
+  },
+  {
+    "id": 829,
+    "label": "SYRIA"
+  },
+  {
+    "id": 830,
+    "label": "TAIWAN"
+  },
+  {
+    "id": 831,
+    "label": "TANZANIA"
+  },
+  {
+    "id": 832,
+    "label": "THAILAND"
+  },
+  {
+    "id": 5627,
+    "label": "THE REPUBLIC OF THE CONGO"
+  },
+  {
+    "id": 5256,
+    "label": "TOGO"
+  },
+  {
+    "id": 833,
+    "label": "TUNISIA"
+  },
+  {
+    "id": 834,
+    "label": "TURKEY"
+  },
+  {
+    "id": 835,
+    "label": "UKRAINE"
+  },
+  {
+    "id": 836,
+    "label": "UNITED ARAB EMIRATES"
+  },
+  {
+    "id": 837,
+    "label": "UNITED KINGDOM"
+  },
+  {
+    "id": 838,
+    "label": "UNITED STATES OF AMERICA"
+  },
+  {
+    "id": 6340,
+    "label": "URUGUAY"
+  },
+  {
+    "id": 6259,
+    "label": "VIETNAM"
+  },
+  {
+    "id": 839,
+    "label": "YEMEN"
+  }
+]
