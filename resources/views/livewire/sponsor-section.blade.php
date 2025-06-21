@@ -50,12 +50,14 @@
                     <div class="text-right font-bold border border-black mb-[2px]">
                         <p>Total: {{ $contract->sponsor_amount }} {{ $currency->CODE }}</p>
                     </div>
+                    @if($contract->sponsor_discount > 0)
                     <div class="text-right font-bold border border-black mb-[2px]">
                         <p>Discount: {{ $contract->sponsor_discount }} {{ $currency->CODE }}</p>
                     </div>
                     <div class="text-right font-bold border border-black mb-[2px]">
                         <p>Net: {{ $contract->sponsor_net }} {{ $currency->CODE }}</p>
                     </div>
+                    @endif
                 </div>
             </div>
         @break
@@ -126,12 +128,14 @@
                     <div class="text-right font-bold border border-black mb-[2px]">
                         <p>Total: {{ $contract->sponsor_amount }} {{ $currency->CODE }}</p>
                     </div>
+                    @if($contract->sponsor_discount > 0)
                     <div class="text-right font-bold border border-black mb-[2px]">
                         <p>Discount: {{ $contract->sponsor_discount }} {{ $currency->CODE }}</p>
                     </div>
                     <div class="text-right font-bold border border-black mb-[2px]">
                         <p>Net: {{ $contract->sponsor_net }} {{ $currency->CODE }}</p>
                     </div>
+                    @endif
                 </div>
             </div>
             @break

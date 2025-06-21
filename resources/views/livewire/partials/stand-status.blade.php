@@ -13,6 +13,11 @@
     @break
 
     @case('Reserved')
-        <img src="{{ asset('assets/icons/reserved.png') }}" alt="" class="w-8 h-8">
+        <div class="flex">
+            <img src="{{ asset('assets/icons/reserved.png') }}" alt="" class="w-8 h-8">
+            <button @click="openModal('unblock', '{{ json_encode($stand) }}')">
+                <img src="{{ asset('assets/icons/reserve.png') }}" alt="" class="w-8 h-8" title="UnBlock">
+            </button>
+        </div>
     @break
 @endswitch

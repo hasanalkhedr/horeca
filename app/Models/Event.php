@@ -74,7 +74,7 @@ class Event extends Model
     }
     public function availableStands()
     {
-        return $this->stands()->available();
+        return $this->stands()->available()->deductible();
     }
     public function soldStands()
     {

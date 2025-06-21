@@ -122,4 +122,13 @@ class StandController extends Controller
             return response()->json(['error' => 'You can not block sold or preBlocked stand'], 422);
         }
     }
+    public function unblock(Stand $stand)
+    {
+        if ($stand->status == 'Reserved') {
+            $stand->update(['status' => 'Available']);
+            return response()->json($stand);
+        } else {
+            return response()->json(['error' => 'The Stand you try to unblock is already unblocked'], 422);
+        }
+    }
 }

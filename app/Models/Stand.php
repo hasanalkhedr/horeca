@@ -48,6 +48,9 @@ class Stand extends Model
     public function ScopeAvailable($query) {
         return $query->where('status','Available');
     }
+    public function ScopeDeductible($query) {
+        return $query->where('deductable',true);
+    }
     public function ScopeSold($query) {
         return $query->where('status','Sold');
     }

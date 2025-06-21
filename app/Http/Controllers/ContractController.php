@@ -89,7 +89,8 @@ class ContractController extends Controller
     }
     public function edit(Contract $contract)
     {
-        $stands = $contract->event->Stands()->get();
+        $stands = $contract->event->availableStands()->get();
+        $stands->add($contract->Stand);
         $report = $contract->Report;
         //$prices = $contract->event->Prices()->where('currency_id', $report->Currency->id)->get();
         $prices = $contract->event->Prices()->get();

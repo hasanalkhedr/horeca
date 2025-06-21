@@ -199,6 +199,10 @@
                     <p class="mb-4">Are you sure you want to BLOCK this stand?</p>
                     <x-danger-button type="button" @click="confirmBlock()">BLOCK</x-danger-button>
                 </div>
+                <div x-show="action === 'unblock'">
+                    <p class="mb-4">Are you sure you want to UN-BLOCK this stand?</p>
+                    <x-danger-button type="button" @click="confirmUnBlock()">UN-BLOCK</x-danger-button>
+                </div>
             </div>
         </div>
     </div>
@@ -277,7 +281,8 @@
                         action === 'delete' ? 'Delete Stand' :
                         action === 'add-many' ? 'Add Multiple Stands' :
                         action === 'import' ? 'Import Stands data from excel file' :
-                        action === 'block' ? 'BLOCK Stand ' : '';
+                        action === 'block' ? 'BLOCK Stand ' :
+                        action === 'unblock' ? 'UnBlock Stand' : '';
                     if (stand) {
                         this.selectedStand = JSON.parse(stand);
                         this.selectedStandId = this.selectedStand.id;
@@ -366,6 +371,28 @@
 
                 confirmBlock() {
                     fetch(`/stands/${this.selectedStandId}/block`, {
+                            method: 'PUT',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        }).then(response => {
+                            if (!response.ok) {
+                                return response.json().then(data => {
+                                    throw data;
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(() => {
+                            this.closeModal();
+                            location.reload();
+                        }).catch(error => {
+                            console.log(error);
+                            this.errors = error;
+                        });
+                },
+                confirmUnBlock() {
+                    fetch(`/stands/${this.selectedStandId}/unblock`, {
                             method: 'PUT',
                             headers: {
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'

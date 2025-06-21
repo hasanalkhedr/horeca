@@ -45,12 +45,14 @@
             <div class="text-right font-bold border border-black pb-[2px] mb-[2px]">
                 <p>Total: {{ $contract->advertisment_amount }} {{ $currency->CODE }}</p>
             </div>
+            @if($contract->ads_discount > 0)
             <div class="text-right font-bold border border-black pb-[2px] mb-[2px]">
                 <p>Discount: {{ $contract->ads_discount }} {{ $currency->CODE }}</p>
             </div>
             <div class="text-right font-bold border border-black pb-[2px] mb-[2px]">
                 <p>Net: {{ $contract->ads_net }} {{ $currency->CODE }}</p>
             </div>
+            @endif
         </div>
     </div>
 

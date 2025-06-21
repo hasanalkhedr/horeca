@@ -70,12 +70,14 @@
             <div class="text-right font-bold border border-black  mb-[2px] pb-[5px]">
                 <p>Total: {{ $contract->space_amount }} {{ $currency->CODE }}</p>
             </div>
+            @if($contract->space_discount > 0)
             <div class="text-right font-bold border border-black  mb-[2px] pb-[5px]">
                 <p>Discount: {{ $contract->space_discount }} {{ $currency->CODE }}</p>
             </div>
             <div class="text-right font-bold border border-black  mb-[2px] pb-[5px]">
                 <p>Net: {{ $contract->space_net }} {{ $currency->CODE }}</p>
             </div>
+            @endif
         </div>
     </div>
 
