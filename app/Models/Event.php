@@ -103,4 +103,8 @@ class Event extends Model
     {
         return $this->belongsToMany(AdsPackage::class);
     }
+    public function EffAdsPackages()
+    {
+        return $this->belongsToMany(EffAdsPackage::class);
+    }
 }

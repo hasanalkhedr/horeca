@@ -22,6 +22,8 @@ use App\Http\Controllers\{
 };
 use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\Auth\UserController;
+use App\Http\Controllers\EffAdsOptionController;
+use App\Http\Controllers\EffAdsPackageController;
 use App\Http\Controllers\ReportController;
 use App\Livewire\ReportBuilder;
 use Illuminate\Support\Facades\Route;
@@ -151,6 +153,44 @@ Route::group(['prefix' => 'ads-options', 'as' => 'ads-options.'], function () {
         ->name('add-currency');
 
     Route::delete('ads-options/{adsOption}/remove-currency/{currency}', [AdsOptionController::class, 'removeCurrency'])
+        ->name('remove-currency');
+});
+
+// EffAdsPackage Routes
+Route::group(['prefix' => 'eff-ads-packages', 'as' => 'eff-ads-packages.'], function () {
+    // Basic CRUD routes
+    Route::get('/', [EffAdsPackageController::class, 'index'])->name('index');
+    Route::post('/', [EffAdsPackageController::class, 'store'])->name('store');
+    Route::get('/{adsPackage}', [EffAdsPackageController::class, 'show'])->name('show');
+    Route::put('/{adsPackage}', [EffAdsPackageController::class, 'update'])->name('update');
+    Route::delete('/{adsPackage}', [EffAdsPackageController::class, 'destroy'])->name('destroy');
+
+    // Currency management routes
+    Route::post('/{adsPackage}/add-currency', [EffAdsPackageController::class, 'addCurrency'])
+        ->name('add-currency');
+    Route::delete('/{adsPackage}/remove-currency/{currency}', [EffAdsPackageController::class, 'removeCurrency'])
+        ->name('remove-currency');
+
+    // Option management routes
+    Route::post('/{adsPackage}/attach-option', [EffAdsPackageController::class, 'attachOption'])
+        ->name('attach-option');
+    Route::delete('/{adsPackage}/detach-option/{adsOption}', [EffAdsPackageController::class, 'detachOption'])
+        ->name('detach-option');
+});
+// EffAdsOption Routes
+Route::group(['prefix' => 'eff-ads-options', 'as' => 'eff-ads-options.'], function () {
+    // Basic CRUD routes
+    Route::get('/', [EffAdsOptionController::class, 'index'])->name('index');
+    Route::post('/', [EffAdsOptionController::class, 'store'])->name('store');
+    Route::get('/{adsOption}', [EffAdsOptionController::class, 'show'])->name('show');
+    Route::put('/{adsOption}', [EffAdsOptionController::class, 'update'])->name('update');
+    Route::delete('/{adsOption}', [EffAdsOptionController::class, 'destroy'])->name('destroy');
+
+    // Additional currency routes
+    Route::post('eff-ads-options/{adsOption}/add-currency', [EffAdsOptionController::class, 'addCurrency'])
+        ->name('add-currency');
+
+    Route::delete('eff-ads-options/{adsOption}/remove-currency/{currency}', [EffAdsOptionController::class, 'removeCurrency'])
         ->name('remove-currency');
 });
 

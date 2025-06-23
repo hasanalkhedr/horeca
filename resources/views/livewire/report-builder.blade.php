@@ -60,6 +60,7 @@
                         'new-product-section' => 'New Product(s) Section',
                         'sponsor-section' => 'Sponsorship Section',
                         'advertisement-section' => 'Advertisement Section',
+                        'effective-advertisement-section' => 'Effective Advertisement Section',
                         'payment-section' => 'Payment and Totals Section',
                         'notes-section' => 'Notes/Contact Person Section',
                         'signature-section' => 'Signature Section',
@@ -223,6 +224,8 @@
                                 @elseif($component == 'water-section')
                                     @livewire($component, [null, $currency], key($component . '-' . $index))
                                 @elseif($component == 'advertisement-section')
+                                    @livewire($component, [null, $currency, $event], key($component . '-' . $index))
+                                @elseif($component == 'effective-advertisement-section')
                                     @livewire($component, [null, $currency, $event], key($component . '-' . $index))
                                 @elseif($component == 'sponsor-section')
                                     @livewire($component, [null, $currency, $event, $with_options], key($component . '-' . $index))

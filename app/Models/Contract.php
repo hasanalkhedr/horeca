@@ -103,10 +103,15 @@ class Contract extends Model
         'sponsor_net',
         'ads_discount',
         'ads_net',
+        'eff_ads_check',
+        'eff_ads_amount',
+        'eff_ads_discount',
+        'eff_ads_net',
     ];
     protected $casts = [
         'contrat_date' => 'date',
         'ads_check' => 'array',
+        'eff_ads_check' => 'array',
     ];
     public function Company()
     {
@@ -152,5 +157,9 @@ class Contract extends Model
     public function AdsPackage()
     {
         return $this->belongsTo(AdsPackage::class);
+    }
+    public function EffAdsPackage()
+    {
+        return $this->belongsTo(EffAdsPackage::class);
     }
 }

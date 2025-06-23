@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\AdsPackage;
+use App\Models\EffAdsPackage;
 use App\Models\Event;
 use App\Models\Settings\Category;
 use App\Models\Settings\Currency;
@@ -209,6 +210,45 @@ class EventWizard extends WizardComponent
         $this->mergeState([
             'all_ads_packages' => json_encode($this->all_ads_packages),
             'event_ads_packages' => json_encode($this->event_ads_packages),
+        ]);
+    }
+
+
+    public $all_eff_ads_packages = [];
+    public $event_eff_ads_packages = [];
+    public function addEffAdsPackageToEvent($package)
+    {
+        $this->all_eff_ads_packages = array_map(function ($p) {
+            return new EffAdsPackage((array) $p);
+        }, json_decode($this->state['all_eff_ads_packages'], true));
+
+        $this->event_eff_ads_packages = array_map(function ($p) {
+            return new EffAdsPackage((array) $p);
+        }, json_decode($this->state['event_eff_ads_packages'], true));
+
+        array_push($this->event_eff_ads_packages, $package);
+
+        $this->all_eff_ads_packages = collect($this->all_eff_ads_packages)
+            ->reject(fn($p) => $p->id === $package['id'])->toArray();
+
+        $this->mergeState([
+            'all_eff_ads_packages' => json_encode($this->all_eff_ads_packages),
+            'event_eff_ads_packages' => json_encode($this->event_eff_ads_packages),
+        ]);
+    }
+    public function removeEffAdsPackageFromEvent($package)
+    {
+        $this->all_eff_ads_packages = array_map(function ($p) {
+            return new EffAdsPackage((array) $p);
+        }, json_decode($this->state['all_eff_ads_packages'], true));
+        $this->event_eff_ads_packages = array_map(function ($p) {
+            return new EffAdsPackage((array) $p);
+        }, json_decode($this->state['event_eff_ads_packages'], true));
+        array_push($this->all_eff_ads_packages, $package);
+        $this->event_eff_ads_packages = collect($this->event_eff_ads_packages)->reject(fn($p) => $p->id === $package['id']);
+        $this->mergeState([
+            'all_eff_ads_packages' => json_encode($this->all_eff_ads_packages),
+            'event_eff_ads_packages' => json_encode($this->event_eff_ads_packages),
         ]);
     }
 

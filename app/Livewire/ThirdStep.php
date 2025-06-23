@@ -41,23 +41,23 @@ class ThirdStep extends Step
         $pp = collect($prices)->map(function ($p) {
             return [
                 'price' => new Price((array) $p),
-                'currencies' => collect($p->currencies)->map(function($c) {
-                                return [
-                                    'currency_id' => $c->currency_id,
-                                    'amount' => $c->amount
-                                ];
-                            })->toArray()
+                'currencies' => collect($p->currencies)->map(function ($c) {
+                    return [
+                        'currency_id' => $c->currency_id,
+                        'amount' => $c->amount
+                    ];
+                })->toArray()
             ];
         })->toArray();
-
         foreach ($event->Prices as $p) {
-            if(!in_array($p->id, array_column(array_column($pp,'price'),'id'))) {
+            if (!in_array($p->id, array_column(array_column($pp, 'price'), 'id'))) {
                 $p->delete();
             }
         }
-
         foreach ($pp as $p) {
-            $t = $event->prices()->updateOrCreate($p['price']->toArray());
+            $t = $p['price']['id'] > 0 ?
+                $event->prices()->update($p['price']->toArray()) :
+                $event->prices()->create($p['price']->toArray());
             $t->Currencies()->sync($p['currencies']);
         }
 

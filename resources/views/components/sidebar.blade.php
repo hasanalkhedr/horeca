@@ -67,6 +67,10 @@
                     icon="fa-solid fa-box-open" />
                 <x-sidebar-link href="{{ route('ads-options.index') }}" label="Advertisement Options"
                     icon="fa-solid fa-check-to-slot" />
+                <x-sidebar-link href="{{ route('eff-ads-packages.index') }}" label="Effective Advertisement Packages"
+                    icon="fa-solid fa-box-open" />
+                <x-sidebar-link href="{{ route('eff-ads-options.index') }}" label="Effective Advertisement Options"
+                    icon="fa-solid fa-check-to-slot" />
             </div>
         </x-sidebar-link>
         <x-sidebar-link href="" icon="fas fa-file-contract" label="Contracts"

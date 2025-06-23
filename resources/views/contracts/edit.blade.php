@@ -243,9 +243,78 @@
                                 type="number" name="ads_discount" x-model="adsDiscount" step="0.01"
                                 @input="calculateTotal()">{{ $report->Currency->CODE ?? 'USD' }}
                         </div>
-                        Net Space Amount: <span x-text="formatCurrency(adsNet)"></span>
+                        Net Amount: <span x-text="formatCurrency(adsNet)"></span>
                         {{ $report->Currency->CODE ?? 'USD' }}
                         <input type="hidden" name="ads_net" x-model="adsNet">
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if (in_array('effective-advertisement-section', $report->components))
+            <x-form-divider>Effective Advertisement</x-form-divider>
+            <div class="flex pl-4">
+                <div class="flex flex-wrap -mx-3 mb-2 w-3/4">
+                    @foreach ($contract->Event->EffAdsPackages as $package)
+                        <div class="flex justify-between">
+                            <div class="w-full font-bold text-lg leading-none">
+                                <h1>{{ $package->title }}</h1>
+                            </div>
+                        </div>
+                        <table class="w-full">
+                            @foreach ($package->EffAdsOptions as $option)
+                                @if ($loop->even)
+                                    @continue
+                                @endif
+                                <tr class="text-xs">
+                                    <td class="w-2/6">
+                                        <input @change="calculateTotal()" name="eff_ads_check[]"
+                                            value="{{ $package->id }}_{{ $option->id }}" @checked(in_array($package->id . '_' . $option->id, $contract->eff_ads_check))
+                                            data-price="{{ $option->Currencies->where('id', $report->Currency->id)->first()
+                                                ? $option->Currencies->where('id', $report->Currency->id)->first()->pivot->price
+                                                : 0 }}"
+                                            type="checkbox" class="mr-1">{{ $option->title }}
+                                    </td>
+                                    <td class="w-1/6">
+                                        {{ $option->Currencies->where('id', $report->Currency->id)->first()
+                                            ? $option->Currencies->where('id', $report->Currency->id)->first()->pivot->price
+                                            : 0 }}
+                                        {{ $report->Currency->CODE }}</td>
+                                    @if (!$loop->last)
+                                        <td class="w-2/6">
+                                            <input type="checkbox" @change="calculateTotal()" name="eff_ads_check[]"
+                                                value="{{ $package->id }}_{{ $package->EffAdsOptions[$loop->index + 1]->id }}"
+                                                @checked(in_array($package->id . '_' . $package->EffAdsOptions[$loop->index + 1]->id, $contract->eff_ads_check))
+                                                data-price="{{ $package->EffAdsOptions[$loop->index + 1]->Currencies->where('id', $report->Currency->id)->first()
+                                                    ? $package->EffAdsOptions[$loop->index + 1]->Currencies->where('id', $report->Currency->id)->first()->pivot->price
+                                                    : 0 }}"
+                                                class="mr-1">{{ $package->EffAdsOptions[$loop->index + 1]->title }}
+                                        </td>
+                                        <td class="w-1/6">
+                                            {{ $package->EffAdsOptions[$loop->index + 1]->Currencies->where('id', $report->Currency->id)->first()
+                                                ? $package->EffAdsOptions[$loop->index + 1]->Currencies->where('id', $report->Currency->id)->first()->pivot->price
+                                                : 0 }}
+                                            {{ $report->Currency->CODE }}</td>
+                                    @endif
+                                </tr>
+                            @endforeach
+                        </table>
+                    @endforeach
+                </div>
+                <div class="w-1/4 total text-center p-2">
+                    <div class="text-lg font-bold  bg-gray-200">
+                        Effective Advertisement Total: <span x-text="formatCurrency(effAdsTotal)"></span>
+                        {{ $report->Currency->CODE ?? 'USD' }}
+                        <input type="hidden" name="eff_ads_amount" x-model="effAdsTotal">
+                        <div>
+                            Discount: <input
+                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm w-1/2"
+                                type="number" name="eff_ads_discount" x-model="effAdsDiscount" step="0.01"
+                                @input="calculateTotal()">{{ $report->Currency->CODE ?? 'USD' }}
+                        </div>
+                        Net Amount: <span x-text="formatCurrency(effAdsNet)"></span>
+                        {{ $report->Currency->CODE ?? 'USD' }}
+                        <input type="hidden" name="eff_ads_net" x-model="effAdsNet">
                     </div>
                 </div>
             </div>
@@ -334,6 +403,9 @@
                 sub_total_2: {{$contract->sub_total_2}},
                 vat_amount: {{$contract->vat_amount}},
                 net_total: {{$contract->net_total}},
+                effAdsTotal: {{$contract->eff_ads_amount}},
+                effAdsDiscount: {{$contract->eff_ads_discount}},
+                effAdsNet: {{$contract->eff_ads_net}},
 
                 init() {
                     //this.calculateTotal();
@@ -398,6 +470,8 @@
                     this.sponsorNet = 0;
                     this.adsTotal = 0;
                     this.adsNet = 0;
+                    this.effAdsTotal = 0;
+                    this.effAdsNet = 0;
 
                     this.sub_total_1= 0;
                     this.d_i_a= 0;
@@ -443,9 +517,19 @@
                     // Calculate net Advertisement amount
                     this.adsNet = this.adsTotal - parseFloat(this.adsDiscount || 0);
 
+                    // Calculate eff ads total
+                    const effAdsChecks = document.querySelectorAll('input[name="eff_ads_check[]"]:checked');
+                    effAdsChecks.forEach(element => {
+                        const price = parseFloat(element.getAttribute('data-price')) || 0;
+                        this.effAdsTotal += price;
+                    });
+
+                    // Calculate net eff Advertisement amount
+                    this.effAdsNet = this.effAdsTotal - parseFloat(this.effAdsDiscount || 0);
+
                     // Calculate final total
-                   this.sub_total_1 = this.spaceTotal + this.sponsorTotal + this.adsTotal + parseFloat(this.waterElectricityAmount || 0);
-                   this.d_i_a = parseFloat(this.spaceDiscount || 0) + parseFloat(this.sponsorDiscount || 0) + parseFloat(this.adsDiscount || 0);
+                   this.sub_total_1 = this.spaceTotal + this.sponsorTotal + this.adsTotal + this.effAdsTotal + parseFloat(this.waterElectricityAmount || 0);
+                   this.d_i_a = parseFloat(this.spaceDiscount || 0) + parseFloat(this.sponsorDiscount || 0) + parseFloat(this.adsDiscount || 0) + parseFloat(this.effAdsDiscount || 0);
                    this.sub_total_2 = this.sub_total_1 - this.d_i_a;
                    this.vat_amount =this.sub_total_2 * {{$contract->Event->vat_rate}} / 100;
                    this.net_total = this.sub_total_2 + this.vat_amount;

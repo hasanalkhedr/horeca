@@ -76,6 +76,10 @@ class ContractController extends Controller
             'sub_total_2' => $request->sub_total_2,
             'vat_amount' => $request->vat_amount,
             'net_total' => $request->net_total,
+            'eff_ads_check' => $request->eff_ads_check,
+            'eff_ads_amount' => $request->eff_ads_amount ?? 0,
+            'eff_ads_discount' => $request->eff_ads_discount ?? 0,
+            'eff_ads_net' => $request->eff_ads_net ?? 0,
         ]);
         $stand->status = 'Sold';
         $stand->save();
@@ -142,6 +146,10 @@ class ContractController extends Controller
             'sub_total_2' => $request->sub_total_2,
             'vat_amount' => $request->vat_amount,
             'net_total' => $request->net_total,
+            'eff_ads_check' => $request->eff_ads_check,
+            'eff_ads_amount' => $request->eff_ads_amount ?? 0,
+            'eff_ads_discount' => $request->eff_ads_discount ?? 0,
+            'eff_ads_net' => $request->eff_ads_net ?? 0,
         ]);
         // $contract->d_i_a = $request->d_i_a;
         // $contract->sub_total_2 = $request->sub_total_2;
