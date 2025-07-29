@@ -16,13 +16,17 @@
                 <label class="pr-10 font-semibold">Stand N° <strong>{{ $contract->Stand->no }}</strong></label>
                 <label class="ml-10 font-semibold">Space <strong>{{ $contract->Stand->space }} m²</strong></label>
             </div>
-            @foreach ($contract->Event->Prices->where('currency_id', $currency->id) as $price)
+
+            {{-- @foreach ($contract->Event->Prices->where('currency_id', $currency->id) as $price) --}}
+            @foreach ($contract->Event->Prices()->whereHas('currencies', function ($query) use ($currency) {
+        $query->where('currencies.id', $currency->id);
+    })->get() as $price)
                 <div class="flex justify-between">
                     <div class="w-full items-center text-xs gap-2 mb-[2px]">
                         <input type="checkbox" class="mr-2" @checked($price->id == $contract->price_id)>
                         <label class="font-bold">{{ $price->name }}</label>
                         <span class="text-[8px] ml-1">{{ $price->description }}</span>
-                        {{ $contract->Stand->space }} m² x {{ $price->amount }} {{ $currency->CODE }} / m²
+                        {{ $contract->Stand->space }} m² x {{ $price->Currencies()->find($currency->id)->pivot->amount }} {{ $currency->CODE }} / m²
                     </div>
                 </div>
             @endforeach
@@ -70,13 +74,13 @@
             <div class="text-right font-bold border border-black  mb-[2px] pb-[5px]">
                 <p>Total: {{ $contract->space_amount }} {{ $currency->CODE }}</p>
             </div>
-            @if($contract->space_discount > 0)
-            <div class="text-right font-bold border border-black  mb-[2px] pb-[5px]">
-                <p>Discount: {{ $contract->space_discount }} {{ $currency->CODE }}</p>
-            </div>
-            <div class="text-right font-bold border border-black  mb-[2px] pb-[5px]">
-                <p>Net: {{ $contract->space_net }} {{ $currency->CODE }}</p>
-            </div>
+            @if ($contract->space_discount > 0)
+                <div class="text-right font-bold border border-black  mb-[2px] pb-[5px]">
+                    <p>Discount: {{ $contract->space_discount }} {{ $currency->CODE }}</p>
+                </div>
+                <div class="text-right font-bold border border-black  mb-[2px] pb-[5px]">
+                    <p>Net: {{ $contract->space_net }} {{ $currency->CODE }}</p>
+                </div>
             @endif
         </div>
     </div>

@@ -3,7 +3,7 @@
         @case('options_table')
             <table class="border border-gray-800 w-full">
                 <thead>
-                    <th colspan="2" style="padding: 5px !important" class="bg-gray-500 text-white font-bold text-center w-full">
+                    <th colspan="2" style="padding: 2px !important" class="bg-gray-500 text-white font-bold text-center w-full">
                         {{ $contract->SponsorPackage ? $contract->SponsorPackage->title : '' }}</th>
                 </thead>
                 <tbody>
@@ -12,25 +12,25 @@
                             @continue
                         @endif
                         <tr>
-                            <td style="padding: 5px !important" class="w-1/2 border border-gray-800">{{ $option->title }}</td>
+                            <td style="padding: 2px !important" class="w-1/2 border border-gray-800">{{ $option->title }}</td>
                             @if (!$loop->last)
-                                <td style="padding: 5px !important" class="w-1/2 border border-gray-800">
+                                <td style="padding: 2px !important" class="w-1/2 border border-gray-800">
                                     {{ $contract->SponsorPackage->SponsorOptions[$loop->index + 1]->title }}</td>
                             @endif
                         </tr>
                     @empty
                         @if ($contract->SponsorPackage->id <= 0)
                             <tr>
-                                <td style="padding: 5px !important" class="w-1/2 border border-gray-800">Option 2</td>
-                                <td style="padding: 5px !important" class="w-1/2 border border-gray-800">Option 1</td>
+                                <td style="padding: 2px !important" class="w-1/2 border border-gray-800">Option 2</td>
+                                <td style="padding: 2px !important" class="w-1/2 border border-gray-800">Option 1</td>
                             </tr>
                             <tr>
-                                <td style="padding: 5px !important" class="w-1/2 border border-gray-800">Option 3</td>
-                                <td style="padding: 5px !important" class="w-1/2 border border-gray-800">Option 4</td>
+                                <td style="padding: 2px !important" class="w-1/2 border border-gray-800">Option 3</td>
+                                <td style="padding: 2px !important" class="w-1/2 border border-gray-800">Option 4</td>
                             </tr>
                             <tr>
-                                <td style="padding: 5px !important" class="w-1/2 border border-gray-800">Option 5</td>
-                                <td style="padding: 5px !important" class="w-1/2 border border-gray-800">Option 6</td>
+                                <td style="padding: 2px !important" class="w-1/2 border border-gray-800">Option 5</td>
+                                <td style="padding: 2px !important" class="w-1/2 border border-gray-800">Option 6</td>
                             </tr>
                         @endif
                     @endforelse
@@ -67,7 +67,7 @@
                 <div class="border border-black w-3/4 mr-6">
                     <table class="border border-gray-800 w-full">
                         <thead>
-                            <th colspan="2" style="padding: 5px !important"
+                            <th colspan="2" style="padding: 2px !important"
                                 class="bg-gray-500 text-white font-bold text-center w-full">
                                 Event Sponsorship Opportunities</th>
                         </thead>
@@ -75,11 +75,11 @@
                             @if ($event)
                                 @forelse ($event->SponsorPackages as $package)
                                     <tr>
-                                        <td style="padding: 5px !important" class="w-1/2 text-left">
+                                        <td style="padding: 2px !important" class="w-2/3 text-left">
                                             <input type="checkbox" class="mr-2" @checked($package->id == $contract->sponsor_package_id)>
                                             <label class="font-semibold">{{ $package->title }}</label>
                                         </td>
-                                        <td style="padding: 5px !important" class="w-1/2 text-right">
+                                        <td style="padding: 2px !important" class="w-1/3 text-right">
                                             <label
                                                 class="font-semibold">{{ $package->currencies->where('id', $currency->id)->first()
                                                     ? $package->currencies->where('id', $currency->id)->first()->pivot->total_price
@@ -94,29 +94,29 @@
                                 @endforelse
                             @else
                                 <tr>
-                                    <td style="padding: 5px !important" class="w-1/2 text-left">
+                                    <td style="padding: 2px !important" class="w-2/3 text-left">
                                         <input type="checkbox" class="mr-2" checked>
                                         <label class="font-semibold">Golden Sponsor</label>
                                     </td>
-                                    <td style="padding: 5px !important" class="w-1/2 text-right">
+                                    <td style="padding: 2px !important" class="w-1/3 text-right">
                                         <label class="font-semibold">00,00 USD</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td style="padding: 5px !important" class="w-1/2 text-left">
+                                    <td style="padding: 2px !important" class="w-2/3 text-left">
                                         <input type="checkbox" class="mr-2">
                                         <label class="font-semibold">Golden Sponsor</label>
                                     </td>
-                                    <td style="padding: 5px !important" class="w-1/2 text-right">
+                                    <td style="padding: 2px !important" class="w-1/3 text-right">
                                         <label class="font-semibold">00,00 USD</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td style="padding: 5px !important" class="w-1/2 text-left">
+                                    <td style="padding: 2px !important" class="w-2/3 text-left">
                                         <input type="checkbox" class="mr-2">
                                         <label class="font-semibold">Golden Sponsor</label>
                                     </td>
-                                    <td style="padding: 5px !important" class="w-1/2 text-right">
+                                    <td style="padding: 2px !important" class="w-1/3 text-right">
                                         <label class="font-semibold">00,00 USD</label>
                                     </td>
                                 </tr>

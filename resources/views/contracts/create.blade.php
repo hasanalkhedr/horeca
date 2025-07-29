@@ -14,7 +14,7 @@
                 <x-input-label>
                     Contract #
                 </x-input-label>
-                <x-text-input name="contract_no" value="new contract" />
+                <x-text-input name="contract_no" value="" readonly />
             </div>
             <div class="w-1/3 px-3">
                 <x-input-label>

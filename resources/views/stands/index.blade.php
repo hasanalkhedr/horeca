@@ -64,7 +64,7 @@
 
                                 <div>
                                     <x-input-label for="space">Space (sq. m)</x-input-label>
-                                    <x-text-input type="number" id="space" x-model="formData.space" required />
+                                    <x-text-input type="number" id="space" x-model="formData.space" required step="0.01"/>
                                 </div>
                                 @if ($event->id == null)
                                     <div>
