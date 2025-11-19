@@ -32,7 +32,7 @@ class PriceSectionComponent extends Component
             ]);}
             $p->Event = $event;
             $this->contract = new Contract([
-
+                'contract_no' => 'temp'
             ]);
             $this->contract->Stand = $s;
             $this->contract->Event = $event;

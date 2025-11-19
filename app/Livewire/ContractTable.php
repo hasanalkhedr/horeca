@@ -37,9 +37,10 @@ class ContractTable extends DataTableComponent
             Column::make('Stand', 'stand.no')
                 ->sortable(),
             Column::make('Amount', 'net_total')
-                ->secondaryHeader(function ($rows) {
-                    return " Sum of Amount: " . $rows->sum('net_total');
-                }),
+                ->label(function ($row) {
+                    return view('livewire.partials.contract-amount')->with('contract', $row);
+                })
+                ->sortable(),
             Column::make('Form | Actions')
                 ->label(function ($row) {
                     return view('livewire.partials.contract-form-link')->with('contract', $row);

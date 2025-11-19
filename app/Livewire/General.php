@@ -66,7 +66,7 @@ class General extends Step
             [
                 'state.name' => ['required', Rule::unique('events', 'name')->ignoreModel($this->model)],
                 'state.CODE' => ['required', Rule::unique('events', 'CODE')->ignoreModel($this->model)],
-                'state.description' => ['required', ],
+                'state.description' => ['nullable', ],
                 'state.start_date' => ['required', 'date', 'after_or_equal:today' ],
                 'state.end_date' => ['required', 'date', 'after_or_equal:state.start_date'],
                 'state.apply_start_date' => ['required','date', 'before_or_equal:state.start_date'],
