@@ -3,7 +3,7 @@
         @if ($with_logo)
             <!-- Logo -->
             <div class="w-1/3">
-                <img src="{{ asset('storage/' . $logo_path) }}" alt="Logo" class="max-w-32 h-auto">
+                <img src="{{ asset('public/storage/' . $logo_path) }}" alt="Logo" class="max-w-32 h-auto">
             </div>
         @endif
         <!-- Event Details -->
