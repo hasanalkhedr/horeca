@@ -87,7 +87,14 @@ class ClientSelect extends Component
     public $coordinatorId = null;
     public $contactPerson = null;
 
-    public string $apiToken = '8fadcb195d24b8130c0d63881b55ec51364df22a';
+    protected string $apiToken;
+    protected string $baseUrl;
+
+    public function __construct()
+    {
+        $this->apiToken = config('services.pipedrive.api_key');
+        $this->baseUrl = config('services.pipedrive.base_url');
+    }
 
     public function mount($selectedCompany = null, $coordinatorId = null, $contactPerson = null)
     {
@@ -112,7 +119,7 @@ class ClientSelect extends Component
             return;
         }
 
-        $response = Http::get("https://hospitalityservices.pipedrive.com/api/v1/organizations/search", [
+        $response = Http::get("{$this->baseUrl}/organizations/search", [
             'term' => $this->searchTerm,
             'exact_match' => false,
             'fields' => 'name',
@@ -159,19 +166,19 @@ class ClientSelect extends Component
                 'CODE' => $c['label'] ?? 'NOT_SET',
                 //'commerical_registry_number' => $c[''],
                 //'vat_number' => $c[''],
-                'country' => $this->getCountryFromJson($c['affb271863709112a116d275ffc4d573ed7853c7']),
-                'city' => $this->getCityFromJson($c['6182d0aaa2d68c248363bf6ff1cef5ef87c21799']),
-                'street' => $c['e7c3f6cfd690ba7594c56660244a785d6b43c30e'],
-                'po_box' => $c['0323c753854315f57d32dcbddbbc1b8738766799'],
-                'mobile' => $c['588c3b4b858758dca5821c8db6ce5d208974cf2f'] . strlen($c['e19adc02be527463d1385a19de3c5ac26eea329f']) > 0 ? ', ' . $c['e19adc02be527463d1385a19de3c5ac26eea329f'] : '',
-                'phone' => $c['2b7ec723f87ca44956cf5f3976119240d0dc238c'] . strlen($c['1a3a780bdc0be690f487db21056f2db76680cecb']) > 0 ? ', ' . $c['1a3a780bdc0be690f487db21056f2db76680cecb'] : '',
-                'additional_number' => $c['486c3d65d60839be55a60dba0a9ffa3c4b59ab8d'],
-                'fax' => $c['269f2c19aab61c8daa0d61699277b82c37a395ce'] . strlen($c['721cd66763123b5273dd22c0b3d455fc66fca7ed']) > 0 ? ', ' . $c['721cd66763123b5273dd22c0b3d455fc66fca7ed'] : '',
-                'email' => $c['09a7583fcb843a55ef2830d5ee06b2a88edd9623'] . strlen($c['47f4a75a942ecd38279080869573cc7d315b6b9e']) > 0 ? ', ' . $c['47f4a75a942ecd38279080869573cc7d315b6b9e'] : '',
-                'website' => $c['b553abbde7758c4d1bc07731fb21dfdfe1d81c4a'],
-                'facebook_link' => $c['9da0d794d349a1c4218ea1588093c4b1843d06cc'],
-                'instagram_link' => $c['28819bab1cc9066de228c6b2d3cae695fb96aa03'],
-                'x_link' => $c['41c8abbe9d4ea4c933f22d31ad49ed045bb613d6'],
+                'country' => array_key_exists('affb271863709112a116d275ffc4d573ed7853c7', $c)? $this->getCountryFromJson($c['affb271863709112a116d275ffc4d573ed7853c7']):'',
+                'city' => array_key_exists('6182d0aaa2d68c248363bf6ff1cef5ef87c21799', $c) ? $this->getCityFromJson($c['6182d0aaa2d68c248363bf6ff1cef5ef87c21799']) : '',
+                'street' => array_key_exists('e7c3f6cfd690ba7594c56660244a785d6b43c30e', $c) ? $c['e7c3f6cfd690ba7594c56660244a785d6b43c30e'] : '',
+                'po_box' => array_key_exists('0323c753854315f57d32dcbddbbc1b8738766799', $c) ? $c['0323c753854315f57d32dcbddbbc1b8738766799'] : '',
+                'mobile' => array_key_exists('588c3b4b858758dca5821c8db6ce5d208974cf2f', $c) ? $c['588c3b4b858758dca5821c8db6ce5d208974cf2f'] : '',// . strlen($c['e19adc02be527463d1385a19de3c5ac26eea329f']) > 0 ? ', ' . $c['e19adc02be527463d1385a19de3c5ac26eea329f'] : '',
+                'phone' => array_key_exists('2b7ec723f87ca44956cf5f3976119240d0dc238c', $c) ? $c['2b7ec723f87ca44956cf5f3976119240d0dc238c'] : '',// . strlen($c['1a3a780bdc0be690f487db21056f2db76680cecb']) > 0 ? ', ' . $c['1a3a780bdc0be690f487db21056f2db76680cecb'] : '',
+                'additional_number' => array_key_exists('486c3d65d60839be55a60dba0a9ffa3c4b59ab8d', $c)? $c['486c3d65d60839be55a60dba0a9ffa3c4b59ab8d'] : '',
+                'fax' => array_key_exists('269f2c19aab61c8daa0d61699277b82c37a395ce', $c) ? $c['269f2c19aab61c8daa0d61699277b82c37a395ce'] : '',// . strlen($c['721cd66763123b5273dd22c0b3d455fc66fca7ed']) > 0 ? ', ' . $c['721cd66763123b5273dd22c0b3d455fc66fca7ed'] : '',
+                'email' => array_key_exists('09a7583fcb843a55ef2830d5ee06b2a88edd9623', $c) ? $c['09a7583fcb843a55ef2830d5ee06b2a88edd9623'] : '', // . strlen($c['47f4a75a942ecd38279080869573cc7d315b6b9e']) > 0 ? ', ' . $c['47f4a75a942ecd38279080869573cc7d315b6b9e'] : '',
+                'website' => array_key_exists('b553abbde7758c4d1bc07731fb21dfdfe1d81c4a', $c) ? $c['b553abbde7758c4d1bc07731fb21dfdfe1d81c4a'] : '',
+                'facebook_link' => array_key_exists('9da0d794d349a1c4218ea1588093c4b1843d06cc', $c) ? $c['9da0d794d349a1c4218ea1588093c4b1843d06cc'] : '',
+                'instagram_link' => array_key_exists('28819bab1cc9066de228c6b2d3cae695fb96aa03', $c) ? $c['28819bab1cc9066de228c6b2d3cae695fb96aa03'] : '',
+                'x_link' => array_key_exists('41c8abbe9d4ea4c933f22d31ad49ed045bb613d6', $c) ? $c['41c8abbe9d4ea4c933f22d31ad49ed045bb613d6'] : '',
                 'stand_name' => $c['label'],
                 'logo' => $c['picture_id'],
             ]);
@@ -196,7 +203,7 @@ class ClientSelect extends Component
 
     public function fetchPeopleForCompany($companyId)
     {
-        $response = Http::get("https://hospitalityservices.pipedrive.com/api/v1/organizations/{$companyId}/persons", [
+        $response = Http::get("{$this->baseUrl}/organizations/{$companyId}/persons", [
             'api_token' => $this->apiToken,
         ]);
         $people = $response->json('data') ?? [];
@@ -207,7 +214,7 @@ class ClientSelect extends Component
     }
     public function fetchCompanyDetails($companyId)
     {
-        $response = Http::get("https://hospitalityservices.pipedrive.com/api/v1/organizations/{$companyId}", [
+        $response = Http::get("{$this->baseUrl}/organizations/{$companyId}", [
             'api_token' => $this->apiToken,
         ]);
         $company = $response->json('data') ?? [];

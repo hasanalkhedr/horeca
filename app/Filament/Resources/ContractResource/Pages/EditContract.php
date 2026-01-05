@@ -1,0 +1,337 @@
+<?php
+
+namespace App\Filament\Resources\ContractResource\Pages;
+
+use App\Filament\Resources\ContractResource;
+use App\Models\Contract;
+use App\Models\Stand;
+use App\Models\Event;
+use App\Models\Settings\Price;
+use App\Models\SponsorPackage;
+use App\Models\AdsPackage;
+use App\Models\EffAdsPackage;
+use Filament\Actions;
+use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Model;
+
+class EditContract extends EditRecord
+{
+    protected static string $resource = ContractResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\DeleteAction::make(),
+        ];
+    }
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $contract = $this->record;
+
+        // Set currency_id from report
+        $data['currency_id'] = $contract->Report?->currency_id;
+
+        // Set use_special_price flag
+        $data['use_special_price'] = $contract->price_id === null;
+
+        // Process ads_check into ads_selections
+        $adsSelections = [];
+        $currentAds = $contract->ads_check ?? [];
+
+        if (!empty($currentAds) && is_array($currentAds)) {
+            $groupedByPackage = [];
+            foreach ($currentAds as $item) {
+                if (strpos($item, '_') !== false) {
+                    [$packageId, $optionId] = explode('_', $item);
+                    $groupedByPackage[$packageId][] = (int)$optionId;
+                }
+            }
+
+            foreach ($groupedByPackage as $packageId => $optionIds) {
+                $adsSelections[] = [
+                    'ads_package_id' => (int)$packageId,
+                    'ads_options' => $optionIds,
+                ];
+            }
+        }
+        $data['ads_selections'] = $adsSelections;
+
+        // Process eff_ads_check into eff_ads_selections
+        $effAdsSelections = [];
+        $currentEffAds = $contract->eff_ads_check ?? [];
+
+        if (!empty($currentEffAds) && is_array($currentEffAds)) {
+            $groupedByPackage = [];
+            foreach ($currentEffAds as $item) {
+                if (strpos($item, '_') !== false) {
+                    [$packageId, $optionId] = explode('_', $item);
+                    $groupedByPackage[$packageId][] = (int)$optionId;
+                }
+            }
+
+            foreach ($groupedByPackage as $packageId => $optionIds) {
+                $effAdsSelections[] = [
+                    'eff_ads_package_id' => (int)$packageId,
+                    'eff_ads_options' => $optionIds,
+                ];
+            }
+        }
+        $data['eff_ads_selections'] = $effAdsSelections;
+
+        return $data;
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // Process arrays
+        $data = $this->processArrays($data);
+
+        // Calculate amounts
+        $data = $this->calculateAllAmounts($data);
+
+        return $data;
+    }
+
+    private function processArrays(array $data): array
+    {
+        // Process ads_check array
+        $adsCheck = [];
+        if (isset($data['ads_selections'])) {
+            foreach ($data['ads_selections'] as $selection) {
+                if (isset($selection['ads_package_id'], $selection['ads_options'])) {
+                    foreach ($selection['ads_options'] as $optionId) {
+                        $adsCheck[] = $selection['ads_package_id'] . '_' . $optionId;
+                    }
+                }
+            }
+        }
+        $data['ads_check'] = $adsCheck;
+
+        // Process eff_ads_check array
+        $effAdsCheck = [];
+        if (isset($data['eff_ads_selections'])) {
+            foreach ($data['eff_ads_selections'] as $selection) {
+                if (isset($selection['eff_ads_package_id'], $selection['eff_ads_options'])) {
+                    foreach ($selection['eff_ads_options'] as $optionId) {
+                        $effAdsCheck[] = $selection['eff_ads_package_id'] . '_' . $optionId;
+                    }
+                }
+            }
+        }
+        $data['eff_ads_check'] = $effAdsCheck;
+
+        // Handle special price
+        if (isset($data['use_special_price']) && $data['use_special_price']) {
+            $data['price_id'] = null;
+        } else {
+            $data['price_amount'] = null;
+        }
+        unset($data['use_special_price']);
+
+        // Remove temporary fields
+        unset($data['ads_selections']);
+        unset($data['eff_ads_selections']);
+
+        return $data;
+    }
+
+    private function calculateAllAmounts(array $data): array
+    {
+        // Calculate space amount
+        $data = $this->calculateSpaceAmount($data);
+
+        // Calculate space net
+        $data['space_net'] = max(0, ($data['space_amount'] ?? 0) - ($data['space_discount'] ?? 0));
+
+        // Calculate sponsor amount if selected
+        if (isset($data['sponsor_package_id']) && $data['sponsor_package_id']) {
+            $data = $this->calculateSponsorAmount($data);
+        } else {
+            $data['sponsor_amount'] = 0;
+        }
+        $data['sponsor_net'] = max(0, ($data['sponsor_amount'] ?? 0) - ($data['sponsor_discount'] ?? 0));
+
+        // Calculate ads amount if selected
+        if (isset($data['ads_check']) && is_array($data['ads_check']) && !empty($data['ads_check'])) {
+            $data = $this->calculateAdsAmountFromCheck($data);
+        } else {
+            $data['advertisment_amount'] = 0;
+        }
+        $data['ads_net'] = max(0, ($data['advertisment_amount'] ?? 0) - ($data['ads_discount'] ?? 0));
+
+        // Calculate eff ads amount if selected
+        if (isset($data['eff_ads_check']) && is_array($data['eff_ads_check']) && !empty($data['eff_ads_check'])) {
+            $data = $this->calculateEffAdsAmountFromCheck($data);
+        } else {
+            $data['eff_ads_amount'] = 0;
+        }
+        $data['eff_ads_net'] = max(0, ($data['eff_ads_amount'] ?? 0) - ($data['eff_ads_discount'] ?? 0));
+
+        // Calculate special design amount if applicable
+        if (isset($data['special_design_price']) && $data['special_design_price'] > 0 && isset($data['stand_id'])) {
+            $stand = Stand::find($data['stand_id']);
+            if ($stand) {
+                $data['special_design_amount'] = $stand->space * $data['special_design_price'];
+            }
+        }
+
+        // Calculate totals
+        $data['sub_total_1'] =
+            ($data['space_net'] ?? 0) +
+            ($data['sponsor_net'] ?? 0) +
+            ($data['ads_net'] ?? 0) +
+            ($data['eff_ads_net'] ?? 0) +
+            ($data['water_electricity_amount'] ?? 0) +
+            ($data['special_design_amount'] ?? 0);
+
+        $data['d_i_a'] =
+            ($data['space_discount'] ?? 0) +
+            ($data['sponsor_discount'] ?? 0) +
+            ($data['ads_discount'] ?? 0) +
+            ($data['eff_ads_discount'] ?? 0);
+
+        $data['sub_total_2'] = ($data['sub_total_1'] ?? 0) - ($data['d_i_a'] ?? 0);
+
+        // Calculate VAT
+        $event = Event::find($data['event_id']);
+        $vatRate = $event?->vat_rate ?? 0;
+        $data['vat_amount'] = ($data['sub_total_2'] ?? 0) * ($vatRate / 100);
+
+        $data['net_total'] = ($data['sub_total_2'] ?? 0) + ($data['vat_amount'] ?? 0);
+
+        return $data;
+    }
+
+    private function calculateSpaceAmount(array $data): array
+    {
+        if (empty($data['stand_id'])) {
+            $data['space_amount'] = 0;
+            return $data;
+        }
+
+        $stand = Stand::find($data['stand_id']);
+        if (!$stand) {
+            $data['space_amount'] = 0;
+            return $data;
+        }
+
+        $space = $stand->space;
+
+        // Check if using special price
+        if (isset($data['price_id']) && !$data['price_id'] && isset($data['price_amount'])) {
+            $data['space_amount'] = $space * ($data['price_amount'] ?? 0);
+        } elseif (!empty($data['price_id'])) {
+            // Get price from database
+            $price = Price::with(['Currencies' => function($query) use ($data) {
+                $query->where('currencies.id', $data['currency_id'] ?? null);
+            }])->find($data['price_id']);
+
+            $priceAmount = $price?->Currencies->first()?->pivot->amount ?? 0;
+            $data['space_amount'] = $space * $priceAmount;
+        } else {
+            $data['space_amount'] = 0;
+        }
+
+        return $data;
+    }
+
+    private function calculateSponsorAmount(array $data): array
+    {
+        $package = SponsorPackage::with(['Currencies' => function($query) use ($data) {
+            $query->where('currencies.id', $data['currency_id'] ?? null);
+        }])->find($data['sponsor_package_id']);
+
+        $data['sponsor_amount'] = $package?->Currencies->first()?->pivot->total_price ?? 0;
+        return $data;
+    }
+
+    private function calculateAdsAmountFromCheck(array $data): array
+    {
+        $adsCheck = $data['ads_check'] ?? [];
+        $currencyId = $data['currency_id'] ?? null;
+        $total = 0;
+
+        foreach ($adsCheck as $item) {
+            if (strpos($item, '_') !== false) {
+                [$packageId, $optionId] = explode('_', $item);
+
+                $package = AdsPackage::with(['AdsOptions.Currencies' => function($query) use ($currencyId) {
+                    $query->where('currencies.id', $currencyId);
+                }])->find($packageId);
+
+                if ($package) {
+                    $option = $package->AdsOptions->find($optionId);
+                    if ($option) {
+                        $price = $option->Currencies
+                            ->where('id', $currencyId)
+                            ->first()?->pivot->price ?? 0;
+                        $total += $price;
+                    }
+                }
+            }
+        }
+
+        $data['advertisment_amount'] = $total;
+        return $data;
+    }
+
+    private function calculateEffAdsAmountFromCheck(array $data): array
+    {
+        $effAdsCheck = $data['eff_ads_check'] ?? [];
+        $currencyId = $data['currency_id'] ?? null;
+        $total = 0;
+
+        foreach ($effAdsCheck as $item) {
+            if (strpos($item, '_') !== false) {
+                [$packageId, $optionId] = explode('_', $item);
+
+                $package = EffAdsPackage::with(['EffAdsOptions.Currencies' => function($query) use ($currencyId) {
+                    $query->where('currencies.id', $currencyId);
+                }])->find($packageId);
+
+                if ($package) {
+                    $option = $package->EffAdsOptions->find($optionId);
+                    if ($option) {
+                        $price = $option->Currencies
+                            ->where('id', $currencyId)
+                            ->first()?->pivot->price ?? 0;
+                        $total += $price;
+                    }
+                }
+            }
+        }
+
+        $data['eff_ads_amount'] = $total;
+        return $data;
+    }
+
+    protected function handleRecordUpdate($record, array $data): Model
+    {
+        $oldStandId = $record->stand_id;
+
+        // Update contract
+        $record->update($data);
+
+        // Update stand status if changed
+        $newStandId = $record->stand_id;
+        if ($oldStandId != $newStandId) {
+            // Mark old stand as available
+            if ($oldStandId) {
+                Stand::where('id', $oldStandId)->update(['status' => 'Available']);
+            }
+
+            // Mark new stand as sold
+            if ($newStandId) {
+                Stand::where('id', $newStandId)->update(['status' => 'Sold']);
+            }
+        }
+
+        return $record;
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+}

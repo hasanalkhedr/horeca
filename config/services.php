@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+
+    'pipedrive' => [
+        'base_url' => env('PIPEDRIVE_BASE_URL', 'https://api.pipedrive.com/v1/'),
+        'api_key' => env('PIPEDRIVE_API_KEY', ''),
+    ],
+
 ];

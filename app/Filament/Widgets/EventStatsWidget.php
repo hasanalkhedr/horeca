@@ -1,0 +1,212 @@
+<?php
+
+namespace App\Filament\Widgets;
+
+use App\Models\Event;
+use App\Models\Contract;
+use App\Models\Stand;
+use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Carbon;
+
+class EventStatsWidget extends BaseWidget
+{
+    protected function getStats(): array
+    {
+        // Total Events Statistics
+        $totalEvents = Event::count();
+        $activeEvents = Event::where('end_date', '>=', now())->where('start_date', '<=', now())->count();
+        $upcomingEvents = Event::where('start_date', '>', now())->count();
+        $endedEvents = Event::where('end_date', '<', now())->count();
+
+        // Stands Statistics
+        $totalStands = Stand::count();
+        $soldStands = Stand::where('status', 'Sold')->count();
+        $availableStands = Stand::where('status', 'Available')->count();
+        $reservedStands = Stand::where('status', 'Reserved')->count();
+        $mergedStands = Stand::where('is_merged', true)->count();
+
+        // Space Statistics
+        $totalSpace = Stand::sum('space');
+        $soldSpace = Stand::where('status', 'Sold')->sum('space');
+        $availableSpace = Stand::where('status', 'Available')->sum('space');
+        $reservedSpace = Stand::where('status', 'Reserved')->sum('space');
+
+        // Contract Statistics
+        $totalContracts = Contract::count();
+        $draftContracts = Contract::where('status', 'draft')->count();
+        $interestedContracts = Contract::where('status', 'INT')->count();
+        $signedNotPaidContracts = Contract::where('status', 'S&NP')->count();
+        $signedPaidContracts = Contract::where('status', 'S&P')->count();
+
+        // Financial Statistics
+        $totalRevenue = Contract::where('status', 'S&P')->sum('net_total');
+        $pendingRevenue = Contract::where('status', 'S&NP')->sum('net_total');
+        $potentialRevenue = Contract::whereIn('status', ['draft', 'INT'])->sum('net_total');
+
+        // Calculate percentages
+        $standsOccupancyRate = $totalStands > 0 ? round(($soldStands / $totalStands) * 100, 1) : 0;
+        $spaceOccupancyRate = $totalSpace > 0 ? round(($soldSpace / $totalSpace) * 100, 1) : 0;
+        $contractConversionRate = $totalContracts > 0 ? round(($signedPaidContracts / $totalContracts) * 100, 1) : 0;
+
+        return [
+            // Events Stats
+            Stat::make('Total Events', $totalEvents)
+                ->description($activeEvents . ' Active • ' . $upcomingEvents . ' Upcoming')
+                ->descriptionIcon('heroicon-o-calendar')
+                ->color('primary')
+                ->chart($this->getEventsChartData())
+                ->extraAttributes([
+                    'class' => 'cursor-pointer',
+                    'wire:click' => '$dispatch(\'open-modal\', { id: \'events-breakdown\' })',
+                ]),
+
+            Stat::make('Event Status', $activeEvents . '/' . $totalEvents . ' Active')
+                ->description($upcomingEvents . ' Upcoming • ' . $endedEvents . ' Ended')
+                ->descriptionIcon('heroicon-o-clock')
+                ->color($activeEvents > 0 ? 'success' : 'warning')
+                ->chart($this->getEventStatusChartData()),
+
+            // Stands Stats
+            Stat::make('Total Stands', $totalStands)
+                ->description($soldStands . ' Sold • ' . $availableStands . ' Available')
+                ->descriptionIcon('heroicon-o-map-pin')
+                ->color('success')
+                ->chart($this->getStandsChartData())
+                ->extraAttributes([
+                    'class' => 'cursor-pointer',
+                    'wire:click' => '$dispatch(\'open-modal\', { id: \'stands-breakdown\' })',
+                ]),
+
+            Stat::make('Stands Occupancy', $standsOccupancyRate . '%')
+                ->description($totalStands . ' Total • ' . $mergedStands . ' Merged')
+                ->descriptionIcon('heroicon-o-check-circle')
+                ->color($standsOccupancyRate > 70 ? 'success' : ($standsOccupancyRate > 40 ? 'warning' : 'danger'))
+                ->chart($this->getOccupancyChartData()),
+
+            // Space Stats
+            Stat::make('Total Space', number_format($totalSpace) . ' sqm')
+                ->description(number_format($soldSpace) . ' sqm Sold • ' . number_format($availableSpace) . ' sqm Available')
+                ->descriptionIcon('heroicon-o-square-3-stack-3d')
+                ->color('info')
+                ->chart($this->getSpaceChartData()),
+
+            Stat::make('Space Occupancy', $spaceOccupancyRate . '%')
+                ->description(number_format($soldSpace) . ' sqm Sold • ' . number_format($reservedSpace) . ' sqm Reserved')
+                ->descriptionIcon('heroicon-o-chart-bar')
+                ->color($spaceOccupancyRate > 70 ? 'success' : ($spaceOccupancyRate > 40 ? 'warning' : 'danger')),
+
+            // Contracts Stats
+            Stat::make('Total Contracts', $totalContracts)
+                ->description($signedPaidContracts . ' Paid • ' . $signedNotPaidContracts . ' Pending')
+                ->descriptionIcon('heroicon-o-document-text')
+                ->color('warning')
+                ->chart($this->getContractsChartData())
+                ->extraAttributes([
+                    'class' => 'cursor-pointer',
+                    'wire:click' => '$dispatch(\'open-modal\', { id: \'contracts-breakdown\' })',
+                ]),
+
+            Stat::make('Contract Conversion', $contractConversionRate . '%')
+                ->description($draftContracts . ' Draft • ' . $interestedContracts . ' Interested')
+                ->descriptionIcon('heroicon-o-arrow-trending-up')
+                ->color($contractConversionRate > 70 ? 'success' : ($contractConversionRate > 40 ? 'warning' : 'danger')),
+
+            // Financial Stats
+            Stat::make('Total Revenue', '$' . number_format($totalRevenue, 0))
+                ->description('$' . number_format($pendingRevenue, 0) . ' Pending • $' . number_format($potentialRevenue, 0) . ' Potential')
+                ->descriptionIcon('heroicon-o-currency-dollar')
+                ->color('danger')
+                ->chart($this->getRevenueChartData()),
+
+            Stat::make('Avg. Contract Value', $signedPaidContracts > 0 ? '$' . number_format($totalRevenue / $signedPaidContracts, 0) : '$0')
+                ->description('Based on ' . $signedPaidContracts . ' paid contracts')
+                ->descriptionIcon('heroicon-o-banknotes')
+                ->color('gray'),
+        ];
+    }
+
+    private function getEventsChartData(): array
+    {
+        $data = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $count = Event::whereDate('created_at', $date)->count();
+            $data[] = $count;
+        }
+        return $data;
+    }
+
+    private function getEventStatusChartData(): array
+    {
+        $active = Event::where('end_date', '>=', now())->where('start_date', '<=', now())->count();
+        $upcoming = Event::where('start_date', '>', now())->count();
+        $ended = Event::where('end_date', '<', now())->count();
+
+        return [$active, $upcoming, $ended];
+    }
+
+    private function getStandsChartData(): array
+    {
+        $data = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $count = Stand::whereDate('created_at', $date)->count();
+            $data[] = $count;
+        }
+        return $data;
+    }
+
+    private function getOccupancyChartData(): array
+    {
+        $data = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $total = Stand::whereDate('created_at', '<=', $date)->count();
+            $sold = Stand::where('status', 'Sold')->whereDate('created_at', '<=', $date)->count();
+            $rate = $total > 0 ? ($sold / $total) * 100 : 0;
+            $data[] = $rate;
+        }
+        return $data;
+    }
+
+    private function getSpaceChartData(): array
+    {
+        $data = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $space = Stand::whereDate('created_at', $date)->sum('space');
+            $data[] = $space;
+        }
+        return $data;
+    }
+
+    private function getContractsChartData(): array
+    {
+        $data = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $count = Contract::whereDate('created_at', $date)->count();
+            $data[] = $count;
+        }
+        return $data;
+    }
+
+    private function getRevenueChartData(): array
+    {
+        $data = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $revenue = Contract::where('status', 'S&P')
+                ->whereDate('created_at', $date)
+                ->sum('net_total');
+            $data[] = $revenue;
+        }
+        return $data;
+    }
+
+    protected function getColumns(): int
+    {
+        return 4;
+    }
+}

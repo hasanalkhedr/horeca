@@ -41,11 +41,11 @@ Route::middleware(['auth'])->group(function () {
     Route::view('profile', 'profile')->name('profile');
 
     // Admin-specific routes
-    Route::middleware(['role:eventManager'])->group(function () {
-        Route::get('/admin', function () {
-            return "admin role";
-        });
-    });
+    // Route::middleware(['role:eventManager'])->group(function () {
+    //     Route::get('/admin', function () {
+    //         return "admin role";
+    //     });
+    // });
 
     // Payment settings
     Route::resource('currencies', CurrencyController::class);

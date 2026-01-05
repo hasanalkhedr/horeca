@@ -30,23 +30,23 @@
         <div class="grid grid-cols-2 border border-black mb-[1px]">
             <div class="flex">
                 <div class="px-2 font-semibold">Contact Person</div>
-                <div class="px-2">{{ $contract->ContactPerson->name }}</div>
+                <div class="px-2">{{ $contract->ContactPerson ? $contract->ContactPerson->name : '' }}</div>
             </div>
             <div class="flex">
                 <div class="px-2 font-semibold">
                     Mobile</div>
-                <div class="px-2">{{ $contract->ContactPerson->mobile }}</div>
+                <div class="px-2">{{ $contract->ContactPerson ? $contract->ContactPerson->mobile : '' }}</div>
             </div>
         </div>
         <div class="grid grid-cols-2 border border-black mb-[1px]">
             <div class="flex">
                 <div class="px-2 font-semibold">Exhibition Coordinator</div>
-                <div class="px-2">{{ $contract->ExhabitionCoordinator->name }}</div>
+                <div class="px-2">{{ $contract->ExhabitionCoordinator ? $contract->ExhabitionCoordinator->name : '' }}</div>
             </div>
             <div class="flex">
                 <div class="px-2 font-semibold">
                     Mobile</div>
-                <div class="px-2">{{ $contract->ExhabitionCoordinator->mobile }}</div>
+                <div class="px-2">{{ $contract->ExhabitionCoordinator ? $contract->ExhabitionCoordinator->mobile : '' }}</div>
             </div>
         </div>
         <div class="grid grid-cols-2 border border-black mb-[1px]">

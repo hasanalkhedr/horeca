@@ -12,28 +12,35 @@ use Illuminate\Database\Eloquent\Model;
 class Event extends Model
 {
     protected $wasRecentlyUpdated = false;
+
+     protected $with = ['Prices.Currencies'];
+
     protected static function booted()
     {
+        static::creating(function (Event $event) {
+            $event->free_space = 0;
+            $event->remaining_free_space = 0;
+            $event->remaining_space_to_sell = 0;
+        });
+
         static::created(function (Event $event) {
             $event->free_space = $event->total_space - $event->space_to_sell;
             $event->remaining_free_space = $event->free_space;
             $event->remaining_space_to_sell = $event->space_to_sell;
-            $event->save();
         });
-        static::updated(function (Event $event) {
 
+        static::updated(function (Event $event) {
             if (!$event->wasRecentlyUpdated) {
                 if (array_key_exists('total_space', $event->getChanges()) || array_key_exists('space_to_sell', $event->getChanges())) {
                     $event->free_space = $event->total_space - $event->space_to_sell;
                     $event->remaining_free_space = $event->free_space;
                     $event->remaining_space_to_sell = $event->space_to_sell;
                     $event->wasRecentlyUpdated = true;
-                    $event->save();
                 }
             }
-
         });
     }
+
     protected $fillable = [
         'CODE',
         'name',
@@ -52,16 +59,19 @@ class Event extends Model
         'city',
         'address'
     ];
+
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
         'apply_start_date' => 'date',
         'apply_deadline_date' => 'date',
     ];
+
     public function Categories()
     {
         return $this->belongsToMany(Category::class);
     }
+
     public function Currencies()
     {
         return $this->belongsToMany(Currency::class)
@@ -72,10 +82,12 @@ class Event extends Model
     {
         return $this->hasMany(Stand::class);
     }
+
     public function availableStands()
     {
         return $this->stands()->available()->deductible();
     }
+
     public function soldStands()
     {
         return $this->stands()->sold();
@@ -83,7 +95,7 @@ class Event extends Model
 
     public function Prices()
     {
-        return $this->hasMany(Price::class);
+        return $this->hasMany(Price::class)->with('Currencies');
     }
 
     public function Contracts()
@@ -95,16 +107,21 @@ class Event extends Model
     {
         return $this->hasMany(Report::class);
     }
+
     public function SponsorPackages()
     {
         return $this->belongsToMany(SponsorPackage::class);
     }
+
     public function AdsPackages()
     {
         return $this->belongsToMany(AdsPackage::class);
     }
+
     public function EffAdsPackages()
     {
         return $this->belongsToMany(EffAdsPackage::class);
     }
+
+
 }
