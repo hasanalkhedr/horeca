@@ -296,9 +296,9 @@ class AdsPackageResource extends Resource
                     ->query(fn(Builder $query): Builder => $query->whereHas('AdsOptions')),
             ], FiltersLayout::AboveContent)
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
+                Tables\Actions\ViewAction::make()->label(''),
+                Tables\Actions\EditAction::make()->label(''),
+                Tables\Actions\DeleteAction::make()->label('')
                     ->before(function (AdsPackage $record) {
                         if ($record->Contracts()->exists()) {
                             throw new \Exception('Cannot delete package with existing contracts. Delete contracts first.');

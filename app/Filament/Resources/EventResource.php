@@ -487,7 +487,8 @@ class EventResource extends Resource
             ])
             ->actions([
                 Tables\Actions\Action::make('createContract')
-                    ->label('Create Contract')
+                    ->label('')
+                    ->tooltip('Create Contract')
                     ->icon('heroicon-o-document-plus')
                     ->color('success')
                     ->modalHeading('Select Report')
@@ -497,7 +498,6 @@ class EventResource extends Resource
                         Forms\Components\Select::make('report_id')
                             ->label('Select Report')
                             ->options(function (Event $record) {
-                                // Get reports related to this event
                                 return $record->Reports()
                                     ->get()
                                     ->pluck('name', 'id')
@@ -509,18 +509,16 @@ class EventResource extends Resource
                             ->native(false),
                     ])
                     ->action(function (Event $record, array $data) {
-                        // Store the selected report ID in session
-                        session()->flash('contract_report_id', $data['report_id']);
-
-                        // Redirect to contract create page with event ID
+                        // Redirect with both parameters
                         return redirect()->route('filament.admin.resources.contracts.create', [
-                            'event_id' => $record->id
+                            'event_id' => $record->id,
+                            'report_id' => $data['report_id'],
                         ]);
                     }),
 
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
+                Tables\Actions\ViewAction::make()->label(''),
+                Tables\Actions\EditAction::make()->label(''),
+                Tables\Actions\DeleteAction::make()->label('')
                     ->before(function (Event $record) {
                         if ($record->Stands()->exists()) {
                             throw new \Exception('Cannot delete event with existing stands. Delete stands first.');

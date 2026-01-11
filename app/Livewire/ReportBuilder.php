@@ -107,7 +107,7 @@ class ReportBuilder extends Component
         }
         $this->message = 'Report template saved successfully! ID: ' . $this->report->id;
         $this->messageType = 'success';
-        return redirect()->route('reports.index');
+        return redirect()->route('filament.admin.resources.reports.index');
     }
     public function render()
     {

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Helpers;
 
+use App\Models\AdsOption;
+use App\Models\EffAdsOption;
 use App\Models\Stand;
 use App\Models\Event;
 use App\Models\Settings\Price;
@@ -39,7 +41,7 @@ trait ContractCalculations
                 $query->where('currencies.id', $currencyId);
             }])->find($priceId);
 
-            $priceAmount = $price?->Currencies->first()?->pivot->amount ?? 0;
+            $priceAmount = $price?->Currencies()->where('currencies.id', $currencyId)->first()?->pivot->amount ?? 0;
             $amount = $space * $priceAmount;
         } else {
             $amount = 0;
@@ -110,34 +112,19 @@ trait ContractCalculations
         self::calculateTotal($set, $get);
     }
 
-    public static function calculateAdsAmount(callable $set, callable $get): void
+    public static function calculateAdsAmount(callable $set, callable $get, ?array $adsSelections = null): void
     {
-        $adsSelections = $get('ads_selections') ?? [];
         $currencyId = $get('currency_id');
         $total = 0;
-
         foreach ($adsSelections as $selection) {
-            if (!isset($selection['ads_package_id']) || empty($selection['ads_options'])) {
-                continue;
-            }
-
-            $package = AdsPackage::with(['AdsOptions.Currencies' => function($query) use ($currencyId) {
-                $query->where('currencies.id', $currencyId);
-            }])->find($selection['ads_package_id']);
-
-            if (!$package) continue;
-
-            foreach ($selection['ads_options'] as $optionId) {
-                $option = $package->AdsOptions->find($optionId);
-                if ($option) {
-                    $price = $option->Currencies
-                        ->where('id', $currencyId)
-                        ->first()?->pivot->price ?? 0;
-                    $total += $price;
-                }
+            $option = AdsOption::find($selection);
+            if ($option) {
+                $price = $option->Currencies
+                    ->where('id', $currencyId)
+                    ->first()?->pivot->price ?? 0;
+                $total += $price;
             }
         }
-
         $set('advertisment_amount', $total);
         self::calculateAdsNet($set, $get);
     }
@@ -151,31 +138,18 @@ trait ContractCalculations
         self::calculateTotal($set, $get);
     }
 
-    public static function calculateEffAdsAmount(callable $set, callable $get): void
+    public static function calculateEffAdsAmount(callable $set, callable $get, ?array $effAdsSelections = null): void
     {
-        $effAdsSelections = $get('eff_ads_selections') ?? [];
         $currencyId = $get('currency_id');
         $total = 0;
 
         foreach ($effAdsSelections as $selection) {
-            if (!isset($selection['eff_ads_package_id']) || empty($selection['eff_ads_options'])) {
-                continue;
-            }
-
-            $package = EffAdsPackage::with(['EffAdsOptions.Currencies' => function($query) use ($currencyId) {
-                $query->where('currencies.id', $currencyId);
-            }])->find($selection['eff_ads_package_id']);
-
-            if (!$package) continue;
-
-            foreach ($selection['eff_ads_options'] as $optionId) {
-                $option = $package->EffAdsOptions->find($optionId);
-                if ($option) {
-                    $price = $option->Currencies
-                        ->where('id', $currencyId)
-                        ->first()?->pivot->price ?? 0;
-                    $total += $price;
-                }
+            $option = EffAdsOption::find($selection);
+            if ($option) {
+                $price = $option->Currencies
+                    ->where('id', $currencyId)
+                    ->first()?->pivot->price ?? 0;
+                $total += $price;
             }
         }
 
@@ -194,14 +168,19 @@ trait ContractCalculations
 
     public static function calculateTotal(callable $set, callable $get): void
     {
-        $spaceNet = $get('space_net') ?? 0;
-        $sponsorNet = $get('sponsor_net') ?? 0;
-        $adsNet = $get('ads_net') ?? 0;
-        $effAdsNet = $get('eff_ads_net') ?? 0;
+        $spaceAmount = $get('space_amount') ?? 0;
+        $sponsorAmount = $get('sponsor_amount') ?? 0;
+        $adsAmount = $get('advertisment_amount') ?? 0;
+        $effAdsAmount = $get('eff_ads_amount') ?? 0;
         $waterElectricity = $get('water_electricity_amount') ?? 0;
         $specialDesign = $get('special_design_amount') ?? 0;
 
-        $subTotal1 = $spaceNet + $sponsorNet + $adsNet + $effAdsNet + $waterElectricity + $specialDesign;
+        // $spaceNet = $get('space_net') ?? 0;
+        // $sponsorNet = $get('sponsor_net') ?? 0;
+        // $adsNet = $get('ads_net') ?? 0;
+        // $effAdsNet = $get('eff_ads_net') ?? 0;
+
+        $subTotal1 = $spaceAmount + $sponsorAmount + $adsAmount + $effAdsAmount + $waterElectricity + $specialDesign;
         $set('sub_total_1', $subTotal1);
 
         $spaceDiscount = $get('space_discount') ?? 0;

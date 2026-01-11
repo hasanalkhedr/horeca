@@ -260,29 +260,28 @@ class ReportResource extends Resource
             ])
             ->actions([
                 Tables\Actions\Action::make('manage')
-                    ->label('Manage Contract Template')
+                    ->label('')
+                    ->tooltip('Manage Contract Template')
                     ->icon('heroicon-o-cog-6-tooth')
                     ->color('primary')
                     ->url(fn(Report $record): string => route('report.editor', $record))
                     ->openUrlInNewTab(),
                 Tables\Actions\Action::make('preview')
-                    ->label('Preview')
+                    ->label('')
                     ->icon('heroicon-o-eye')
                     ->color('info')
                     ->url(fn(Report $record): string => route('reports.show', $record))
                     ->openUrlInNewTab(),
                 Tables\Actions\Action::make('createContract')
-                    ->label('Create Contract')
+                    ->label('')
+                    ->tooltip('Create Contract')
                     ->icon('heroicon-o-document-plus')
                     ->color('success')
                     ->action(function (Report $record) {
-                        // Store the selected report ID in session
-                        session()->flash('contract_report_id', $record->id);
-                        //session()->flash('contract_event_id', $record->event_id);
-
-                        // Redirect to contract create page with event ID
+                        // Redirect with both event_id and report_id in URL
                         return redirect()->route('filament.admin.resources.contracts.create', [
-                            'event_id' => $record->event_id
+                            'event_id' => $record->event_id,
+                            'report_id' => $record->id,
                         ]);
                     }),
                 // Tables\Actions\Action::make('download')
@@ -294,7 +293,7 @@ class ReportResource extends Resource
 
                 // Tables\Actions\ViewAction::make(),
                 // Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
+                Tables\Actions\DeleteAction::make()->label('')
                     ->before(function (Report $record) {
                         if ($record->Contracts()->exists()) {
                             throw new \Exception('Cannot delete contract template with existing contracts. Delete contracts first.');

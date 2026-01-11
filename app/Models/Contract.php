@@ -430,6 +430,8 @@
             'eff_ads_amount',
             'eff_ads_discount',
             'eff_ads_net',
+            'ads_package_id',
+            'eff_ads_package_id'
         ];
         protected $casts = [
             'contrat_date' => 'date',

@@ -274,8 +274,8 @@ class SponsorPackageResource extends Resource
                     ->query(fn(Builder $query): Builder => $query->whereHas('SponsorOptions')),
             ], FiltersLayout::AboveContent)
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()->label(''),
+                Tables\Actions\EditAction::make()->label(''),
                 // Tables\Actions\Action::make('duplicate')
                 //     ->label('Duplicate')
                 //     ->icon('heroicon-o-document-duplicate')
@@ -302,7 +302,7 @@ class SponsorPackageResource extends Resource
 
                 //         return redirect()->to(self::getUrl('edit', ['record' => $newPackage]));
                 //     }),
-                Tables\Actions\DeleteAction::make()
+                Tables\Actions\DeleteAction::make()->label('')
                     ->before(function (SponsorPackage $record) {
                         if ($record->Contracts()->exists()) {
                             throw new \Exception('Cannot delete package with existing contracts. Delete contracts first.');
