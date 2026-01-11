@@ -313,6 +313,7 @@ class ContractResource extends Resource
                                                 ->toArray();
                                         });
                                     })
+                                    ->searchable()
                                     ->required()
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
