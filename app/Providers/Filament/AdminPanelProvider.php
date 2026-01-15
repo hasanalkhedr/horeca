@@ -46,19 +46,20 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
             ->sidebarCollapsibleOnDesktop()
-            ->sidebarWidth('15rem')
+            // ->sidebarWidth('15rem')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                //Pages\Dashboard::class,
+                Dashboard::class, // Custom
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                EventStatsWidget::class,
-                    //StandsAndContractsChartWidget::class,
-                StandsChartWidget::class,
-                ContractsChartWidget::class,
-                FilterableStandsContractsWidget::class,
+                // EventStatsWidget::class,
+                //     //StandsAndContractsChartWidget::class,
+                // StandsChartWidget::class,
+                // ContractsChartWidget::class,
+                // FilterableStandsContractsWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

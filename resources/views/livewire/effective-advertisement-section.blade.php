@@ -50,7 +50,7 @@
                 <p>Discount: {{ $contract->eff_ads_discount }} {{ $currency->CODE }}</p>
             </div>
             <div class="text-right font-bold border border-black pb-[2px] mb-[2px]">
-                <p>Net: {{ $contract->eff_ads_amount }} {{ $currency->CODE }}</p>
+                <p>Net: {{ $contract->eff_ads_net }} {{ $currency->CODE }}</p>
             </div>
             @endif
         </div>

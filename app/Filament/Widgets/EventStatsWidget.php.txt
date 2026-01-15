@@ -5,14 +5,22 @@ namespace App\Filament\Widgets;
 use App\Models\Event;
 use App\Models\Contract;
 use App\Models\Stand;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Carbon;
 
 class EventStatsWidget extends BaseWidget
 {
+    use InteractsWithPageFilters;
     protected function getStats(): array
     {
+        $startDate = $this->filters['startDate'] ?? null;
+        $endDate = $this->filters['endDate'] ?? null;
+        $event_id = $this->filters['event_id'] ?? null;
+        $user_id = $this->filters['user_id'] ?? null;
+
+
         // Total Events Statistics
         $totalEvents = Event::count();
         $activeEvents = Event::where('end_date', '>=', now())->where('start_date', '<=', now())->count();
@@ -51,15 +59,15 @@ class EventStatsWidget extends BaseWidget
 
         return [
             // Events Stats
-            Stat::make('Total Events', $totalEvents)
-                ->description($activeEvents . ' Active • ' . $upcomingEvents . ' Upcoming')
-                ->descriptionIcon('heroicon-o-calendar')
-                ->color('primary')
-                ->chart($this->getEventsChartData())
-                ->extraAttributes([
-                    'class' => 'cursor-pointer',
-                    'wire:click' => '$dispatch(\'open-modal\', { id: \'events-breakdown\' })',
-                ]),
+            // Stat::make('Total Events', $totalEvents)
+            //     ->description($activeEvents . ' Active • ' . $upcomingEvents . ' Upcoming')
+            //     ->descriptionIcon('heroicon-o-calendar')
+            //     ->color('primary')
+            //     ->chart($this->getEventsChartData())
+            //     ->extraAttributes([
+            //         'class' => 'cursor-pointer',
+            //         'wire:click' => '$dispatch(\'open-modal\', { id: \'events-breakdown\' })',
+            //     ]),
 
             Stat::make('Event Status', $activeEvents . '/' . $totalEvents . ' Active')
                 ->description($upcomingEvents . ' Upcoming • ' . $endedEvents . ' Ended')
@@ -207,6 +215,6 @@ class EventStatsWidget extends BaseWidget
 
     protected function getColumns(): int
     {
-        return 4;
+        return 3;
     }
 }

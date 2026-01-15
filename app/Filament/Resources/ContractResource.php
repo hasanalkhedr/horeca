@@ -66,20 +66,7 @@ class ContractResource extends Resource
                                     )
                                     ->required()
                                     ->reactive()
-                                    // ->default(function () {
-                                    //     // Get from URL parameter
-                                    //     return request('event_id') ?: null;
-                                    // })
-                                    // //->disabled(fn(): bool => request()->has('event_id'))
-                                    // ->afterStateUpdated(function ($state, callable $set) {
-                                    //     $set('stand_id', null);
-                                    //     $set('price_id', null);
-                                    //     $set('report_id', null);
-                                    //     $set('currency_id', null);
-                                    //     $set('sponsor_package_id', null);
-                                    //     $set('category_id', null);
-                                    // })
-                                    ->afterStateHydrated(function ($state, callable $set) {
+                                    ->afterStateUpdated(function ($state, callable $set) {
                                         $set('stand_id', null);
                                         $set('price_id', null);
                                         $set('report_id', null);
@@ -103,19 +90,7 @@ class ContractResource extends Resource
                                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                         $report = Report::find($state);
                                         $set('currency_id', $report?->currency_id);
-                                    })
-                                    // ->afterStateHydrated(function ($state, callable $set) {
-                                    //     // This runs when the form loads with an existing value
-                                    //     if ($state) {
-                                    //         $report = Report::find($state);
-                                    //         $set('currency_id', $report?->currency_id);
-                                    //         $set('event_id', $report?->event_id);
-                                    //     }
-                                    // })
-                                    // ->default(function () {
-                                    //     return request('report_id') ?: null;
-                                    // })
-                                    ->required(),
+                                    })->required(),
 
                                 Forms\Components\Hidden::make('currency_id')
                                     ->dehydrated(false),
@@ -148,41 +123,7 @@ class ContractResource extends Resource
                     ->schema([
                         Forms\Components\Section::make('Company & Contacts')
                             ->schema([
-                                // Forms\Components\Select::make('company_id')
-                                //     ->label('Company')
-                                //     ->options(Company::query()->pluck('name', 'id'))
-                                //     ->searchable()
-                                //     ->required()
-                                //     ->reactive(),
-
-                                // Forms\Components\Select::make('exhabition_coordinator')
-                                //     ->label('Exhibition Coordinator')
-                                //     ->options(function (callable $get) {
-                                //         $companyId = $get('company_id');
-                                //         if (!$companyId) {
-                                //             return [];
-                                //         }
-                                //         return Client::where('company_id', $companyId)
-                                //             ->pluck('name', 'id')
-                                //             ->toArray();
-                                //     })
-                                //     ->searchable()
-                                // ,
-
-                                // Forms\Components\Select::make('contact_person')
-                                //     ->label('Daily Contact Person')
-                                //     ->options(function (callable $get) {
-                                //         $companyId = $get('company_id');
-                                //         if (!$companyId) {
-                                //             return [];
-                                //         }
-                                //         return Client::where('company_id', $companyId)
-                                //             ->pluck('name', 'id')
-                                //             ->toArray();
-                                //     })
-                                //     ->searchable(),
-
-                                Forms\Components\Select::make('company_id')
+                               Forms\Components\Select::make('company_id')
                                     ->label('Company')
                                     ->searchable()
                                     ->preload(false)
@@ -232,7 +173,7 @@ class ContractResource extends Resource
                                     ->required(),
                                 Forms\Components\Select::make('exhabition_coordinator')
                                     ->label('Exhibition Coordinator')
-                                    ->reactive()
+                                    // ->reactive()
                                     ->options(
                                         fn(Get $get) =>
                                         Client::where('company_id', $get('company_id'))
@@ -242,7 +183,7 @@ class ContractResource extends Resource
 
                                 Forms\Components\Select::make('contact_person')
                                     ->label('Daily Contact Person')
-                                    ->reactive()
+                                    // ->reactive()
                                     ->options(
                                         fn(Get $get) =>
                                         Client::where('company_id', $get('company_id'))
@@ -256,15 +197,11 @@ class ContractResource extends Resource
                                     ->options(User::all()->pluck('name', 'id'))
                                     ->searchable()
                                     ->required(),
-                            ])
-
-
-                            ->columns(4)
+                            ])->columns(4)
                             ->collapsible(),
-
                         Forms\Components\Section::make('Category')
                             ->schema([
-                                Forms\Components\Select::make('category_id')
+                                Forms\Components\Radio::make('category_id')
                                     ->label('Category')
                                     ->options(function (callable $get) {
                                         $eventId = $get('event_id');
@@ -274,7 +211,9 @@ class ContractResource extends Resource
                                         $event = Event::find($eventId);
                                         return $event->Categories->pluck('name', 'id')->toArray();
                                     })
-                                    ->searchable(),
+                                    ->columns(4)
+                                    // ->reactive()
+                                    ->required(false),
                             ])->collapsible(),
                     ])->collapsible()
                     ->visible(function ($set, $get): bool {
@@ -625,57 +564,74 @@ class ContractResource extends Resource
                         // Advertisement Packages
                         Forms\Components\Section::make('Advertisement Packages')
                             ->schema([
-                                Forms\Components\Select::make('ads_package_id')
-                                    ->label('Package')
+                                // Hidden field to store the array of selected package_option combinations
+                                Forms\Components\Hidden::make('ads_check')
+                                    ->dehydrated(true)
+                                    ->reactive()
+                                    ->default([]),
+
+                                // Dynamic checkbox list
+                                Forms\Components\CheckboxList::make('ads_options_display')
+                                    ->label('Advertisement Options')
                                     ->options(function (callable $get) {
                                         $eventId = $get('event_id');
-                                        if (!$eventId) {
-                                            return [];
-                                        }
-                                        $event = Event::find($eventId);
-                                        return $event->AdsPackages->pluck('title', 'id')->toArray();
-                                    })
-                                    ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                        $set('ads_options', []);
-                                        $set('advertisment_amount', 0);
-                                        $set('ads_net', 0);
-                                    }),
-                                Forms\Components\CheckboxList::make('ads_selections')
-                                    ->label('Options')
-                                    ->options(function (callable $get) {
-                                        $packageId = $get('ads_package_id');
                                         $currencyId = $get('currency_id');
 
-                                        if (!$packageId || !$currencyId) {
+                                        if (!$eventId || !$currencyId) {
                                             return [];
                                         }
 
-                                        $package = AdsPackage::with([
-                                            'AdsOptions.Currencies' => function ($query) use ($currencyId) {
-                                                $query->where('currencies.id', $currencyId);
-                                            }
-                                        ])->find($packageId);
-
-                                        if (!$package)
-                                            return [];
-
+                                        $event = Event::find($eventId);
+                                        $packages = $event->AdsPackages;
                                         $options = [];
-                                        foreach ($package->AdsOptions as $option) {
-                                            $price = $option->Currencies
-                                                ->where('id', $currencyId)
-                                                ->first()?->pivot->price ?? 0;
-                                            $options[$option->id] = "{$option->title} | {$price}";
+
+                                        foreach ($packages as $package) {
+                                            $loadedPackage = AdsPackage::with([
+                                                'AdsOptions.Currencies' => function ($query) use ($currencyId) {
+                                                    $query->where('currencies.id', $currencyId);
+                                                }
+                                            ])->find($package->id);
+
+                                            if (!$loadedPackage)
+                                                continue;
+
+                                            foreach ($loadedPackage->AdsOptions as $option) {
+                                                $price = $option->Currencies
+                                                    ->where('id', $currencyId)
+                                                    ->first()?->pivot->price ?? 0;
+
+                                                // Store as packageID_optionID format
+                                                $key = "{$package->id}_{$option->id}";
+                                                $options[$key] = "{$package->title} - {$option->title} | {$price}";
+                                            }
                                         }
+
                                         return $options;
                                     })
                                     ->columns(2)
+                                    ->gridDirection('row')
+                                    ->bulkToggleable()
                                     ->reactive()
+                                    ->dehydrated(false) // Don't save this display field
+                                    ->afterStateHydrated(function ($component, $record) {
+                                        // Convert stored ads_check array to display format
+                                        if ($record && $record->ads_check) {
+                                            $displaySelections = [];
+                                            foreach ($record->ads_check as $selection) {
+                                                $displaySelections[] = $selection; // Already in packageID_optionID format
+                                            }
+                                            $component->state($displaySelections);
+                                        }
+                                    })
                                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                        $checkedOptions = $get('ads_selections') ?? [];
-                                        self::calculateAdsAmount($set, $get, $checkedOptions);
+                                        // Update the actual ads_check field
+                                        $set('ads_check', $state ?? []);
+
+                                        // Calculate total amount
+                                        self::calculateAdsAmount($set, $get, $state ?? []);
                                     }),
 
+                                // Total amount section
                                 Forms\Components\Grid::make(3)
                                     ->schema([
                                         Forms\Components\TextInput::make('advertisment_amount')
@@ -709,7 +665,8 @@ class ContractResource extends Resource
                                                 Report::find($get('report_id'))?->Currency?->CODE ?? 'USD'
                                             ),
                                     ]),
-                            ])->collapsible()
+                            ])
+                            ->collapsible()
                             ->visible(function (callable $get) {
                                 $reportId = $get('report_id');
                                 if (!$reportId)
@@ -723,56 +680,74 @@ class ContractResource extends Resource
                         // Effective Advertisement Packages
                         Forms\Components\Section::make('Effective Advertisement Packages')
                             ->schema([
-                                Forms\Components\Select::make('eff_ads_package_id')
-                                    ->label('Package')
+                                // Hidden field to store the array of selected package_option combinations
+                                Forms\Components\Hidden::make('eff_ads_check')
+                                    ->dehydrated(true)
+                                    ->reactive()
+                                    ->default([]),
+
+                                // Dynamic checkbox list
+                                Forms\Components\CheckboxList::make('eff_ads_options_display')
+                                    ->label('Effective Advertisement Options')
                                     ->options(function (callable $get) {
                                         $eventId = $get('event_id');
-                                        if (!$eventId) {
-                                            return [];
-                                        }
-                                        $event = Event::find($eventId);
-                                        return $event->EffAdsPackages->pluck('title', 'id')->toArray();
-                                    })
-                                    ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                        $set('eff_ads_options', []);
-                                    }),
-
-                                Forms\Components\CheckboxList::make('eff_ads_selections')
-                                    ->label('Options')
-                                    ->options(function (callable $get) {
-                                        $packageId = $get('eff_ads_package_id');
                                         $currencyId = $get('currency_id');
-                                        if (!$packageId || !$currencyId) {
+
+                                        if (!$eventId || !$currencyId) {
                                             return [];
                                         }
 
-                                        $package = EffAdsPackage::with([
-                                            'EffAdsOptions.Currencies' => function ($query) use ($currencyId) {
-                                                $query->where('currencies.id', $currencyId);
-                                            }
-                                        ])->find($packageId);
-
-                                        if (!$package)
-                                            return [];
-
+                                        $event = Event::find($eventId);
+                                        $packages = $event->EffAdsPackages;
                                         $options = [];
-                                        foreach ($package->EffAdsOptions as $option) {
-                                            $price = $option->Currencies
-                                                ->where('id', $currencyId)
-                                                ->first()?->pivot->price ?? 0;
-                                            $options[$option->id] = "{$option->title} | {$price}";
+
+                                        foreach ($packages as $package) {
+                                            $loadedPackage = EffAdsPackage::with([
+                                                'EffAdsOptions.Currencies' => function ($query) use ($currencyId) {
+                                                    $query->where('currencies.id', $currencyId);
+                                                }
+                                            ])->find($package->id);
+
+                                            if (!$loadedPackage)
+                                                continue;
+
+                                            foreach ($loadedPackage->EffAdsOptions as $option) {
+                                                $price = $option->Currencies
+                                                    ->where('id', $currencyId)
+                                                    ->first()?->pivot->price ?? 0;
+
+                                                // Store as packageID_optionID format
+                                                $key = "{$package->id}_{$option->id}";
+                                                $options[$key] = "{$package->title} - {$option->title} | {$price}";
+                                            }
                                         }
+
                                         return $options;
                                     })
                                     ->columns(2)
+                                    ->gridDirection('row')
+                                    ->bulkToggleable()
                                     ->reactive()
+                                    ->dehydrated(false) // Don't save this display field
+                                    ->afterStateHydrated(function ($component, $record) {
+                                        // Convert stored ads_check array to display format
+                                        if ($record && $record->eff_ads_check) {
+                                            $effdisplaySelections = [];
+                                            foreach ($record->eff_ads_check as $selection) {
+                                                $effdisplaySelections[] = $selection; // Already in packageID_optionID format
+                                            }
+                                            $component->state($effdisplaySelections);
+                                        }
+                                    })
                                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                        $checkedEffOptions = $get('eff_ads_selections') ?? [];
-                                        self::calculateEffAdsAmount($set, $get, $checkedEffOptions);
+                                        // Update the actual ads_check field
+                                        $set('eff_ads_check', $state ?? []);
+
+                                        // Calculate total amount
+                                        self::calculateEffAdsAmount($set, $get, $state ?? []);
                                     }),
 
-
+                                // Total amount section
                                 Forms\Components\Grid::make(3)
                                     ->schema([
                                         Forms\Components\TextInput::make('eff_ads_amount')
@@ -806,7 +781,8 @@ class ContractResource extends Resource
                                                 Report::find($get('report_id'))?->Currency?->CODE ?? 'USD'
                                             ),
                                     ]),
-                            ])->collapsible()
+                            ])
+                            ->collapsible()
                             ->visible(function (callable $get) {
                                 $reportId = $get('report_id');
                                 if (!$reportId)
