@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Contract;
 use App\Models\Settings\Currency;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\ChartWidget;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 class ContractAmountsByCurrencyChart extends ChartWidget
 {
     use InteractsWithPageFilters;
-
+use HasWidgetShield;
     protected static ?string $heading = 'Contract Amounts by Currency & Status';
     protected static ?string $maxHeight = '450px';
     protected static ?string $pollingInterval = null;
@@ -226,10 +227,5 @@ class ContractAmountsByCurrencyChart extends ChartWidget
     {
         // Convert rgb(r, g, b) to rgba(r, g, b, opacity)
         return str_replace('rgb(', 'rgba(', $rgb) . ', ' . $opacity . ')';
-    }
-
-    public static function canView(): bool
-    {
-        return true;
     }
 }

@@ -3,28 +3,18 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ContractResource\Pages;
-use App\Filament\Resources\ContractResource\RelationManagers;
-use App\Livewire\ClientSelect;
 use App\Models\Contract;
 use App\Models\Event;
 use App\Models\Report;
-use App\Models\Stand;
-use App\Models\Settings\Price;
-use App\Models\Settings\Category;
-use App\Models\SponsorPackage;
-use App\Models\AdsPackage;
-use App\Models\EffAdsPackage;
 use App\Models\User;
 use App\Models\Company;
 use App\Models\Client;
 use App\Filament\Helpers\ContractCalculations;
 use Filament\Forms;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Livewire;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
-use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -32,10 +22,9 @@ use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\File;
-
+use Illuminate\Support\Facades\Cache;
 
 class ContractResource extends Resource
 {
@@ -47,6 +36,94 @@ class ContractResource extends Resource
     protected static ?string $navigationGroup = 'Contracts';
     protected static ?int $navigationSort = 5;
 
+    /**
+     * Cache key for form data
+     */
+    protected static function getFormDataCacheKey($eventId, $reportId, $currencyId = null): string
+    {
+        $key = "contract_form_data_{$eventId}_{$reportId}";
+        if ($currencyId) {
+            $key .= "_{$currencyId}";
+        }
+        return $key;
+    }
+
+    /**
+     * Load all form data in a single query
+     */
+    protected static function loadFormData(callable $get): array
+    {
+        $eventId = $get('event_id');
+        $reportId = $get('report_id');
+        $currencyId = $get('currency_id');
+
+        if (!$eventId || !$reportId) {
+            return [];
+        }
+
+        return Cache::remember(
+            self::getFormDataCacheKey($eventId, $reportId, $currencyId),
+            300, // 5 minutes
+            function () use ($eventId, $reportId, $currencyId) {
+                // Load event with all related data in a single query
+                $event = Event::with([
+                    'Categories' => fn($q) => $q->select(['id', 'name']),
+                    'Stands' => fn($q) => $q->select(['id', 'no', 'space', 'status', 'event_id']), // Capital S!
+                    'Prices.Currencies' => function ($q) use ($currencyId) {
+                    $q->when($currencyId, fn($q) => $q->where('currencies.id', $currencyId));
+                },
+                    'SponsorPackages.Currencies' => function ($q) use ($currencyId) {
+                    $q->when($currencyId, fn($q) => $q->where('currencies.id', $currencyId));
+                },
+                    'AdsPackages.AdsOptions.Currencies' => function ($q) use ($currencyId) {
+                    $q->when($currencyId, fn($q) => $q->where('currencies.id', $currencyId));
+                },
+                    'EffAdsPackages.EffAdsOptions.Currencies' => function ($q) use ($currencyId) {
+                    $q->when($currencyId, fn($q) => $q->where('currencies.id', $currencyId));
+                },
+                ])->find($eventId);
+
+                // Load report with currency
+                $report = Report::with('currency')
+                    ->find($reportId);
+
+                return [
+                    'event' => $event,
+                    'report' => $report,
+                    'categories' => $event?->Categories ?? collect(), // Capital C!
+                    'stands' => $event?->Stands ?? collect(), // Capital S!
+                    'prices' => $event?->Prices ?? collect(), // Capital P!
+                    'sponsorPackages' => $event?->SponsorPackages ?? collect(), // Capital SP!
+                    'adsPackages' => $event?->AdsPackages ?? collect(), // Capital AP!
+                    'effAdsPackages' => $event?->EffAdsPackages ?? collect(), // Capital EAP!
+                    'currencyCode' => $report?->currency?->CODE ?? 'USD',
+                    'vatRate' => $event?->vat_rate ?? 0,
+                    'components' => $report?->components ?? [],
+                ];
+            }
+        );
+    }
+
+    /**
+     * Get currency code with fallback
+     */
+    protected static function getCurrencyCode(callable $get, array $formData = null): string
+    {
+        if ($formData) {
+            return $formData['currencyCode'];
+        }
+
+        return Report::find($get('report_id'))?->currency?->CODE ?? 'USD';
+    }
+
+    /**
+     * Clear form data cache when event or report changes
+     */
+    protected static function clearFormCache($eventId, $reportId): void
+    {
+        Cache::forget(self::getFormDataCacheKey($eventId, $reportId));
+        Cache::forget(self::getFormDataCacheKey($eventId, $reportId, null));
+    }
     public static function form(Form $form): Form
     {
         return $form
@@ -73,6 +150,14 @@ class ContractResource extends Resource
                                         $set('currency_id', null);
                                         $set('sponsor_package_id', null);
                                         $set('category_id', null);
+
+                                        // Clear cache when event changes
+                                        if ($state) {
+                                            $currentReportId = request()->input('report_id');
+                                            if ($currentReportId) {
+                                                self::clearFormCache($state, $currentReportId);
+                                            }
+                                        }
                                     }),
 
                                 Forms\Components\Select::make('report_id')
@@ -82,15 +167,26 @@ class ContractResource extends Resource
                                         if (!$eventId) {
                                             return [];
                                         }
-                                        return Report::where('event_id', $eventId)
-                                            ->pluck('name', 'id')
-                                            ->toArray();
+
+                                        // Cache this query
+                                        return Cache::remember("reports_event_{$eventId}", 300, function () use ($eventId) {
+                                            return Report::where('event_id', $eventId)
+                                                ->pluck('name', 'id')
+                                                ->toArray();
+                                        });
                                     })
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                        $report = Report::find($state);
-                                        $set('currency_id', $report?->currency_id);
-                                    })->required(),
+                                        $formData = self::loadFormData($get);
+                                        $set('currency_id', $formData['report']?->currency_id ?? null);
+
+                                        // Clear cache when report changes
+                                        $eventId = $get('event_id');
+                                        if ($eventId && $state) {
+                                            self::clearFormCache($eventId, $state);
+                                        }
+                                    })
+                                    ->required(),
 
                                 Forms\Components\Hidden::make('currency_id')
                                     ->dehydrated(false),
@@ -123,7 +219,7 @@ class ContractResource extends Resource
                     ->schema([
                         Forms\Components\Section::make('Company & Contacts')
                             ->schema([
-                               Forms\Components\Select::make('company_id')
+                                Forms\Components\Select::make('company_id')
                                     ->label('Company')
                                     ->searchable()
                                     ->preload(false)
@@ -133,37 +229,43 @@ class ContractResource extends Resource
                                             return [];
                                         }
 
-                                        $response = Http::get(
-                                            config('services.pipedrive.base_url') . '/organizations/search',
-                                            [
-                                                'term' => $search,
-                                                'fields' => 'name',
-                                                'api_token' => config('services.pipedrive.api_key'),
-                                            ]
-                                        );
+                                        return Cache::remember("company_search_{$search}", 300, function () use ($search) {
+                                            $response = Http::get(
+                                                config('services.pipedrive.base_url') . '/organizations/search',
+                                                [
+                                                    'term' => $search,
+                                                    'fields' => 'name',
+                                                    'api_token' => config('services.pipedrive.api_key'),
+                                                ]
+                                            );
 
-                                        return collect($response->json('data.items') ?? [])
-                                            ->mapWithKeys(fn($item) => [
-                                                $item['item']['id'] => $item['item']['name'],
-                                            ])
-                                            ->toArray();
+                                            return collect($response->json('data.items') ?? [])
+                                                ->mapWithKeys(fn($item) => [
+                                                    $item['item']['id'] => $item['item']['name'],
+                                                ])
+                                                ->toArray();
+                                        });
                                     })
                                     ->getOptionLabelUsing(function ($value): ?string {
-                                        return Company::find($value)?->name;
+                                        return Cache::remember("company_label_{$value}", 300, function () use ($value) {
+                                            return Company::find($value)?->name;
+                                        });
                                     })
                                     ->afterStateUpdated(function ($state, Set $set) {
-
                                         if (!$state) {
                                             $set('exhabition_coordinator', null);
                                             $set('contact_person', null);
                                             return;
                                         }
 
-                                        // Check local DB
-                                        $company = Company::where('pipe_id', $state)->first();
+                                        $company = Cache::remember("company_pipe_{$state}", 300, function () use ($state) {
+                                            return Company::where('pipe_id', $state)->first();
+                                        });
 
                                         if (!$company) {
                                             $company = self::createCompanyFromPipedrive($state);
+                                            Cache::forget("company_pipe_{$state}");
+                                            Cache::forget("company_label_{$company->id}");
                                         }
 
                                         $set('company_id', $company->id);
@@ -171,52 +273,56 @@ class ContractResource extends Resource
                                         $set('contact_person', null);
                                     })
                                     ->required(),
+
                                 Forms\Components\Select::make('exhabition_coordinator')
                                     ->label('Exhibition Coordinator')
-                                    // ->reactive()
                                     ->options(
-                                        fn(Get $get) =>
-                                        Client::where('company_id', $get('company_id'))
-                                            ->pluck('name', 'id')
+                                        fn(Get $get) => Cache::remember(
+                                            "clients_company_{$get('company_id')}",
+                                            300,
+                                            fn() => Client::where('company_id', $get('company_id'))
+                                                ->pluck('name', 'id')
+                                        )
                                     )
                                     ->disabled(fn(Get $get) => !$get('company_id')),
 
                                 Forms\Components\Select::make('contact_person')
                                     ->label('Daily Contact Person')
-                                    // ->reactive()
                                     ->options(
-                                        fn(Get $get) =>
-                                        Client::where('company_id', $get('company_id'))
-                                            ->pluck('name', 'id')
+                                        fn(Get $get) => Cache::remember(
+                                            "clients_company_{$get('company_id')}",
+                                            300,
+                                            fn() => Client::where('company_id', $get('company_id'))
+                                                ->pluck('name', 'id')
+                                        )
                                     )
                                     ->disabled(fn(Get $get) => !$get('company_id')),
-                                //Livewire::make('client-select')->columnSpanFull(),
 
                                 Forms\Components\Select::make('seller')
                                     ->label('Sales Person')
-                                    ->options(User::all()->pluck('name', 'id'))
+                                    ->options(function () {
+                                        return Cache::remember('all_users', 300, function () {
+                                            return User::all()->pluck('name', 'id');
+                                        });
+                                    })
                                     ->searchable()
                                     ->required(),
                             ])->columns(4)
                             ->collapsible(),
+
                         Forms\Components\Section::make('Category')
                             ->schema([
                                 Forms\Components\Radio::make('category_id')
                                     ->label('Category')
                                     ->options(function (callable $get) {
-                                        $eventId = $get('event_id');
-                                        if (!$eventId) {
-                                            return [];
-                                        }
-                                        $event = Event::find($eventId);
-                                        return $event->Categories->pluck('name', 'id')->toArray();
+                                        $formData = self::loadFormData($get);
+                                        return $formData['categories']->pluck('name', 'id')->toArray();
                                     })
                                     ->columns(4)
-                                    // ->reactive()
                                     ->required(false),
                             ])->collapsible(),
                     ])->collapsible()
-                    ->visible(function ($set, $get): bool {
+                    ->visible(function ($get): bool {
                         $eventId = $get('event_id');
                         $reportId = $get('report_id');
                         return $eventId && $reportId;
@@ -231,26 +337,17 @@ class ContractResource extends Resource
                                 Forms\Components\Select::make('stand_id')
                                     ->label('Stand')
                                     ->options(function (callable $get) {
-                                        $eventId = $get('event_id');
-                                        if (!$eventId) {
-                                            return [];
-                                        }
+                                        $formData = self::loadFormData($get);
+                                        $currentStandId = $get('stand_id');
 
-                                        // Cache this query result
-                                        return cache()->remember("stands_event_{$eventId}", 300, function () use ($eventId, $get) {
-                                            return Stand::query()
-                                                ->select(['id', 'no', 'space', 'status'])
-                                                ->where('event_id', $eventId)
-                                                ->where(function ($query) use ($get) {
-                                                    $query->where('status', 'Available')
-                                                        ->orWhere('id', $get('stand_id'));
-                                                })
-                                                ->get()
-                                                ->mapWithKeys(fn($stand) => [
-                                                    $stand->id => "{$stand->no} | {$stand->space} sqm"
-                                                ])
-                                                ->toArray();
-                                        });
+                                        return $formData['stands']
+                                            ->filter(function ($stand) use ($currentStandId) {
+                                                return $stand->status === 'Available' || $stand->id == $currentStandId;
+                                            })
+                                            ->mapWithKeys(fn($stand) => [
+                                                $stand->id => "{$stand->no} | {$stand->space} sqm"
+                                            ])
+                                            ->toArray();
                                     })
                                     ->searchable()
                                     ->required()
@@ -266,7 +363,9 @@ class ContractResource extends Resource
                                         if (!$standId) {
                                             return 'Select a stand';
                                         }
-                                        $stand = Stand::find($standId);
+
+                                        $formData = self::loadFormData($get);
+                                        $stand = $formData['stands']->firstWhere('id', $standId);
                                         return $stand ? "{$stand->space} sqm" : 'N/A';
                                     }),
                             ])->collapsible()
@@ -277,29 +376,28 @@ class ContractResource extends Resource
                                 Forms\Components\Radio::make('price_id')
                                     ->label('Select Price Package')
                                     ->options(function (callable $get) {
-                                        $eventId = $get('event_id');
+                                        $formData = self::loadFormData($get);
                                         $currencyId = $get('currency_id');
-                                        if (!$eventId || !$currencyId) {
-                                            return [];
-                                        }
 
-                                        $prices = Price::where('event_id', $eventId)
-                                            ->with([
-                                                'Currencies' => function ($query) use ($currencyId) {
-                                                    $query->where('currencies.id', $currencyId);
-                                                }
-                                            ])
-                                            ->get();
+                                        if (!$currencyId)
+                                            return [];
 
                                         $options = [];
-                                        foreach ($prices as $price) {
-                                            $amount = $price->Currencies()->where('currencies.id', $currencyId)->first()?->pivot->amount ?? 0;
+                                        foreach ($formData['prices'] as $price) {
+                                            $amount = $price->currencies
+                                                ->firstWhere('id', $currencyId)?->pivot->amount ?? 0;
                                             $options[$price->id] = "{$price->name} | {$amount}";
                                         }
                                         return $options;
                                     })
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                        if ($state) {
+                                            $set('use_special_price', false);
+                                            $set('price_amount', null);
+                                        } else {
+                                            $set('price_id', null);
+                                        }
                                         self::calculateSpaceAmount($set, $get);
                                     }),
 
@@ -323,7 +421,8 @@ class ContractResource extends Resource
                                             ->default(0)
                                             ->minValue(0)
                                             ->visible(fn(callable $get): bool => $get('use_special_price'))
-                                            //->reactive()
+                                            ->reactive()
+                                            ->debounce(500)
                                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                                 self::calculateSpaceAmount($set, $get);
                                             }),
@@ -338,7 +437,7 @@ class ContractResource extends Resource
                                             ->readOnly()
                                             ->prefix(
                                                 fn(callable $get): string =>
-                                                Report::find($get('report_id'))?->Currency?->CODE ?? 'USD'
+                                                self::getCurrencyCode($get)
                                             ),
 
                                         Forms\Components\TextInput::make('space_discount')
@@ -359,13 +458,13 @@ class ContractResource extends Resource
                                             ->readOnly()
                                             ->prefix(
                                                 fn(callable $get): string =>
-                                                Report::find($get('report_id'))?->Currency?->CODE ?? 'USD'
+                                                self::getCurrencyCode($get)
                                             ),
                                     ]),
                             ])->collapsible(),
                     ])->collapsible()
                     ->collapsed()
-                    ->visible(function ($set, $get): bool {
+                    ->visible(function ($get): bool {
                         $eventId = $get('event_id');
                         $reportId = $get('report_id');
                         return $eventId && $reportId;
@@ -408,54 +507,21 @@ class ContractResource extends Resource
                                     ->default(0)
                                     ->prefix(
                                         fn(callable $get): string =>
-                                        Report::find($get('report_id'))?->Currency?->CODE ?? 'USD'
+                                        self::getCurrencyCode($get)
                                     )
                                     ->visible(
                                         fn(callable $get): bool =>
                                         $get('if_water') || $get('if_electricity')
                                     )
-                                    //->reactive()
                                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                         self::calculateTotal($set, $get);
                                     }),
                             ])->collapsible()
                             ->columns(2)
                             ->visible(function (callable $get) {
-                                $reportId = $get('report_id');
-                                if (!$reportId)
-                                    return false;
-
-                                $report = Report::find($reportId);
-                                $components = $report?->components ?? [];
-                                return in_array('water-section', $components);
+                                $formData = self::loadFormData($get);
+                                return in_array('water-section', $formData['components']);
                             }),
-
-                        // // Special Design
-                        // Forms\Components\Section::make('Special Design')
-                        //     ->schema([
-                        //         Forms\Components\Textarea::make('special_design_text')
-                        //             ->label('Design Description')
-                        //             ->rows(2),
-
-                        //         Forms\Components\TextInput::make('special_design_price')
-                        //             ->label('Design Price per sqm')
-                        //             ->numeric()
-                        //             ->minValue(0)
-                        //             ->reactive()
-                        //             ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                        //                 self::calculateSpecialDesignAmount($set, $get);
-                        //             }),
-
-                        //         Forms\Components\TextInput::make('special_design_amount')
-                        //             ->label('Total Design Amount')
-                        //             ->numeric()
-                        //             ->readOnly()
-                        //             ->prefix(
-                        //                 fn(callable $get): string =>
-                        //                 Report::find($get('report_id'))?->Currency?->CODE ?? 'USD'
-                        //             ),
-                        //     ])
-                        //     ->columns(3),
 
                         // New Product
                         Forms\Components\Section::make('New Product')
@@ -465,16 +531,11 @@ class ContractResource extends Resource
                                     ->rows(2)
                                     ->columnSpanFull(),
                             ])->visible(function (callable $get) {
-                                $reportId = $get('report_id');
-                                if (!$reportId)
-                                    return false;
-
-                                $report = Report::find($reportId);
-                                $components = $report?->components ?? [];
-                                return in_array('new-product-section', $components);
+                                $formData = self::loadFormData($get);
+                                return in_array('new-product-section', $formData['components']);
                             }),
                     ])->collapsible()->collapsed()
-                    ->visible(function ($set, $get): bool {
+                    ->visible(function ($get): bool {
                         $eventId = $get('event_id');
                         $reportId = $get('report_id');
                         return $eventId && $reportId;
@@ -490,20 +551,16 @@ class ContractResource extends Resource
                                 Forms\Components\Select::make('sponsor_package_id')
                                     ->label('Sponsor Package')
                                     ->options(function (callable $get) {
-                                        $eventId = $get('event_id');
+                                        $formData = self::loadFormData($get);
                                         $currencyId = $get('currency_id');
-                                        if (!$eventId || !$currencyId) {
-                                            return [];
-                                        }
 
-                                        $event = Event::find($eventId);
-                                        $packages = $event->SponsorPackages;
+                                        if (!$currencyId)
+                                            return [];
 
                                         $options = [];
-                                        foreach ($packages as $package) {
-                                            $price = $package->Currencies
-                                                ->where('id', $currencyId)
-                                                ->first()?->pivot->total_price ?? 0;
+                                        foreach ($formData['sponsorPackages'] as $package) {
+                                            $price = $package->currencies
+                                                ->firstWhere('id', $currencyId)?->pivot->total_price ?? 0;
                                             $options[$package->id] = "{$package->title} | {$price}";
                                         }
                                         return $options;
@@ -526,7 +583,7 @@ class ContractResource extends Resource
                                             ->readOnly()
                                             ->prefix(
                                                 fn(callable $get): string =>
-                                                Report::find($get('report_id'))?->Currency?->CODE ?? 'USD'
+                                                self::getCurrencyCode($get)
                                             ),
 
                                         Forms\Components\TextInput::make('sponsor_discount')
@@ -547,91 +604,58 @@ class ContractResource extends Resource
                                             ->readOnly()
                                             ->prefix(
                                                 fn(callable $get): string =>
-                                                Report::find($get('report_id'))?->Currency?->CODE ?? 'USD'
+                                                self::getCurrencyCode($get)
                                             ),
                                     ]),
                             ])->collapsible()
                             ->visible(function (callable $get) {
-                                $reportId = $get('report_id');
-                                if (!$reportId)
-                                    return false;
-
-                                $report = Report::find($reportId);
-                                $components = $report?->components ?? [];
-                                return in_array('sponsor-section', $components);
+                                $formData = self::loadFormData($get);
+                                return in_array('sponsor-section', $formData['components']);
                             }),
 
                         // Advertisement Packages
                         Forms\Components\Section::make('Advertisement Packages')
                             ->schema([
-                                // Hidden field to store the array of selected package_option combinations
                                 Forms\Components\Hidden::make('ads_check')
                                     ->dehydrated(true)
                                     ->reactive()
                                     ->default([]),
 
-                                // Dynamic checkbox list
                                 Forms\Components\CheckboxList::make('ads_options_display')
                                     ->label('Advertisement Options')
                                     ->options(function (callable $get) {
-                                        $eventId = $get('event_id');
+                                        $formData = self::loadFormData($get);
                                         $currencyId = $get('currency_id');
 
-                                        if (!$eventId || !$currencyId) {
+                                        if (!$currencyId)
                                             return [];
-                                        }
 
-                                        $event = Event::find($eventId);
-                                        $packages = $event->AdsPackages;
                                         $options = [];
-
-                                        foreach ($packages as $package) {
-                                            $loadedPackage = AdsPackage::with([
-                                                'AdsOptions.Currencies' => function ($query) use ($currencyId) {
-                                                    $query->where('currencies.id', $currencyId);
-                                                }
-                                            ])->find($package->id);
-
-                                            if (!$loadedPackage)
-                                                continue;
-
-                                            foreach ($loadedPackage->AdsOptions as $option) {
-                                                $price = $option->Currencies
-                                                    ->where('id', $currencyId)
-                                                    ->first()?->pivot->price ?? 0;
-
-                                                // Store as packageID_optionID format
+                                        foreach ($formData['adsPackages'] as $package) {
+                                            foreach ($package->adsOptions as $option) {
+                                                $price = $option->currencies
+                                                    ->firstWhere('id', $currencyId)?->pivot->price ?? 0;
                                                 $key = "{$package->id}_{$option->id}";
                                                 $options[$key] = "{$package->title} - {$option->title} | {$price}";
                                             }
                                         }
-
                                         return $options;
                                     })
                                     ->columns(2)
                                     ->gridDirection('row')
                                     ->bulkToggleable()
                                     ->reactive()
-                                    ->dehydrated(false) // Don't save this display field
+                                    ->dehydrated(false)
                                     ->afterStateHydrated(function ($component, $record) {
-                                        // Convert stored ads_check array to display format
                                         if ($record && $record->ads_check) {
-                                            $displaySelections = [];
-                                            foreach ($record->ads_check as $selection) {
-                                                $displaySelections[] = $selection; // Already in packageID_optionID format
-                                            }
-                                            $component->state($displaySelections);
+                                            $component->state($record->ads_check);
                                         }
                                     })
                                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                        // Update the actual ads_check field
                                         $set('ads_check', $state ?? []);
-
-                                        // Calculate total amount
                                         self::calculateAdsAmount($set, $get, $state ?? []);
                                     }),
 
-                                // Total amount section
                                 Forms\Components\Grid::make(3)
                                     ->schema([
                                         Forms\Components\TextInput::make('advertisment_amount')
@@ -641,7 +665,7 @@ class ContractResource extends Resource
                                             ->readOnly()
                                             ->prefix(
                                                 fn(callable $get): string =>
-                                                Report::find($get('report_id'))?->Currency?->CODE ?? 'USD'
+                                                self::getCurrencyCode($get)
                                             ),
 
                                         Forms\Components\TextInput::make('ads_discount')
@@ -662,92 +686,59 @@ class ContractResource extends Resource
                                             ->readOnly()
                                             ->prefix(
                                                 fn(callable $get): string =>
-                                                Report::find($get('report_id'))?->Currency?->CODE ?? 'USD'
+                                                self::getCurrencyCode($get)
                                             ),
                                     ]),
                             ])
                             ->collapsible()
                             ->visible(function (callable $get) {
-                                $reportId = $get('report_id');
-                                if (!$reportId)
-                                    return false;
-
-                                $report = Report::find($reportId);
-                                $components = $report?->components ?? [];
-                                return in_array('advertisement-section', $components);
+                                $formData = self::loadFormData($get);
+                                return in_array('advertisement-section', $formData['components']);
                             }),
 
                         // Effective Advertisement Packages
                         Forms\Components\Section::make('Effective Advertisement Packages')
                             ->schema([
-                                // Hidden field to store the array of selected package_option combinations
                                 Forms\Components\Hidden::make('eff_ads_check')
                                     ->dehydrated(true)
                                     ->reactive()
                                     ->default([]),
 
-                                // Dynamic checkbox list
                                 Forms\Components\CheckboxList::make('eff_ads_options_display')
                                     ->label('Effective Advertisement Options')
                                     ->options(function (callable $get) {
-                                        $eventId = $get('event_id');
+                                        $formData = self::loadFormData($get);
                                         $currencyId = $get('currency_id');
 
-                                        if (!$eventId || !$currencyId) {
+                                        if (!$currencyId)
                                             return [];
-                                        }
 
-                                        $event = Event::find($eventId);
-                                        $packages = $event->EffAdsPackages;
                                         $options = [];
-
-                                        foreach ($packages as $package) {
-                                            $loadedPackage = EffAdsPackage::with([
-                                                'EffAdsOptions.Currencies' => function ($query) use ($currencyId) {
-                                                    $query->where('currencies.id', $currencyId);
-                                                }
-                                            ])->find($package->id);
-
-                                            if (!$loadedPackage)
-                                                continue;
-
-                                            foreach ($loadedPackage->EffAdsOptions as $option) {
-                                                $price = $option->Currencies
-                                                    ->where('id', $currencyId)
-                                                    ->first()?->pivot->price ?? 0;
-
-                                                // Store as packageID_optionID format
+                                        foreach ($formData['effAdsPackages'] as $package) {
+                                            foreach ($package->effAdsOptions as $option) {
+                                                $price = $option->currencies
+                                                    ->firstWhere('id', $currencyId)?->pivot->price ?? 0;
                                                 $key = "{$package->id}_{$option->id}";
                                                 $options[$key] = "{$package->title} - {$option->title} | {$price}";
                                             }
                                         }
-
                                         return $options;
                                     })
                                     ->columns(2)
                                     ->gridDirection('row')
                                     ->bulkToggleable()
                                     ->reactive()
-                                    ->dehydrated(false) // Don't save this display field
+                                    ->dehydrated(false)
                                     ->afterStateHydrated(function ($component, $record) {
-                                        // Convert stored ads_check array to display format
                                         if ($record && $record->eff_ads_check) {
-                                            $effdisplaySelections = [];
-                                            foreach ($record->eff_ads_check as $selection) {
-                                                $effdisplaySelections[] = $selection; // Already in packageID_optionID format
-                                            }
-                                            $component->state($effdisplaySelections);
+                                            $component->state($record->eff_ads_check);
                                         }
                                     })
                                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                        // Update the actual ads_check field
                                         $set('eff_ads_check', $state ?? []);
-
-                                        // Calculate total amount
                                         self::calculateEffAdsAmount($set, $get, $state ?? []);
                                     }),
 
-                                // Total amount section
                                 Forms\Components\Grid::make(3)
                                     ->schema([
                                         Forms\Components\TextInput::make('eff_ads_amount')
@@ -757,7 +748,7 @@ class ContractResource extends Resource
                                             ->readOnly()
                                             ->prefix(
                                                 fn(callable $get): string =>
-                                                Report::find($get('report_id'))?->Currency?->CODE ?? 'USD'
+                                                self::getCurrencyCode($get)
                                             ),
 
                                         Forms\Components\TextInput::make('eff_ads_discount')
@@ -778,22 +769,17 @@ class ContractResource extends Resource
                                             ->readOnly()
                                             ->prefix(
                                                 fn(callable $get): string =>
-                                                Report::find($get('report_id'))?->Currency?->CODE ?? 'USD'
+                                                self::getCurrencyCode($get)
                                             ),
                                     ]),
                             ])
                             ->collapsible()
                             ->visible(function (callable $get) {
-                                $reportId = $get('report_id');
-                                if (!$reportId)
-                                    return false;
-
-                                $report = Report::find($reportId);
-                                $components = $report?->components ?? [];
-                                return in_array('effective-advertisement-section', $components);
+                                $formData = self::loadFormData($get);
+                                return in_array('effective-advertisement-section', $formData['components']);
                             }),
                     ])->collapsible()->collapsed()
-                    ->visible(function ($set, $get): bool {
+                    ->visible(function ($get): bool {
                         $eventId = $get('event_id');
                         $reportId = $get('report_id');
                         return $eventId && $reportId;
@@ -816,13 +802,8 @@ class ContractResource extends Resource
                                     ->columnSpan(1),
                             ])->collapsible()->collapsed()
                             ->visible(function (callable $get) {
-                                $reportId = $get('report_id');
-                                if (!$reportId)
-                                    return false;
-
-                                $report = Report::find($reportId);
-                                $components = $report?->components ?? [];
-                                return in_array('notes-section', $components);
+                                $formData = self::loadFormData($get);
+                                return in_array('notes-section', $formData['components']);
                             })
                             ->columns(2),
 
@@ -835,47 +816,51 @@ class ContractResource extends Resource
                                         Hidden::make('sub_total_2'),
                                         Hidden::make('vat_amount'),
                                         Hidden::make('net_total'),
+
                                         Forms\Components\Placeholder::make('sub_total_1_display')
                                             ->label('Sub Total 1')
                                             ->content(function (callable $get) {
+                                                $formData = self::loadFormData($get);
                                                 return number_format($get('sub_total_1') ?? 0, 2) . ' ' .
-                                                    (Report::find($get('report_id'))?->Currency?->CODE ?? 'USD');
+                                                    $formData['currencyCode'];
                                             }),
 
                                         Forms\Components\Placeholder::make('d_i_a_display')
                                             ->label('Discount (D/I/A)')
                                             ->content(function (callable $get) {
+                                                $formData = self::loadFormData($get);
                                                 return number_format($get('d_i_a') ?? 0, 2) . ' ' .
-                                                    (Report::find($get('report_id'))?->Currency?->CODE ?? 'USD');
+                                                    $formData['currencyCode'];
                                             }),
 
                                         Forms\Components\Placeholder::make('sub_total_2_display')
                                             ->label('Sub Total 2 (Net)')
                                             ->content(function (callable $get) {
+                                                $formData = self::loadFormData($get);
                                                 return number_format($get('sub_total_2') ?? 0, 2) . ' ' .
-                                                    (Report::find($get('report_id'))?->Currency?->CODE ?? 'USD');
+                                                    $formData['currencyCode'];
                                             }),
 
                                         Forms\Components\Placeholder::make('vat_amount_display')
                                             ->label('VAT Amount')
                                             ->content(function (callable $get) {
-                                                $vatRate = Event::find($get('event_id'))?->vat_rate ?? 0;
+                                                $formData = self::loadFormData($get);
                                                 return number_format($get('vat_amount') ?? 0, 2) . ' ' .
-                                                    (Report::find($get('report_id'))?->Currency?->CODE ?? 'USD') .
-                                                    " ({$vatRate}%)";
+                                                    $formData['currencyCode'] . " ({$formData['vatRate']}%)";
                                             }),
 
                                         Forms\Components\Placeholder::make('net_total_display')
                                             ->label('Net Total')
                                             ->content(function (callable $get) {
+                                                $formData = self::loadFormData($get);
                                                 return number_format($get('net_total') ?? 0, 2) . ' ' .
-                                                    (Report::find($get('report_id'))?->Currency?->CODE ?? 'USD');
+                                                    $formData['currencyCode'];
                                             })
                                             ->extraAttributes(['class' => 'text-xl font-bold']),
                                     ]),
                             ])->collapsible(),
                     ])->collapsible()
-                    ->visible(function ($set, $get): bool {
+                    ->visible(function ($get): bool {
                         $eventId = $get('event_id');
                         $reportId = $get('report_id');
                         return $eventId && $reportId;

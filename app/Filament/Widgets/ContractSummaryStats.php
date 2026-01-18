@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Contract;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 class ContractSummaryStats extends BaseWidget
 {
     use InteractsWithPageFilters;
-
+use HasWidgetShield;
     protected static ?string $pollingInterval = null;
 
     protected function getStats(): array
@@ -76,10 +77,5 @@ class ContractSummaryStats extends BaseWidget
                 ->color('warning')
                 ->chart([1000, 2000, 3000, 4000, 5000, 6000, 7000]),
         ];
-    }
-
-    public static function canView(): bool
-    {
-        return true;
     }
 }

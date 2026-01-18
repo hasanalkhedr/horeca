@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Contract;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\ChartWidget;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Illuminate\Database\Eloquent\Builder;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 class ContractSpaceByStatusChart extends ChartWidget
 {
     use InteractsWithPageFilters;
-
+use HasWidgetShield;
     protected static ?string $heading = 'Total Space by Contract Status';
     protected static ?string $maxHeight = '400px';
     protected static ?string $pollingInterval = null;
@@ -134,10 +135,5 @@ class ContractSpaceByStatusChart extends ChartWidget
             //     ],
              ],
         ];
-    }
-
-    public static function canView(): bool
-    {
-        return true;
     }
 }

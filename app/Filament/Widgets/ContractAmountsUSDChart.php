@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Contract;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\ChartWidget;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Illuminate\Database\Eloquent\Builder;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 class ContractAmountsUSDChart extends ChartWidget
 {
     use InteractsWithPageFilters;
-
+use HasWidgetShield;
     protected static ?string $heading = 'Contract Amounts in USD Equivalent';
     protected static ?string $maxHeight = '400px';
     protected static ?string $pollingInterval = null;
@@ -144,10 +145,5 @@ class ContractAmountsUSDChart extends ChartWidget
                 // ],
             ],
         ];
-    }
-
-    public static function canView(): bool
-    {
-        return true;
     }
 }
