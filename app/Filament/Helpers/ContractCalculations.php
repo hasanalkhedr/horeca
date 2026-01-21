@@ -29,7 +29,7 @@ trait ContractCalculations
     /**
      * Get cached data or store it
      */
-    protected static function getCached($key, $callback, $ttl = 300)
+    protected static function getCached($key, $callback, $ttl = 60)
     {
         return Cache::remember($key, $ttl, $callback);
     }

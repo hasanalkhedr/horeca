@@ -63,7 +63,7 @@ class ContractResource extends Resource
 
         return Cache::remember(
             self::getFormDataCacheKey($eventId, $reportId, $currencyId),
-            300, // 5 minutes
+            60, // 1 minute
             function () use ($eventId, $reportId, $currencyId) {
                 // Load event with all related data in a single query
                 $event = Event::with([

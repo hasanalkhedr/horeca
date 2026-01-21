@@ -42,8 +42,12 @@ class ListStands extends ListRecords
                         ->reactive(),
 
                     Forms\Components\Select::make('category_id')
-                        ->relationship('Category', 'name')
-                        ->required()
+                        ->options(function($get) {
+                            $event = Event::find($get('event_id'));
+                            return $event?->Categories->pluck('name', 'id');
+                        })
+                        //->relationship('Category', 'name')
+                        // ->required()
                         ->searchable()
                         ->preload()
                         ->label('Category'),
@@ -67,12 +71,12 @@ class ListStands extends ListRecords
                         ->default('Available')
                         ->required(),
 
-                    Forms\Components\TextInput::make('start_no')
+                    Forms\Components\TextInput::make('name_prefix')
                         ->required()
-                        ->numeric()
-                        ->minValue(1)
-                        ->label('Start Stand Number')
-                        ->helperText('First stand number'),
+                        // ->numeric()
+                        // ->minValue(1)
+                        ->label('Stand No# prefix'),
+                        //->helperText('First stand number'),
 
                     Forms\Components\TextInput::make('count')
                         ->required()
@@ -90,18 +94,18 @@ class ListStands extends ListRecords
                             $set('stand_numbers', $numbers);
                         }),
 
-                    Repeater::make('stand_numbers')
-                        ->label('Custom Stand Numbers (Optional)')
-                        ->schema([
-                            Forms\Components\TextInput::make('stand_no')
-                                ->label('Stand Number')
-                                ->numeric()
-                                ->required(),
-                        ])
-                        ->columns(2)
-                        ->helperText('If left empty, sequential numbers will be used')
-                        ->default([])
-                        ->hidden(fn(callable $get) => !$get('count') || $get('count') == 0),
+                    // Repeater::make('stand_numbers')
+                    //     ->label('Custom Stand Numbers (Optional)')
+                    //     ->schema([
+                    //         Forms\Components\TextInput::make('stand_no')
+                    //             ->label('Stand Number')
+                    //             ->numeric()
+                    //             ->required(),
+                    //     ])
+                    //     ->columns(2)
+                    //     ->helperText('If left empty, sequential numbers will be used')
+                    //     ->default([])
+                    //     ->hidden(fn(callable $get) => !$get('count') || $get('count') == 0),
                 ])
                 ->action(function (array $data) {
                     try {
@@ -112,35 +116,28 @@ class ListStands extends ListRecords
                         $space = $data['space'];
                         $deductable = $data['deductable'];
                         $status = $data['status'];
-                        $startNo = $data['start_no'];
+                        $prefix = $data['name_prefix'];
                         $count = $data['count'];
-                        $customNumbers = collect($data['stand_numbers'] ?? [])->pluck('stand_no')->filter()->toArray();
+                        //$customNumbers = collect($data['stand_numbers'] ?? [])->pluck('stand_no')->filter()->toArray();
 
                         // Get existing stand numbers for this event
-                        $existingNumbers = \App\Models\Stand::where('event_id', $eventId)
+                        $existingStands = \App\Models\Stand::where('event_id', $eventId)
                             ->pluck('no')
                             ->toArray();
 
                         $createdCount = 0;
                         $errors = [];
 
-                        for ($i = 0; $i < $count; $i++) {
-                            // Determine stand number
-                            if (!empty($customNumbers[$i])) {
-                                $standNo = $customNumbers[$i];
-                            } else {
-                                $standNo = $startNo + $i;
-                            }
-
+                        for ($i = 1; $i <= $count; $i++) {
                             // Check if stand number already exists
-                            if (in_array($standNo, $existingNumbers)) {
-                                $errors[] = "Stand #{$standNo} already exists";
+                            if (in_array($prefix.'-'.$i, $existingStands)) {
+                                $errors[] = "Stand #{$prefix}-{$i} already exists";
                                 continue;
                             }
 
                             // Create the stand
                             \App\Models\Stand::create([
-                                'no' => $standNo,
+                                'no' => $prefix.'-'.$i,
                                 'space' => $space,
                                 'category_id' => $categoryId,
                                 'deductable' => $deductable,
@@ -149,7 +146,7 @@ class ListStands extends ListRecords
                             ]);
 
                             $createdCount++;
-                            $existingNumbers[] = $standNo; // Add to existing to prevent duplicates in same batch
+                            $existingStands[] = $prefix.'-'.$i; // Add to existing to prevent duplicates in same batch
                         }
 
                         DB::commit();
