@@ -51,11 +51,11 @@ class ContractResource extends Resource
     /**
      * Load all form data in a single query
      */
-    protected static function loadFormData(callable $get): array
+    protected static function loadFormData(callable $get, bool $flag = false): array
     {
-        $eventId = $get('event_id');
-        $reportId = $get('report_id');
-        $currencyId = $get('currency_id');
+        $eventId = !$flag ? $get('event_id') : $get('../../event_id');
+        $reportId = !$flag ? $get('report_id') : $get('../../report_id');
+        $currencyId = !$flag ? $get('currency_id') : $get('../../currency_id');
 
         if (!$eventId || !$reportId) {
             return [];
@@ -68,7 +68,19 @@ class ContractResource extends Resource
                 // Load event with all related data in a single query
                 $event = Event::with([
                     'Categories' => fn($q) => $q->select(['id', 'name']),
-                    'Stands' => fn($q) => $q->select(['id', 'no', 'space', 'status', 'event_id']), // Capital S!
+                    'Stands' => function ($q) {
+                    $q->select([
+                        'id',
+                        'no',
+                        'space',
+                        'status',
+                        'event_id',
+                        'category_id',
+                        'deductable',
+                        'is_merged',
+                        'parent_stand_id',
+                    ]);
+                },
                     'Prices.Currencies' => function ($q) use ($currencyId) {
                     $q->when($currencyId, fn($q) => $q->where('currencies.id', $currencyId));
                 },
@@ -334,27 +346,67 @@ class ContractResource extends Resource
                     ->schema([
                         Forms\Components\Section::make('Stand Selection')
                             ->schema([
+                                // Toggle between single stand and merge mode
+                                Forms\Components\Toggle::make('enable_merge_mode')
+                                    ->label('Merge Multiple Stands')
+                                    ->helperText('Enable to merge multiple stands into one')
+                                    ->reactive()
+                                    ->default(false)
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        if ($state) {
+                                            // When enabling merge mode, clear single stand selection
+                                            $set('stand_id', null);
+                                            $set('merge_stands', []);
+                                            $set('merged_stand_id', null);
+                                        } else {
+                                            // When disabling merge mode, clear merge selections
+                                            $set('merge_stands', []);
+                                            $set('merged_stand_id', null);
+                                            $set('use_first_as_parent', true);
+                                            $set('suggested_merge_no', '');
+                                        }
+                                    })
+                                    ->columnSpanFull(),
+
+                                // Single stand selection (disabled when merge mode is enabled)
                                 Forms\Components\Select::make('stand_id')
                                     ->label('Stand')
                                     ->options(function (callable $get) {
                                         $formData = self::loadFormData($get);
                                         $currentStandId = $get('stand_id');
+                                        $mergedStandId = $get('merged_stand_id') ?? null;
 
                                         return $formData['stands']
-                                            ->filter(function ($stand) use ($currentStandId) {
-                                                return $stand->status === 'Available' || $stand->id == $currentStandId;
+                                            ->filter(function ($stand) use ($currentStandId, $mergedStandId) {
+                                                // Show available stands or the current selected stand
+                                                $isAvailable = $stand->status === 'Available';
+                                                $isCurrent = $stand->id == $currentStandId;
+                                                $isMergedSelected = $stand->id == $mergedStandId;
+
+                                                return $isAvailable || $isCurrent || $isMergedSelected;
                                             })
                                             ->mapWithKeys(fn($stand) => [
-                                                $stand->id => "{$stand->no} | {$stand->space} sqm"
+                                                $stand->id => $stand->is_merged
+                                                    ? "📦 {$stand->no} | {$stand->space} sqm (Merged)"
+                                                    : "📍 {$stand->no} | {$stand->space} sqm"
                                             ])
                                             ->toArray();
                                     })
                                     ->searchable()
                                     ->required()
                                     ->reactive()
+                                    ->disabled(fn(callable $get) => $get('enable_merge_mode'))
                                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                         self::calculateSpaceAmount($set, $get);
-                                    }),
+
+                                        // Clear merge selection when selecting a stand directly
+                                        if ($state) {
+                                            $set('merge_stands', []);
+                                            $set('merged_stand_id', null);
+                                            $set('use_first_as_parent', true);
+                                        }
+                                    })
+                                    ->visible(fn(callable $get) => !$get('enable_merge_mode')),
 
                                 Forms\Components\Placeholder::make('stand_space')
                                     ->label('Stand Space')
@@ -366,102 +418,713 @@ class ContractResource extends Resource
 
                                         $formData = self::loadFormData($get);
                                         $stand = $formData['stands']->firstWhere('id', $standId);
-                                        return $stand ? "{$stand->space} sqm" : 'N/A';
-                                    }),
-                            ])->collapsible()
-                            ->columns(2),
 
-                        Forms\Components\Section::make('Pricing')
-                            ->schema([
-                                Forms\Components\Radio::make('price_id')
-                                    ->label('Select Price Package')
-                                    ->options(function (callable $get) {
-                                        $formData = self::loadFormData($get);
-                                        $currencyId = $get('currency_id');
-
-                                        if (!$currencyId)
-                                            return [];
-
-                                        $options = [];
-                                        foreach ($formData['prices'] as $price) {
-                                            $amount = $price->currencies
-                                                ->firstWhere('id', $currencyId)?->pivot->amount ?? 0;
-                                            $options[$price->id] = "{$price->name} | {$amount}";
+                                        if (!$stand) {
+                                            return 'N/A';
                                         }
-                                        return $options;
+
+                                        if ($stand->is_merged && !$stand->parent_stand_id) {
+                                            $childStands = $stand->getAllMergeGroupStands();
+                                            $childList = $childStands->where('id', '!=', $standId)
+                                                ->pluck('no')
+                                                ->implode(', ');
+
+                                            return "{$stand->space} sqm (Merged from: {$childList})";
+                                        }
+
+                                        return "{$stand->space} sqm";
                                     })
-                                    ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                        if ($state) {
-                                            $set('use_special_price', false);
-                                            $set('price_amount', null);
-                                        } else {
-                                            $set('price_id', null);
-                                        }
-                                        self::calculateSpaceAmount($set, $get);
-                                    }),
+                                    ->columnSpan(1)
+                                    ->visible(fn(callable $get) => !$get('enable_merge_mode')),
 
-                                Forms\Components\Fieldset::make('Special Price')
+                                // MERGE MODE SECTION (only visible when merge mode is enabled)
+                                Forms\Components\Placeholder::make('merge_mode_header')
+                                    ->label('Merge Mode Active')
+                                    ->content('You are now in merge mode. Add stands below to merge them into one.')
+                                    ->extraAttributes(['class' => 'font-medium text-green-700 bg-green-50 p-3 rounded-md'])
+                                    ->columnSpanFull()
+                                    ->visible(fn(callable $get) => $get('enable_merge_mode') && $get('event_id') && $get('report_id')),
+
+                                // Hidden fields for merge tracking
+                                Forms\Components\Hidden::make('merged_stand_id')
+                                    ->dehydrated(false),
+
+                                // Forms\Components\Hidden::make('use_first_as_parent')
+                                //     ->default(true)
+                                //     ->dehydrated(false),
+
+                                // Merge functionality buttons (only in merge mode)
+                                Forms\Components\Actions::make([
+                                    Forms\Components\Actions\Action::make('addStandForMerge')
+                                        ->label('+ Add Stand for Merging')
+                                        ->icon('heroicon-o-plus')
+                                        ->color('gray')
+                                        ->size('sm')
+                                        ->visible(fn(callable $get) => $get('enable_merge_mode') && $get('event_id') && $get('report_id'))
+                                        ->action(function (callable $get, callable $set) {
+                                            $mergeStands = $get('merge_stands') ?? [];
+                                            $mergeStands[] = ['stand_id' => null];
+                                            $set('merge_stands', $mergeStands);
+                                        }),
+
+                                    Forms\Components\Actions\Action::make('clearAllMergeStands')
+                                        ->label('Clear All Stands')
+                                        ->icon('heroicon-o-x-mark')
+                                        ->color('danger')
+                                        ->size('sm')
+                                        ->visible(fn(callable $get) => $get('enable_merge_mode') && !empty($get('merge_stands')))
+                                        ->action(function (callable $set) {
+                                            $set('merge_stands', []);
+                                            $set('merged_stand_id', null);
+                                            $set('suggested_merge_no', '');
+                                        }),
+                                ])->columnSpanFull()
+                                    ->visible(fn(callable $get) => $get('enable_merge_mode')),
+
+                                // Dynamic stand selections for merging (only in merge mode)
+                                Forms\Components\Repeater::make('merge_stands')
+                                    ->label('Stands to Merge')
                                     ->schema([
-                                        Forms\Components\Toggle::make('use_special_price')
-                                            ->label('Use Special Price')
-                                            ->reactive()
-                                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                                if ($state) {
-                                                    $set('price_id', null);
-                                                } else {
-                                                    $set('price_amount', null);
+                                        Forms\Components\Select::make('stand_id')
+                                            ->label('Stand')
+                                            ->options(function (callable $get, $state) {
+                                                $formData = self::loadFormData($get, true);
+                                                if (!$formData['stands']) {
+                                                    return [];
                                                 }
-                                                self::calculateSpaceAmount($set, $get);
-                                            }),
 
-                                        Forms\Components\TextInput::make('price_amount')
-                                            ->label('Special Price Amount')
-                                            ->numeric()
-                                            ->default(0)
-                                            ->minValue(0)
-                                            ->visible(fn(callable $get): bool => $get('use_special_price'))
+                                                // Get all selected stand IDs from the repeater
+                                                $allMergeStands = $get('../../merge_stands') ?? [];
+                                                $selectedIds = collect($allMergeStands)
+                                                    ->pluck('stand_id')
+                                                    ->filter()
+                                                    ->toArray();
+
+                                                return $formData['stands']
+                                                    ->filter(function ($stand) use ($selectedIds, $state) {
+                                                        // Include the current value even if selected elsewhere
+                                                        if ($stand->id == $state) {
+                                                            return true;
+                                                        }
+
+                                                        // Only show available, non-merged stands
+                                                        return $stand->status === 'Available'
+                                                            && !$stand->is_merged
+                                                            && !$stand->parent_stand_id
+                                                            && !in_array($stand->id, $selectedIds);
+                                                    })
+                                                    ->mapWithKeys(fn($stand) => [
+                                                        $stand->id => "Stand #{$stand->no} ({$stand->space} sqm)"
+                                                    ]);
+                                            })
+                                            ->searchable()
+                                            ->required()
                                             ->reactive()
-                                            ->debounce(500)
                                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                                self::calculateSpaceAmount($set, $get);
-                                            }),
-                                    ]),
+                                                // Recalculate total space when stands change
+                                                $mergeStands = $get('../../merge_stands') ?? [];
+                                                $totalSpace = 0;
+                                                $standNumbers = [];
 
-                                Forms\Components\Grid::make(3)
+                                                foreach ($mergeStands as $item) {
+                                                    if (!empty($item['stand_id'])) {
+                                                        $stand = \App\Models\Stand::find($item['stand_id']);
+                                                        if ($stand) {
+                                                            $totalSpace += $stand->space;
+                                                            $standNumbers[] = $stand->no;
+                                                        }
+                                                    }
+                                                }
+
+                                                // Generate suggested merged stand number
+                                                if (count($standNumbers) > 0) {
+                                                    sort($standNumbers);
+                                                    $set('../../suggested_merge_no', implode('-', $standNumbers) . '-M');
+                                                }
+                                            }),
+                                    ])
+                                    ->defaultItems(0)
+                                    ->addActionLabel('Add Another Stand')
+                                    ->reorderable(false)
+                                    ->deleteAction(
+                                        fn($action) => $action->requiresConfirmation()
+                                    )
+                                    ->columnSpanFull()
+                                    ->hidden(fn(callable $get) => !$get('enable_merge_mode')),
+
+                                // Merge information (only in merge mode)
+                                Forms\Components\Placeholder::make('merge_info')
+                                    ->label('Merge Information')
+                                    ->content(function (callable $get) {
+                                        $mergeStands = $get('merge_stands') ?? [];
+                                        $standIds = collect($mergeStands)
+                                            ->pluck('stand_id')
+                                            ->filter()
+                                            ->unique()
+                                            ->toArray();
+
+                                        if (count($standIds) < 2) {
+                                            return 'Select at least 2 stands to merge';
+                                        }
+
+                                        $stands = \App\Models\Stand::whereIn('id', $standIds)->get();
+                                        $firstStand = $stands->first();
+                                        $totalSpace = $stands->sum('space');
+                                        $standNumbers = $stands->pluck('no')->sort()->values();
+                                        $suggestedNo = $get('suggested_merge_no') ?? $standNumbers->implode('-') . '-M';
+                                        $useFirstAsParent = $get('use_first_as_parent') ?? true;
+
+                                        $info = "✅ Selected stands: " . $standNumbers->implode(', ') . "\n";
+                                        $info .= "📏 Total space: {$totalSpace} sqm\n";
+
+                                        if ($useFirstAsParent) {
+                                            $info .= "🎯 First stand (#{$firstStand->no}) will become the parent\n";
+                                        } else {
+                                            $info .= "🆕 A new parent stand will be created\n";
+                                        }
+
+                                        $info .= "🔢 New stand number: {$suggestedNo}";
+
+                                        return $info;
+                                    })
+                                    ->columnSpanFull()
+                                    ->visible(fn(callable $get) => $get('enable_merge_mode') && count($get('merge_stands') ?? []) >= 2),
+
+                                // Merge options (only in merge mode)
+                                Forms\Components\Fieldset::make('Merge Options')
                                     ->schema([
-                                        Forms\Components\TextInput::make('space_amount')
-                                            ->label('Space Amount')
-                                            ->numeric()
-                                            ->default(0)
-                                            ->readOnly()
-                                            ->prefix(
-                                                fn(callable $get): string =>
-                                                self::getCurrencyCode($get)
-                                            ),
+                                        // Forms\Components\Toggle::make('use_first_as_parent')
+                                        //     ->label('Use first selected stand as parent?')
+                                        //     ->default(true)
+                                        //     ->helperText('If checked, the first selected stand becomes the parent. If unchecked, a new parent stand is created.')
+                                        //     ->reactive()
+                                        //     ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                        //         $mergeStands = $get('merge_stands') ?? [];
+                                        //         $standIds = collect($mergeStands)
+                                        //             ->pluck('stand_id')
+                                        //             ->filter()
+                                        //             ->unique()
+                                        //             ->toArray();
 
-                                        Forms\Components\TextInput::make('space_discount')
-                                            ->label('Discount')
-                                            ->numeric()
-                                            ->minValue(0)
-                                            ->reactive()
-                                            ->debounce(500)
-                                            ->default(0)
-                                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                                self::calculateSpaceNet($set, $get);
-                                            }),
+                                        //         if (count($standIds) >= 1) {
+                                        //             $stands = \App\Models\Stand::whereIn('id', $standIds)->get();
+                                        //             $firstStand = $stands->first();
 
-                                        Forms\Components\TextInput::make('space_net')
-                                            ->label('Net Amount')
-                                            ->numeric()
-                                            ->default(0)
-                                            ->readOnly()
-                                            ->prefix(
-                                                fn(callable $get): string =>
-                                                self::getCurrencyCode($get)
-                                            ),
-                                    ]),
-                            ])->collapsible(),
+                                        //             if ($state) {
+                                        //                 // Use first stand number as base
+                                        //                 $set('suggested_merge_no', $firstStand->no . '-M');
+                                        //             } else {
+                                        //                 // Generate new number
+                                        //                 $standNumbers = $stands->pluck('no')->sort()->values();
+                                        //                 $set('suggested_merge_no', $standNumbers->implode('-') . '-M');
+                                        //             }
+                                        //         }
+                                        //     }),
+
+                                        Forms\Components\TextInput::make('suggested_merge_no')
+                                            ->label('New Stand Number')
+                                            ->required()
+                                            ->default(function (callable $get) {
+                                                $mergeStands = $get('merge_stands') ?? [];
+                                                $standIds = collect($mergeStands)
+                                                    ->pluck('stand_id')
+                                                    ->filter()
+                                                    ->unique()
+                                                    ->toArray();
+
+                                                if (count($standIds) >= 1) {
+                                                    $stands = \App\Models\Stand::whereIn('id', $standIds)->get();
+                                                    $firstStand = $stands->first();
+                                                    // $useFirstAsParent = $get('use_first_as_parent') ?? true;
+
+                                                    // if ($useFirstAsParent) {
+                                                    //     return $firstStand->no . '-M';
+                                                    // } else {
+                                                    $standNumbers = $stands->pluck('no')->sort()->values();
+                                                    return $standNumbers->implode('-') . '-M';
+                                                    // }
+                                                }
+
+                                                return '';
+                                            })
+                                            ->helperText('Enter the stand number for the merged stand')
+                                            ->columnSpanFull(),
+                                    ])
+                                    ->columns(1)
+                                    ->visible(fn(callable $get) => $get('enable_merge_mode') && count($get('merge_stands') ?? []) >= 2),
+
+                                // Merge action button (only in merge mode)
+                                Forms\Components\Actions::make([
+                                    Forms\Components\Actions\Action::make('mergeStands')
+                                        ->label('Merge Selected Stands')
+                                        ->icon('heroicon-o-arrows-right-left')
+                                        ->color('primary')
+                                        ->size('sm')
+                                        ->visible(fn(callable $get) => $get('enable_merge_mode') && count($get('merge_stands') ?? []) >= 2)
+                                        ->requiresConfirmation()
+                                        ->modalHeading('Merge Stands')
+                                        ->modalDescription(function (callable $get) {
+                                            $mergeStands = $get('merge_stands') ?? [];
+                                            $standIds = collect($mergeStands)
+                                                ->pluck('stand_id')
+                                                ->filter()
+                                                ->unique()
+                                                ->toArray();
+
+                                            $stands = \App\Models\Stand::whereIn('id', $standIds)->get();
+                                            $standList = $stands->pluck('no')->sort()->implode(', ');
+                                            $totalSpace = $stands->sum('space');
+                                            $suggestedNo = $get('suggested_merge_no');
+                                            $useFirstAsParent = $get('use_first_as_parent') ?? true;
+                                            $firstStand = $stands->first();
+
+                                            $description = "You are about to merge the following stands:\n";
+                                            $description .= "Stands: {$standList}\n";
+                                            $description .= "Total space: {$totalSpace} sqm\n";
+
+                                            if ($useFirstAsParent) {
+                                                $description .= "First stand (#{$firstStand->no}) will become the parent\n";
+                                            } else {
+                                                $description .= "A new parent stand will be created\n";
+                                            }
+
+                                            $description .= "New stand number: {$suggestedNo}\n\n";
+                                            $description .= "This action cannot be undone.";
+
+                                            return $description;
+                                        })
+                                        ->modalSubmitActionLabel('Merge Stands')
+                                        ->modalCancelActionLabel('Cancel')
+                                        ->action(function (callable $get, callable $set, array $data) {
+                                            $mergeStands = $get('merge_stands') ?? [];
+                                            $standIds = collect($mergeStands)
+                                                ->pluck('stand_id')
+                                                ->filter()
+                                                ->unique()
+                                                ->toArray();
+
+                                            if (count($standIds) < 2) {
+                                                Notification::make()
+                                                    ->title('Error')
+                                                    ->body('Please select at least 2 stands to merge')
+                                                    ->danger()
+                                                    ->send();
+                                                return;
+                                            }
+
+                                            // Get the stands from database
+                                            $stands = \App\Models\Stand::whereIn('id', $standIds)->get();
+
+                                            // Sort stands by selection order (maintain first stand)
+                                            $firstStandId = $standIds[0];
+                                            $firstStand = $stands->firstWhere('id', $firstStandId);
+                                            $otherStands = $stands->where('id', '!=', $firstStandId);
+
+                                            // Check if all stands are available and not merged
+                                            foreach ($stands as $stand) {
+                                                if ($stand->status !== 'Available') {
+                                                    Notification::make()
+                                                        ->title('Error')
+                                                        ->body("Stand #{$stand->no} is not available. Current status: {$stand->status}")
+                                                        ->danger()
+                                                        ->send();
+                                                    return;
+                                                }
+
+                                                if ($stand->is_merged || $stand->parent_stand_id) {
+                                                    Notification::make()
+                                                        ->title('Error')
+                                                        ->body("Stand #{$stand->no} is already part of a merge group")
+                                                        ->danger()
+                                                        ->send();
+                                                    return;
+                                                }
+                                            }
+
+                                            // Get event_id from form
+                                            $eventId = $get('event_id');
+                                            $reportId = $get('report_id');
+
+                                            if (!$eventId || !$reportId) {
+                                                Notification::make()
+                                                    ->title('Error')
+                                                    ->body('Please select an event and contract template first')
+                                                    ->danger()
+                                                    ->send();
+                                                return;
+                                            }
+
+                                            // Get event to access category_id
+                                            $event = \App\Models\Event::find($eventId);
+                                            if (!$event) {
+                                                Notification::make()
+                                                    ->title('Error')
+                                                    ->body('Event not found')
+                                                    ->danger()
+                                                    ->send();
+                                                return;
+                                            }
+
+                                            // Calculate total space
+                                            $totalSpace = $stands->sum('space');
+
+                                            // Use provided stand number
+                                            $newStandNo = $get('suggested_merge_no');
+
+                                            // Check if stand number already exists
+                                            $existingStand = \App\Models\Stand::where('event_id', $eventId)
+                                                ->where('no', $newStandNo)
+                                                ->first();
+
+                                            if ($existingStand) {
+                                                Notification::make()
+                                                    ->title('Error')
+                                                    ->body("Stand number {$newStandNo} already exists in this event")
+                                                    ->danger()
+                                                    ->send();
+                                                return;
+                                            }
+
+                                            // $useFirstAsParent = $get('use_first_as_parent') ?? true;
+                                            $parentStand = null;
+
+                                            // if ($useFirstAsParent) {
+                                            //     // Use first stand as parent (same logic as Stand resource)
+                                            //     $parentStand = $firstStand;
+                                            //     $parentStand->update([
+                                            //         'no' => $newStandNo,
+                                            //         'space' => $totalSpace,
+                                            //         'is_merged' => true,
+                                            //         'original_no' => $firstStand->no,
+                                            //     ]);
+                                            // } else {
+                                            // Create new parent stand
+                                            $parentStand = \App\Models\Stand::create([
+                                                'no' => $newStandNo,
+                                                'space' => $totalSpace,
+                                                'category_id' => $firstStand->category_id ?? $event->category_id,
+                                                'event_id' => $eventId,
+                                                'deductable' => $firstStand->deductable,
+                                                'is_merged' => true,
+                                                'status' => 'Available',
+                                                'original_no' => null,
+                                            ]);
+
+                                            // Mark first stand as merged child
+                                            $firstStand->update([
+                                                'parent_stand_id' => $parentStand->id,
+                                                'is_merged' => true,
+                                                'status' => 'Available',
+                                            ]);
+                                            // }
+
+                                            // Mark other stands as merged children
+                                            foreach ($otherStands as $stand) {
+                                                $stand->update([
+                                                    'parent_stand_id' => $parentStand->id,
+                                                    'is_merged' => true,
+                                                    'status' => 'Available',
+                                                ]);
+                                            }
+
+                                            // IMPORTANT: Set the merged stand as selected and disable merge mode
+                                            $set('merged_stand_id', $parentStand->id);
+                                            $set('stand_id', $parentStand->id); // This selects it in the dropdown
+                                            $set('enable_merge_mode', false); // Disable merge mode after successful merge
+
+                                            // Clear merge selections
+                                            $set('merge_stands', []);
+                                            $set('suggested_merge_no', '');
+                                            $set('use_first_as_parent', true);
+
+                                            // Clear form cache
+                                            self::clearFormCache($eventId, $reportId);
+
+                                            // Trigger space calculation with the new stand
+                                            self::calculateSpaceAmount($set, $get);
+
+                                            Notification::make()
+                                                ->title('Stands Merged Successfully')
+                                                ->body("Successfully merged " . count($stands) . " stands into #{$newStandNo}")
+                                                ->success()
+                                                ->send();
+                                        }),
+                                ])->columnSpanFull()
+                                    ->visible(fn(callable $get) => $get('enable_merge_mode') && count($get('merge_stands') ?? []) >= 2),
+
+                                // Show selected merged stand info after merge
+                                Forms\Components\Placeholder::make('merged_stand_result')
+                                    ->label('Merged Stand Selected')
+                                    ->content(function (callable $get) {
+                                        $mergedStandId = $get('merged_stand_id');
+                                        if (!$mergedStandId) {
+                                            return '';
+                                        }
+
+                                        $stand = \App\Models\Stand::find($mergedStandId);
+                                        if (!$stand) {
+                                            return '';
+                                        }
+
+                                        $childStands = $stand->getAllMergeGroupStands();
+                                        $childList = $childStands->where('id', '!=', $stand->id)
+                                            ->pluck('no')
+                                            ->implode(', ');
+
+                                        return "✅ Merged Stand #{$stand->no} selected\n" .
+                                            "📏 Total Space: {$stand->space} sqm\n" .
+                                            "🔗 Includes: {$childList}";
+                                    })
+                                    ->extraAttributes(['class' => 'bg-green-50 p-3 rounded-md'])
+                                    ->columnSpanFull()
+                                    ->visible(fn(callable $get) => !$get('enable_merge_mode') && !empty($get('merged_stand_id'))),
+                            ])
+                            ->collapsible()
+                            ->columns(2)
+                            ->visible(function ($get): bool {
+                                $eventId = $get('event_id');
+                                $reportId = $get('report_id');
+                                return $eventId && $reportId;
+                            }),
+
+                        // Forms\Components\Section::make('Pricing')
+                        //     ->schema([
+                        //         Forms\Components\Radio::make('price_id')
+                        //             ->label('Select Price Package')
+                        //             ->options(function (callable $get) {
+                        //                 $formData = self::loadFormData($get);
+                        //                 $currencyId = $get('currency_id');
+
+                        //                 if (!$currencyId)
+                        //                     return [];
+
+                        //                 $options = [];
+                        //                 foreach ($formData['prices'] as $price) {
+                        //                     $amount = $price->currencies
+                        //                         ->firstWhere('id', $currencyId)?->pivot->amount ?? 0;
+                        //                     $options[$price->id] = "{$price->name} | {$amount}";
+                        //                 }
+                        //                 return $options;
+                        //             })
+                        //             ->reactive()
+                        //             ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                        //                 if ($state) {
+                        //                     $set('use_special_price', false);
+                        //                     $set('price_amount', null);
+                        //                 } else {
+                        //                     $set('price_id', null);
+                        //                 }
+                        //                 self::calculateSpaceAmount($set, $get);
+                        //             }),
+
+                        //         Forms\Components\Fieldset::make('Special Price')
+                        //             ->schema([
+                        //                 Forms\Components\Toggle::make('use_special_price')
+                        //                     ->label('Use Special Price')
+                        //                     ->reactive()
+                        //                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                        //                         if ($state) {
+                        //                             $set('price_id', null);
+                        //                         } else {
+                        //                             $set('price_amount', null);
+                        //                         }
+                        //                         self::calculateSpaceAmount($set, $get);
+                        //                     }),
+
+                        //                 Forms\Components\TextInput::make('price_amount')
+                        //                     ->label('Special Price Amount')
+                        //                     ->numeric()
+                        //                     ->default(0)
+                        //                     ->minValue(0)
+                        //                     ->visible(fn(callable $get): bool => $get('use_special_price'))
+                        //                     ->reactive()
+                        //                     ->debounce(500)
+                        //                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                        //                         self::calculateSpaceAmount($set, $get);
+                        //                     }),
+                        //             ]),
+
+                        //         Forms\Components\Grid::make(3)
+                        //             ->schema([
+                        //                 Forms\Components\TextInput::make('space_amount')
+                        //                     ->label('Space Amount')
+                        //                     ->numeric()
+                        //                     ->default(0)
+                        //                     ->readOnly()
+                        //                     ->prefix(
+                        //                         fn(callable $get): string =>
+                        //                         self::getCurrencyCode($get)
+                        //                     ),
+
+                        //                 Forms\Components\TextInput::make('space_discount')
+                        //                     ->label('Discount')
+                        //                     ->numeric()
+                        //                     ->minValue(0)
+                        //                     ->reactive()
+                        //                     ->debounce(500)
+                        //                     ->default(0)
+                        //                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                        //                         self::calculateSpaceNet($set, $get);
+                        //                     }),
+
+                        //                 Forms\Components\TextInput::make('space_net')
+                        //                     ->label('Net Amount')
+                        //                     ->numeric()
+                        //                     ->default(0)
+                        //                     ->readOnly()
+                        //                     ->prefix(
+                        //                         fn(callable $get): string =>
+                        //                         self::getCurrencyCode($get)
+                        //                     ),
+                        //             ]),
+                        //     ])->collapsible(),
+                        Forms\Components\Section::make('Pricing')
+    ->schema([
+        Forms\Components\Radio::make('price_id')
+            ->label('Select Price Package')
+            ->options(function (callable $get) {
+                $formData = self::loadFormData($get);
+                $currencyId = $get('currency_id');
+
+                if (!$currencyId)
+                    return [];
+
+                $options = [];
+                foreach ($formData['prices'] as $price) {
+                    $amount = $price->currencies
+                        ->firstWhere('id', $currencyId)?->pivot->amount ?? 0;
+                    $options[$price->id] = "{$price->name} | {$amount}";
+                }
+                return $options;
+            })
+            ->reactive()
+            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                if ($state) {
+                    $set('use_special_price', false);
+                    $set('price_amount', null);
+                } else {
+                    $set('price_id', null);
+                }
+                self::calculateSpaceAmount($set, $get);
+            }),
+
+        Forms\Components\Fieldset::make('Special Price')
+            ->schema([
+                Forms\Components\Toggle::make('use_special_price')
+                    ->label('Use Special Price')
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                        if ($state) {
+                            $set('price_id', null);
+                        } else {
+                            $set('price_amount', null);
+                        }
+                        self::calculateSpaceAmount($set, $get);
+                    }),
+
+                Forms\Components\TextInput::make('price_amount')
+                    ->label('Special Price Amount')
+                    ->numeric()
+                    ->default(0)
+                    ->minValue(0)
+                    ->visible(fn(callable $get): bool => $get('use_special_price'))
+                    ->reactive()
+                    ->debounce(500)
+                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                        self::calculateSpaceAmount($set, $get);
+                    }),
+            ]),
+
+        // Tax per sqm section
+        Forms\Components\Fieldset::make('Additional Taxes')
+            ->schema([
+                Forms\Components\Toggle::make('enable_tax_per_sqm')
+                    ->label('Enable Tax per Square Meter')
+                    ->reactive()
+                    ->default(false)
+                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                        if (!$state) {
+                            $set('tax_per_sqm_amount', 0);
+                        }
+                        self::calculateSpaceAmount($set, $get);
+                    }),
+
+                Forms\Components\TextInput::make('tax_per_sqm_amount')
+                    ->label('Tax Amount per Sqm')
+                    ->numeric()
+                    ->default(0)
+                    ->minValue(0)
+                    ->visible(fn(callable $get): bool => $get('enable_tax_per_sqm'))
+                    ->prefix(
+                        fn(callable $get): string =>
+                        self::getCurrencyCode($get)
+                    )
+                    ->reactive()
+                    ->debounce(500)
+                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                        self::calculateSpaceAmount($set, $get);
+                    }),
+
+                Forms\Components\TextInput::make('tax_per_sqm_total')
+                    ->label('Total Tax Amount')
+                    ->readOnly()
+                    // ->content(function (callable $get) {
+                    //     if (!$get('enable_tax_per_sqm')) {
+                    //         return '0.00 ' . self::getCurrencyCode($get);
+                    //     }
+
+                    //     $standId = $get('stand_id');
+                    //     $taxAmount = (float) ($get('tax_per_sqm_amount') ?? 0);
+
+                    //     if (!$standId || $taxAmount <= 0) {
+                    //         return '0.00 ' . self::getCurrencyCode($get);
+                    //     }
+
+                    //     $stand = \App\Models\Stand::find($standId);
+                    //     if (!$stand) {
+                    //         return '0.00 ' . self::getCurrencyCode($get);
+                    //     }
+
+                    //     $totalTax = $stand->space * $taxAmount;
+                    //     return number_format($totalTax, 2) . ' ' . self::getCurrencyCode($get);
+                    // })
+                    ->visible(fn(callable $get): bool => $get('enable_tax_per_sqm')),
+            ]),
+
+        Forms\Components\Grid::make(3)
+            ->schema([
+                Forms\Components\TextInput::make('space_amount')
+                    ->label('Space Amount')
+                    ->numeric()
+                    ->default(0)
+                    ->readOnly()
+                    ->prefix(
+                        fn(callable $get): string =>
+                        self::getCurrencyCode($get)
+                    ),
+
+                Forms\Components\TextInput::make('space_discount')
+                    ->label('Discount')
+                    ->numeric()
+                    ->minValue(0)
+                    ->reactive()
+                    ->debounce(500)
+                    ->default(0)
+                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                        self::calculateSpaceNet($set, $get);
+                    }),
+
+                Forms\Components\TextInput::make('space_net')
+                    ->label('Net Amount')
+                    ->numeric()
+                    ->default(0)
+                    ->readOnly()
+                    ->prefix(
+                        fn(callable $get): string =>
+                        self::getCurrencyCode($get)
+                    ),
+            ]),
+    ])->collapsible(),
                     ])->collapsible()
                     ->collapsed()
                     ->visible(function ($get): bool {
@@ -816,7 +1479,6 @@ class ContractResource extends Resource
                                         Hidden::make('sub_total_2'),
                                         Hidden::make('vat_amount'),
                                         Hidden::make('net_total'),
-
                                         Forms\Components\Placeholder::make('sub_total_1_display')
                                             ->label('Sub Total 1')
                                             ->content(function (callable $get) {
@@ -840,7 +1502,14 @@ class ContractResource extends Resource
                                                 return number_format($get('sub_total_2') ?? 0, 2) . ' ' .
                                                     $formData['currencyCode'];
                                             }),
-
+Forms\Components\Placeholder::make('tax_per_sqm_display')
+    ->label('Tax per Sqm Total')
+    ->content(function (callable $get) {
+        $taxPerSqmTotal = $get('tax_per_sqm_total') ?? 0;
+        $formData = self::loadFormData($get);
+        return number_format($taxPerSqmTotal, 2) . ' ' . $formData['currencyCode'];
+    })
+    ->visible(fn(callable $get) => ($get('tax_per_sqm_total') ?? 0) > 0),
                                         Forms\Components\Placeholder::make('vat_amount_display')
                                             ->label('VAT Amount')
                                             ->content(function (callable $get) {
@@ -1180,5 +1849,104 @@ class ContractResource extends Resource
                 ->badge(fn() => static::getModel()::where('status', Contract::STATUS_SIGNED_PAID)->count())
             ,
         ];
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // If we have a merged stand, use it
+        if (!empty($data['merged_stand_id'])) {
+            $data['stand_id'] = $data['merged_stand_id'];
+        }
+
+        // Remove temporary merge data from database storage
+        unset($data['merged_stand_id']);
+        unset($data['merge_stands']);
+        unset($data['merge_stand_count']);
+        unset($data['suggested_merge_no']);
+
+        return $data;
+    }
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        // When editing, check if the stand is merged
+        if (!empty($data['stand_id'])) {
+            $stand = \App\Models\Stand::find($data['stand_id']);
+            if ($stand && $stand->is_merged && !$stand->parent_stand_id) {
+                $data['merged_stand_id'] = $stand->id;
+
+                // Populate the merge stands repeater with child stands
+                $childStands = $stand->getAllMergeGroupStands()
+                    ->where('id', '!=', $stand->id)
+                    ->map(function ($childStand) {
+                        return ['stand_id' => $childStand->id];
+                    })
+                    ->values()
+                    ->toArray();
+
+                $data['merge_stands'] = $childStands;
+            }
+        }
+
+        return $data;
+    }
+
+private function processContractData(array $data): array
+{
+    // Process stand selection
+    $data = $this->processStandSelection($data);
+
+    // Ensure tax per sqm fields are properly set
+    $enableTaxPerSqm = $data['enable_tax_per_sqm'] ?? false;
+    if (!$enableTaxPerSqm) {
+        $data['tax_per_sqm_amount'] = 0;
+        $data['tax_per_sqm_total'] = 0;
+    }
+
+    // Calculate base space amount if not already calculated
+    if (!isset($data['base_space_amount'])) {
+        $data['base_space_amount'] = $data['space_amount'] - ($data['tax_per_sqm_total'] ?? 0);
+    }
+
+    return $data;
+}
+    protected function beforeCreate(array $data): array
+    {
+        return $this->processStandSelection($data);
+        return $this->processContractData($data);
+
+    }
+
+    protected function beforeSave(array $data): array
+    {
+        return $this->processStandSelection($data);
+        return $this->processContractData($data);
+    }
+
+    private function processStandSelection(array $data): array
+    {
+        // Validate stand exists and is available
+        if (!empty($data['stand_id'])) {
+            $stand = \App\Models\Stand::find($data['stand_id']);
+            if ($stand && $stand->status === 'Available') {
+                $data['stand_id'] = $stand->id;
+
+                // Update stand status based on contract status
+                $contractStatus = $data['status'] ?? \App\Models\Contract::STATUS_DRAFT;
+                if (
+                    $contractStatus === \App\Models\Contract::STATUS_SIGNED_PAID ||
+                    $contractStatus === \App\Models\Contract::STATUS_SIGNED_NOT_PAID
+                ) {
+                    $stand->update(['status' => 'Sold']);
+                }
+
+                // Clear caches
+                self::clearFormCache($data['event_id'] ?? null, $data['report_id'] ?? null);
+            } else {
+                throw new \Exception('Selected stand is not available or does not exist');
+            }
+        }
+
+        return $data;
     }
 }

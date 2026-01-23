@@ -431,12 +431,18 @@
             'eff_ads_discount',
             'eff_ads_net',
             'ads_package_id',
-            'eff_ads_package_id'
+            'eff_ads_package_id',
+            'enable_tax_per_sqm',
+        'tax_per_sqm_amount',
+        'tax_per_sqm_total',
         ];
         protected $casts = [
             'contrat_date' => 'date',
             'ads_check' => 'array',
             'eff_ads_check' => 'array',
+            'enable_tax_per_sqm' => 'boolean',
+        'tax_per_sqm_amount' => 'decimal:2',
+        'tax_per_sqm_total' => 'decimal:2',
         ];
 
         protected $appends = [

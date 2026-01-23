@@ -151,41 +151,111 @@ trait ContractCalculations
         }
     }
 
-    public static function calculateSpaceAmount(callable $set, callable $get): void
-    {
-        $standId = $get('stand_id');
-        $priceId = $get('price_id');
-        $useSpecialPrice = $get('use_special_price');
-        $specialPrice = $get('price_amount');
-        $currencyId = $get('currency_id');
+//     public static function calculateSpaceAmount(callable $set, callable $get): void
+// {
+//     // Check if we have a merged stand from the merge component
+//     $mergedStandId = $get('merged_stand_id') ?? null;
 
-        if (!$standId) {
-            $set('space_amount', 0);
-            return;
-        }
+//     // Use merged stand if available, otherwise use regular stand_id
+//     $standId = $mergedStandId ?? $get('stand_id');
 
-        $stand = self::getStandWithCache($standId);
-        if (!$stand) {
-            $set('space_amount', 0);
-            return;
-        }
+//     // Update the stand_id field if needed
+//     if ($standId && $standId !== $get('stand_id')) {
+//         $set('stand_id', $standId);
+//     }
 
-        $space = $stand->space;
+//     if (!$standId) {
+//         $set('space_amount', 0);
+//         return;
+//     }
 
-        if ($useSpecialPrice) {
-            $amount = $space * ((float) $specialPrice ?? 0);
-        } elseif ($priceId && $currencyId) {
-            $price = self::getPriceWithCurrency($priceId, $currencyId);
-            $priceAmount = $price?->Currencies->first()?->pivot->amount ?? 0;
-            $amount = $space * $priceAmount;
-        } else {
-            $amount = 0;
-        }
+//     $stand = self::getStandWithCache($standId);
+//     if (!$stand) {
+//         $set('space_amount', 0);
+//         return;
+//     }
 
-        $set('space_amount', $amount);
-        self::calculateSpaceNet($set, $get);
+//     $space = $stand->space;
+//     $priceId = $get('price_id');
+//     $useSpecialPrice = $get('use_special_price');
+//     $specialPrice = $get('price_amount');
+//     $currencyId = $get('currency_id');
+
+//     if ($useSpecialPrice) {
+//         $amount = $space * ((float) $specialPrice ?? 0);
+//     } elseif ($priceId && $currencyId) {
+//         $price = self::getPriceWithCurrency($priceId, $currencyId);
+//         $priceAmount = $price?->Currencies->first()?->pivot->amount ?? 0;
+//         $amount = $space * $priceAmount;
+//     } else {
+//         $amount = 0;
+//     }
+
+//     $set('space_amount', $amount);
+//     self::calculateSpaceNet($set, $get);
+// }
+
+
+public static function calculateSpaceAmount(callable $set, callable $get): void
+{
+    // Check if we have a merged stand from the merge component
+    $mergedStandId = $get('merged_stand_id') ?? null;
+
+    // Use merged stand if available, otherwise use regular stand_id
+    $standId = $mergedStandId ?? $get('stand_id');
+
+    // Update the stand_id field if needed
+    if ($standId && $standId !== $get('stand_id')) {
+        $set('stand_id', $standId);
     }
 
+    if (!$standId) {
+        $set('space_amount', 0);
+        $set('tax_per_sqm_total', 0);
+        $set('base_space_amount', 0);
+        return;
+    }
+
+    $stand = self::getStandWithCache($standId);
+    if (!$stand) {
+        $set('space_amount', 0);
+        $set('tax_per_sqm_total', 0);
+        $set('base_space_amount', 0);
+        return;
+    }
+
+    $space = $stand->space;
+    $priceId = $get('price_id');
+    $useSpecialPrice = $get('use_special_price');
+    $specialPrice = $get('price_amount');
+    $currencyId = $get('currency_id');
+
+    // Calculate base space amount (without tax)
+    $baseAmount = 0;
+    if ($useSpecialPrice) {
+        $baseAmount = $space * ((float) $specialPrice ?? 0);
+    } elseif ($priceId && $currencyId) {
+        $price = self::getPriceWithCurrency($priceId, $currencyId);
+        $priceAmount = $price?->Currencies->first()?->pivot->amount ?? 0;
+        $baseAmount = $space * $priceAmount;
+    }
+
+    // Calculate tax per sqm if enabled
+    $taxPerSqmTotal = 0;
+    $enableTaxPerSqm = $get('enable_tax_per_sqm') ?? false;
+    if ($enableTaxPerSqm) {
+        $taxPerSqmAmount = (float) ($get('tax_per_sqm_amount') ?? 0);
+        $taxPerSqmTotal = $space * $taxPerSqmAmount;
+    }
+
+    // Total space amount = base amount + tax per sqm
+    $totalAmount = $baseAmount + $taxPerSqmTotal;
+
+    $set('space_amount', $totalAmount);
+    $set('base_space_amount', $baseAmount);
+    $set('tax_per_sqm_total', $taxPerSqmTotal);
+    self::calculateSpaceNet($set, $get);
+}
     public static function calculateSpaceNet(callable $set, callable $get): void
     {
         $spaceAmount = (float) ($get('space_amount') ?? 0);
@@ -328,38 +398,73 @@ trait ContractCalculations
         self::calculateTotal($set, $get);
     }
 
+    // public static function calculateTotal(callable $set, callable $get): void
+    // {
+    //     $spaceAmount = (float) ($get('space_amount') ?? 0);
+    //     $sponsorAmount = (float) ($get('sponsor_amount') ?? 0);
+    //     $adsAmount = (float) ($get('advertisment_amount') ?? 0);
+    //     $effAdsAmount = (float) ($get('eff_ads_amount') ?? 0);
+    //     $waterElectricity = (float) ($get('water_electricity_amount') ?? 0);
+    //     $specialDesign = (float) ($get('special_design_amount') ?? 0);
+
+    //     $subTotal1 = $spaceAmount + $sponsorAmount + $adsAmount + $effAdsAmount + $waterElectricity + $specialDesign;
+    //     $set('sub_total_1', $subTotal1);
+
+    //     $spaceDiscount = (float) ($get('space_discount') ?? 0);
+    //     $sponsorDiscount = (float) ($get('sponsor_discount') ?? 0);
+    //     $adsDiscount = (float) ($get('ads_discount') ?? 0);
+    //     $effAdsDiscount = (float) ($get('eff_ads_discount') ?? 0);
+
+    //     $d_i_a = $spaceDiscount + $sponsorDiscount + $adsDiscount + $effAdsDiscount;
+    //     $set('d_i_a', $d_i_a);
+
+    //     $subTotal2 = $subTotal1 - $d_i_a;
+    //     $set('sub_total_2', $subTotal2);
+
+    //     $eventId = $get('event_id');
+    //     $vatRate = self::getEventVatRate($eventId);
+    //     $vatAmount = $subTotal2 * ($vatRate / 100);
+    //     $set('vat_amount', $vatAmount);
+
+    //     $netTotal = $subTotal2 + $vatAmount;
+    //     $set('net_total', $netTotal);
+    // }
+
     public static function calculateTotal(callable $set, callable $get): void
-    {
-        $spaceAmount = (float) ($get('space_amount') ?? 0);
-        $sponsorAmount = (float) ($get('sponsor_amount') ?? 0);
-        $adsAmount = (float) ($get('advertisment_amount') ?? 0);
-        $effAdsAmount = (float) ($get('eff_ads_amount') ?? 0);
-        $waterElectricity = (float) ($get('water_electricity_amount') ?? 0);
-        $specialDesign = (float) ($get('special_design_amount') ?? 0);
+{
+    $spaceAmount = (float) ($get('space_amount') ?? 0);
+    $sponsorAmount = (float) ($get('sponsor_amount') ?? 0);
+    $adsAmount = (float) ($get('advertisment_amount') ?? 0);
+    $effAdsAmount = (float) ($get('eff_ads_amount') ?? 0);
+    $waterElectricity = (float) ($get('water_electricity_amount') ?? 0);
+    $specialDesign = (float) ($get('special_design_amount') ?? 0);
 
-        $subTotal1 = $spaceAmount + $sponsorAmount + $adsAmount + $effAdsAmount + $waterElectricity + $specialDesign;
-        $set('sub_total_1', $subTotal1);
+    // Get tax per sqm total
+    $taxPerSqmTotal = (float) ($get('tax_per_sqm_total') ?? 0);
 
-        $spaceDiscount = (float) ($get('space_discount') ?? 0);
-        $sponsorDiscount = (float) ($get('sponsor_discount') ?? 0);
-        $adsDiscount = (float) ($get('ads_discount') ?? 0);
-        $effAdsDiscount = (float) ($get('eff_ads_discount') ?? 0);
+    // Note: space_amount already includes tax_per_sqm_total, so we don't add it again here
+    $subTotal1 = $spaceAmount + $sponsorAmount + $adsAmount + $effAdsAmount + $waterElectricity + $specialDesign;
+    $set('sub_total_1', $subTotal1);
 
-        $d_i_a = $spaceDiscount + $sponsorDiscount + $adsDiscount + $effAdsDiscount;
-        $set('d_i_a', $d_i_a);
+    $spaceDiscount = (float) ($get('space_discount') ?? 0);
+    $sponsorDiscount = (float) ($get('sponsor_discount') ?? 0);
+    $adsDiscount = (float) ($get('ads_discount') ?? 0);
+    $effAdsDiscount = (float) ($get('eff_ads_discount') ?? 0);
 
-        $subTotal2 = $subTotal1 - $d_i_a;
-        $set('sub_total_2', $subTotal2);
+    $d_i_a = $spaceDiscount + $sponsorDiscount + $adsDiscount + $effAdsDiscount;
+    $set('d_i_a', $d_i_a);
 
-        $eventId = $get('event_id');
-        $vatRate = self::getEventVatRate($eventId);
-        $vatAmount = $subTotal2 * ($vatRate / 100);
-        $set('vat_amount', $vatAmount);
+    $subTotal2 = $subTotal1 - $d_i_a;
+    $set('sub_total_2', $subTotal2);
 
-        $netTotal = $subTotal2 + $vatAmount;
-        $set('net_total', $netTotal);
-    }
+    $eventId = $get('event_id');
+    $vatRate = self::getEventVatRate($eventId);
+    $vatAmount = $subTotal2 * ($vatRate / 100);
+    $set('vat_amount', $vatAmount);
 
+    $netTotal = $subTotal2 + $vatAmount;
+    $set('net_total', $netTotal);
+}
     /**
      * Batch clear all calculation caches for a contract
      * Useful when contract is updated or deleted

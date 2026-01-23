@@ -23,7 +23,7 @@
         })->get() as $price)
                 <div class="flex justify-between items-center my-1">
                     <div class="flex items-center text-xs gap-2">
-                        <input type="checkbox" class="mr-2" @checked($price->id == $contract->price_id)>
+                        <input disabled type="checkbox" class="mr-2" @checked($price->id == $contract->price_id)>
                         <label class="font-bold">{{ $price->name }}</label>
                         <span class="text-[8px] ml-1">{{ $price->description }}</span>
                     </div>
@@ -36,7 +36,7 @@
             @if ($special_price)
                 <div class="flex justify-between items-center my-1">
                     <div class="flex items-center text-xs gap-2">
-                        <input type="checkbox" class="mr-2" @checked($contract->contract_no != 'temp' && $contract->price_id == 0)>
+                        <input disabled type="checkbox" class="mr-2" @checked($contract->contract_no != 'temp' && $contract->price_id == 0)>
                         <label class="font-bold pr-4">Special pavilion, specify:</label>
                     </div>
                     <div class="text-xs">
@@ -46,12 +46,23 @@
                     </div>
                 </div>
             @endif
+@if($contract->enable_tax_per_sqm)
+                <div class="text-right font-bold  mb-[2px] pb-[5px]">
+                    <p>Tax per SQM: {{ $contract->tax_per_sqm_amount }} {{ $currency->CODE }}/SQM</p>
+                </div>
+            @endif
+
         </div>
 
         <div class="w-1/4">
             <div class="text-right font-bold border border-black  mb-[2px] pb-[5px]">
-                <p>Total: {{ $contract->space_amount }} {{ $currency->CODE }}</p>
+                <p>Total: {{ $contract->space_amount - $contract->tax_per_sqm_total }} {{ $currency->CODE }}</p>
             </div>
+            @if($contract->enable_tax_per_sqm)
+                <div class="text-right font-bold border border-black  mb-[2px] pb-[5px]">
+                    <p>Tax: {{ $contract->tax_per_sqm_total }} {{ $currency->CODE }}</p>
+                </div>
+            @endif
             @if ($contract->space_discount > 0)
                 <div class="text-right font-bold border border-black  mb-[2px] pb-[5px]">
                     <p>Discount: {{ $contract->space_discount }} {{ $currency->CODE }}</p>

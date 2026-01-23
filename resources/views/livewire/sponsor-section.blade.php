@@ -76,7 +76,7 @@
                                 @forelse ($event->SponsorPackages as $package)
                                     <tr>
                                         <td style="padding: 2px !important" class="w-2/3 text-left">
-                                            <input type="checkbox" class="mr-2" @checked($package->id == $contract->sponsor_package_id)>
+                                            <input disabled type="checkbox" class="mr-2" @checked($package->id == $contract->sponsor_package_id)>
                                             <label class="font-semibold">{{ $package->title }}</label>
                                         </td>
                                         <td style="padding: 2px !important" class="w-1/3 text-right">
@@ -95,7 +95,7 @@
                             @else
                                 <tr>
                                     <td style="padding: 2px !important" class="w-2/3 text-left">
-                                        <input type="checkbox" class="mr-2" checked>
+                                        <input disabled type="checkbox" class="mr-2" checked>
                                         <label class="font-semibold">Golden Sponsor</label>
                                     </td>
                                     <td style="padding: 2px !important" class="w-1/3 text-right">
@@ -104,7 +104,7 @@
                                 </tr>
                                 <tr>
                                     <td style="padding: 2px !important" class="w-2/3 text-left">
-                                        <input type="checkbox" class="mr-2">
+                                        <input disabled type="checkbox" class="mr-2">
                                         <label class="font-semibold">Golden Sponsor</label>
                                     </td>
                                     <td style="padding: 2px !important" class="w-1/3 text-right">
@@ -113,7 +113,7 @@
                                 </tr>
                                 <tr>
                                     <td style="padding: 2px !important" class="w-2/3 text-left">
-                                        <input type="checkbox" class="mr-2">
+                                        <input disabled type="checkbox" class="mr-2">
                                         <label class="font-semibold">Golden Sponsor</label>
                                     </td>
                                     <td style="padding: 2px !important" class="w-1/3 text-right">

@@ -18,7 +18,7 @@
                         @endif
                         <tr class="text-xs">
                             <td class="w-2/6">
-                                <input type="checkbox" @checked(in_array($package->id . '_' . $option->id, $contract->ads_check ?? [])) class="mr-1">{{ $option->title }}
+                                <input disabled type="checkbox" @checked(in_array($package->id . '_' . $option->id, $contract->ads_check ?? [])) class="mr-1">{{ $option->title }}
                             </td>
                             <td class="w-1/6">
                                 {{ $option->Currencies->where('id', $currency->id)->first()
@@ -27,7 +27,7 @@
                                 {{ $currency->CODE }}</td>
                             @if (!$loop->last)
                                 <td class="w-2/6">
-                                    <input type="checkbox" @checked(in_array($package->id . '_' . $package->AdsOptions[$loop->index + 1]->id, $contract->ads_check ?? []))
+                                    <input disabled type="checkbox" @checked(in_array($package->id . '_' . $package->AdsOptions[$loop->index + 1]->id, $contract->ads_check ?? []))
                                         class="mr-1">{{ $package->AdsOptions[$loop->index + 1]->title }}
                                 </td>
                                 <td class="w-1/6">
