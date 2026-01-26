@@ -14,7 +14,8 @@
         <div class="w-3/4 mr-6">
             <div class="w-full items-center gap-2 mb-[2px] mr-1 border border-black">
                 <label class="pr-10 font-semibold">Stand N° <strong>{{ $contract->Stand->no }}</strong></label>
-                <label class="ml-10 font-semibold">Space <strong>{{ $contract->Stand->space }} m²</strong></label>
+                {{-- <label class="ml-10 font-semibold">Space <strong>{{ $contract->Stand->space }} m²</strong></label> --}}
+                <label class="ml-10 font-semibold">Space <strong>__________m * __________m</strong></label>
             </div>
 
             {{-- @foreach ($contract->Event->Prices->where('currency_id', $currency->id) as $price) --}}

@@ -12,11 +12,13 @@
         {{-- @endif --}}
     </title>
     <style>
-        @media print {
-            body {
+        body {
+                font-family: "univers";
                 margin: 0;
                 padding: 0;
             }
+        @media print {
+
 
             .page {
                 box-shadow: none;
@@ -24,7 +26,7 @@
                 width: 100%;
                 max-height: 297mm;
                 /* A4 height */
-                page-break-after: always;
+                page-break-after:always;
                 /* Ensures each page is printed on a new sheet */
             }
 
@@ -40,12 +42,11 @@
             }
 
             .footer {
-                position: absolute;
-                bottom: 10mm;
+
                 left: 0;
                 right: 0;
                 text-align: center;
-                font-size: 10px;
+                font-size: 7.5px;
             }
         }
     </style>

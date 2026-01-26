@@ -11,26 +11,26 @@
                         <h1>{{ $package->title }}</h1>
                     </div>
                 </div>
-                <table class="w-full">
+                <table class="w-full mr-0">
                     @foreach ($package->EffAdsOptions as $option)
                         @if ($loop->even)
                             @continue
                         @endif
-                        <tr class="text-xs">
-                            <td class="w-2/6">
-                                <input disabled type="checkbox" @checked(in_array($package->id . '_' . $option->id, $contract->eff_ads_check ?? [])) class="mr-1">{{ $option->title }}
+                        <tr class="text-[8px]">
+                            <td class="w-2/6 text-[8px]">
+                                <input disabled type="checkbox" @checked(in_array($package->id . '_' . $option->id, $contract->eff_ads_check ?? [])) class="mr-1 h-3 text-[8px]">{{ $option->title }}
                             </td>
-                            <td class="w-1/6">
+                            <td class="w-1/6 text-[8px]">
                                 {{ $option->Currencies->where('id', $currency->id)->first()
                                     ? $option->Currencies->where('id', $currency->id)->first()->pivot->price
                                     : 0 }}
                                 {{ $currency->CODE }}</td>
                             @if (!$loop->last)
-                                <td class="w-2/6">
+                                <td class="w-2/6 text-[8px]">
                                     <input disabled type="checkbox" @checked(in_array($package->id . '_' . $package->EffAdsOptions[$loop->index + 1]->id, $contract->eff_ads_check ?? []))
-                                        class="mr-1">{{ $package->EffAdsOptions[$loop->index + 1]->title }}
+                                        class="mr-1 h-3 text-[8px]">{{ $package->EffAdsOptions[$loop->index + 1]->title }}
                                 </td>
-                                <td class="w-1/6">
+                                <td class="w-1/6 text-[8px]">
                                     {{ $package->EffAdsOptions[$loop->index + 1]->Currencies->where('id', $currency->id)->first()
                                         ? $package->EffAdsOptions[$loop->index + 1]->Currencies->where('id', $currency->id)->first()->pivot->price
                                         : 0 }}

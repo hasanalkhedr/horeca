@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use AlperenErsoy\FilamentExport\Actions\FilamentExportHeaderAction;
 use App\Filament\Resources\ContractResource\Pages;
 use App\Models\Contract;
 use App\Models\Event;
@@ -1773,6 +1774,9 @@ Forms\Components\Placeholder::make('tax_per_sqm_display')
                 //             }
                 //         }),
                 // ]),
+            ])
+            ->headerActions([
+                FilamentExportHeaderAction::make('export')->label('Export Contracts')
             ])
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make(),

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use AlperenErsoy\FilamentExport\Actions\FilamentExportHeaderAction;
 use App\Filament\Resources\StandResource\Pages;
 use App\Filament\Resources\StandResource\RelationManagers;
 use App\Filament\Resources\StandResource\Widgets\StandSpaceStatsWidget;
@@ -181,7 +182,9 @@ class StandResource extends Resource
                     ->label('Deductible')
                     ->boolean()
                     ->trueIcon('heroicon-o-check-circle')
-                    ->falseIcon('heroicon-o-x-circle'),
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
 
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
@@ -200,7 +203,9 @@ class StandResource extends Resource
                     ->label('Parent Stand')
                     ->default('-')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
 
                 Tables\Columns\TextColumn::make('merge_info')
                     ->label('Merge Group')
@@ -211,10 +216,12 @@ class StandResource extends Resource
                             return "Parent of " . $record->mergedStands()->count() . " stands";
                         }
                         return '-';
-                    }),
+                    })
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
 
-                Tables\Columns\TextColumn::make('Contract.contract_no')
-                    ->label('Contract No.')
+                Tables\Columns\TextColumn::make('Contract.Company.name')
+                    ->label('Client info')
                     ->default('-'),
             ])
             ->filters([
@@ -570,6 +577,7 @@ class StandResource extends Resource
                     })
                     ->deselectRecordsAfterCompletion(),
 
+
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
                         ->before(function ($records) {
@@ -580,6 +588,9 @@ class StandResource extends Resource
                             }
                         }),
                 ]),
+            ])
+            ->headerActions([
+                FilamentExportHeaderAction::make('export')->label('Export Stands')
             ])
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make(),
@@ -593,8 +604,6 @@ class StandResource extends Resource
             RelationManagers\MergedStandsRelationManager::class,
         ];
     }
-
-
     public static function getWidgets(): array
     {
         return [

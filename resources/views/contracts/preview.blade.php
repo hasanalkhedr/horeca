@@ -13,7 +13,7 @@
 @section('content')
     <!-- Page 1 -->
     <div
-        class="page mx-auto bg-white min-h-[297mm] max-w-[210mm] shadow-lg print:shadow-none px-[7mm] py-[5mm] my-8 print:my-0 relative">
+        class="page mx-auto bg-white max-h-[297mm] max-w-[210mm] shadow-lg print:shadow-none px-[5mm] py-[2mm] my-2 print:my-0 relative print:mx-0 print:px-0   ">
         @foreach ($contract->Report->components as $component)
             @livewire($component, [
                 $contract,
@@ -37,7 +37,7 @@
     </div>
     <!-- Page 2: Terms and Conditions -->
     <div
-        class="page mx-auto bg-white min-h-[297mm] max-w-[210mm] shadow-lg print:shadow-none px-[7mm] py-[5mm] my-8 print:my-0 relative">
+        class="page mx-auto bg-white max-h-[297mm] max-w-[210mm] shadow-lg print:shadow-none px-[5mm] py-[2mm] my-2 print:my-0 relative print:mx-0 print:px-0">
         @livewire('footer-component')
     </div>
 @endsection
