@@ -363,7 +363,6 @@ class ContractResource extends Resource
                                             // When disabling merge mode, clear merge selections
                                             $set('merge_stands', []);
                                             $set('merged_stand_id', null);
-                                            $set('use_first_as_parent', true);
                                             $set('suggested_merge_no', '');
                                         }
                                     })
@@ -404,40 +403,10 @@ class ContractResource extends Resource
                                         if ($state) {
                                             $set('merge_stands', []);
                                             $set('merged_stand_id', null);
-                                            $set('use_first_as_parent', true);
                                         }
                                     })
-                                    ->visible(fn(callable $get) => !$get('enable_merge_mode')),
-
-                                Forms\Components\Placeholder::make('stand_space')
-                                    ->label('Stand Space')
-                                    ->content(function (callable $get) {
-                                        $standId = $get('stand_id');
-                                        if (!$standId) {
-                                            return 'Select a stand';
-                                        }
-
-                                        $formData = self::loadFormData($get);
-                                        $stand = $formData['stands']->firstWhere('id', $standId);
-
-                                        if (!$stand) {
-                                            return 'N/A';
-                                        }
-
-                                        if ($stand->is_merged && !$stand->parent_stand_id) {
-                                            $childStands = $stand->getAllMergeGroupStands();
-                                            $childList = $childStands->where('id', '!=', $standId)
-                                                ->pluck('no')
-                                                ->implode(', ');
-
-                                            return "{$stand->space} sqm (Merged from: {$childList})";
-                                        }
-
-                                        return "{$stand->space} sqm";
-                                    })
-                                    ->columnSpan(1)
-                                    ->visible(fn(callable $get) => !$get('enable_merge_mode')),
-
+                                    ->visible(fn(callable $get) => !$get('enable_merge_mode') && $get('show_after_merge')),
+Hidden::make('show_after_merge')->default(true)->dehydrated(),
                                 // MERGE MODE SECTION (only visible when merge mode is enabled)
                                 Forms\Components\Placeholder::make('merge_mode_header')
                                     ->label('Merge Mode Active')
@@ -449,10 +418,6 @@ class ContractResource extends Resource
                                 // Hidden fields for merge tracking
                                 Forms\Components\Hidden::make('merged_stand_id')
                                     ->dehydrated(false),
-
-                                // Forms\Components\Hidden::make('use_first_as_parent')
-                                //     ->default(true)
-                                //     ->dehydrated(false),
 
                                 // Merge functionality buttons (only in merge mode)
                                 Forms\Components\Actions::make([
@@ -573,17 +538,10 @@ class ContractResource extends Resource
                                         $totalSpace = $stands->sum('space');
                                         $standNumbers = $stands->pluck('no')->sort()->values();
                                         $suggestedNo = $get('suggested_merge_no') ?? $standNumbers->implode('-') . '-M';
-                                        $useFirstAsParent = $get('use_first_as_parent') ?? true;
 
                                         $info = "✅ Selected stands: " . $standNumbers->implode(', ') . "\n";
                                         $info .= "📏 Total space: {$totalSpace} sqm\n";
-
-                                        if ($useFirstAsParent) {
-                                            $info .= "🎯 First stand (#{$firstStand->no}) will become the parent\n";
-                                        } else {
-                                            $info .= "🆕 A new parent stand will be created\n";
-                                        }
-
+                                        $info .= "🎯 First stand (#{$firstStand->no}) will become the parent\n";
                                         $info .= "🔢 New stand number: {$suggestedNo}";
 
                                         return $info;
@@ -594,34 +552,6 @@ class ContractResource extends Resource
                                 // Merge options (only in merge mode)
                                 Forms\Components\Fieldset::make('Merge Options')
                                     ->schema([
-                                        // Forms\Components\Toggle::make('use_first_as_parent')
-                                        //     ->label('Use first selected stand as parent?')
-                                        //     ->default(true)
-                                        //     ->helperText('If checked, the first selected stand becomes the parent. If unchecked, a new parent stand is created.')
-                                        //     ->reactive()
-                                        //     ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                        //         $mergeStands = $get('merge_stands') ?? [];
-                                        //         $standIds = collect($mergeStands)
-                                        //             ->pluck('stand_id')
-                                        //             ->filter()
-                                        //             ->unique()
-                                        //             ->toArray();
-
-                                        //         if (count($standIds) >= 1) {
-                                        //             $stands = \App\Models\Stand::whereIn('id', $standIds)->get();
-                                        //             $firstStand = $stands->first();
-
-                                        //             if ($state) {
-                                        //                 // Use first stand number as base
-                                        //                 $set('suggested_merge_no', $firstStand->no . '-M');
-                                        //             } else {
-                                        //                 // Generate new number
-                                        //                 $standNumbers = $stands->pluck('no')->sort()->values();
-                                        //                 $set('suggested_merge_no', $standNumbers->implode('-') . '-M');
-                                        //             }
-                                        //         }
-                                        //     }),
-
                                         Forms\Components\TextInput::make('suggested_merge_no')
                                             ->label('New Stand Number')
                                             ->required()
@@ -635,12 +565,6 @@ class ContractResource extends Resource
 
                                                 if (count($standIds) >= 1) {
                                                     $stands = \App\Models\Stand::whereIn('id', $standIds)->get();
-                                                    $firstStand = $stands->first();
-                                                    // $useFirstAsParent = $get('use_first_as_parent') ?? true;
-
-                                                    // if ($useFirstAsParent) {
-                                                    //     return $firstStand->no . '-M';
-                                                    // } else {
                                                     $standNumbers = $stands->pluck('no')->sort()->values();
                                                     return $standNumbers->implode('-') . '-M';
                                                     // }
@@ -676,19 +600,12 @@ class ContractResource extends Resource
                                             $standList = $stands->pluck('no')->sort()->implode(', ');
                                             $totalSpace = $stands->sum('space');
                                             $suggestedNo = $get('suggested_merge_no');
-                                            $useFirstAsParent = $get('use_first_as_parent') ?? true;
                                             $firstStand = $stands->first();
 
                                             $description = "You are about to merge the following stands:\n";
                                             $description .= "Stands: {$standList}\n";
                                             $description .= "Total space: {$totalSpace} sqm\n";
-
-                                            if ($useFirstAsParent) {
-                                                $description .= "First stand (#{$firstStand->no}) will become the parent\n";
-                                            } else {
-                                                $description .= "A new parent stand will be created\n";
-                                            }
-
+                                            $description .= "First stand (#{$firstStand->no}) will become the parent\n";
                                             $description .= "New stand number: {$suggestedNo}\n\n";
                                             $description .= "This action cannot be undone.";
 
@@ -756,7 +673,7 @@ class ContractResource extends Resource
                                             }
 
                                             // Get event to access category_id
-                                            $event = \App\Models\Event::find($eventId);
+                                            $event = Event::find($eventId);
                                             if (!$event) {
                                                 Notification::make()
                                                     ->title('Error')
@@ -786,38 +703,16 @@ class ContractResource extends Resource
                                                 return;
                                             }
 
-                                            // $useFirstAsParent = $get('use_first_as_parent') ?? true;
                                             $parentStand = null;
 
-                                            // if ($useFirstAsParent) {
-                                            //     // Use first stand as parent (same logic as Stand resource)
-                                            //     $parentStand = $firstStand;
-                                            //     $parentStand->update([
-                                            //         'no' => $newStandNo,
-                                            //         'space' => $totalSpace,
-                                            //         'is_merged' => true,
-                                            //         'original_no' => $firstStand->no,
-                                            //     ]);
-                                            // } else {
-                                            // Create new parent stand
-                                            $parentStand = \App\Models\Stand::create([
-                                                'no' => $newStandNo,
-                                                'space' => $totalSpace,
-                                                'category_id' => $firstStand->category_id ?? $event->category_id,
-                                                'event_id' => $eventId,
-                                                'deductable' => $firstStand->deductable,
-                                                'is_merged' => true,
-                                                'status' => 'Available',
-                                                'original_no' => null,
-                                            ]);
-
-                                            // Mark first stand as merged child
-                                            $firstStand->update([
-                                                'parent_stand_id' => $parentStand->id,
-                                                'is_merged' => true,
-                                                'status' => 'Available',
-                                            ]);
-                                            // }
+                                                 // Use first stand as parent (same logic as Stand resource)
+                                                 $parentStand = $firstStand;
+                                                 $parentStand->update([
+                                                     'no' => $newStandNo,
+                                                     'space' => $totalSpace,
+                                                     'is_merged' => true,
+                                                     'original_no' => $firstStand->no,
+                                                 ]);
 
                                             // Mark other stands as merged children
                                             foreach ($otherStands as $stand) {
@@ -836,8 +731,8 @@ class ContractResource extends Resource
                                             // Clear merge selections
                                             $set('merge_stands', []);
                                             $set('suggested_merge_no', '');
-                                            $set('use_first_as_parent', true);
 
+                                            $set('show_after_merge', false);
                                             // Clear form cache
                                             self::clearFormCache($eventId, $reportId);
 

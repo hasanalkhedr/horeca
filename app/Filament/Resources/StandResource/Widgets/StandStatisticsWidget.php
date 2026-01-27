@@ -12,28 +12,30 @@ class StandStatisticsWidget extends BaseWidget
 
     protected function getStats(): array
     {
+
+    $stands = Stand::where('is_merged', false)->orWhere('parent_stand_id', null)->get();
         // Calculate total statistics
-        $totalStands = Stand::count();
-        $totalSpace = Stand::sum('space');
+        $totalStands = $stands->count();
+        $totalSpace = $stands->sum('space');
 
         // Calculate sold statistics
-        $soldStands = Stand::where('status', 'Sold')->count();
-        $soldSpace = Stand::where('status', 'Sold')->sum('space');
+        $soldStands = $stands->where('status', 'Sold')->count();
+        $soldSpace = $stands->where('status', 'Sold')->sum('space');
         $soldPercentage = $totalStands > 0 ? round(($soldStands / $totalStands) * 100, 1) : 0;
         $soldSpacePercentage = $totalSpace > 0 ? round(($soldSpace / $totalSpace) * 100, 1) : 0;
 
         // Calculate available statistics
-        $availableStands = Stand::where('status', 'Available')->count();
-        $availableSpace = Stand::where('status', 'Available')->sum('space');
+        $availableStands = $stands->where('status', 'Available')->count();
+        $availableSpace = $stands->where('status', 'Available')->sum('space');
         $availablePercentage = $totalStands > 0 ? round(($availableStands / $totalStands) * 100, 1) : 0;
         $availableSpacePercentage = $totalSpace > 0 ? round(($availableSpace / $totalSpace) * 100, 1) : 0;
 
         // Calculate reserved statistics
-        $reservedStands = Stand::where('status', 'Reserved')->count();
-        $reservedSpace = Stand::where('status', 'Reserved')->sum('space');
+        $reservedStands = $stands->where('status', 'Reserved')->count();
+        $reservedSpace = $stands->where('status', 'Reserved')->sum('space');
 
         // Calculate deductible statistics
-        $deductibleStands = Stand::where('deductable', true)->count();
+        $deductibleStands = $stands->where('deductable', true)->count();
         $deductiblePercentage = $totalStands > 0 ? round(($deductibleStands / $totalStands) * 100, 1) : 0;
 
         return [
@@ -44,11 +46,11 @@ class StandStatisticsWidget extends BaseWidget
                 ->color('danger')
                 ->chart($this->getStatusTrend('Sold')),
 
-            Stat::make('Sold Stands', $soldStands)
-                ->description("{$soldPercentage}% of total stands")
-                ->descriptionIcon('heroicon-o-map-pin')
-                ->color('danger')
-                ->chart($this->getStatusTrend('Sold', 'count')),
+            // Stat::make('Sold Stands', $soldStands)
+            //     ->description("{$soldPercentage}% of total stands")
+            //     ->descriptionIcon('heroicon-o-map-pin')
+            //     ->color('danger')
+            //     ->chart($this->getStatusTrend('Sold', 'count')),
 
             // Available Statistics
             Stat::make('Available Space', number_format($availableSpace, 2) . ' sqm')
@@ -57,11 +59,11 @@ class StandStatisticsWidget extends BaseWidget
                 ->color('success')
                 ->chart($this->getStatusTrend('Available')),
 
-            Stat::make('Available Stands', $availableStands)
-                ->description("{$availablePercentage}% of total stands")
-                ->descriptionIcon('heroicon-o-map-pin')
-                ->color('success')
-                ->chart($this->getStatusTrend('Available', 'count')),
+            // Stat::make('Available Stands', $availableStands)
+            //     ->description("{$availablePercentage}% of total stands")
+            //     ->descriptionIcon('heroicon-o-map-pin')
+            //     ->color('success')
+            //     ->chart($this->getStatusTrend('Available', 'count')),
 
             // Total Statistics
             Stat::make('Total Space', number_format($totalSpace, 2) . ' sqm')
@@ -77,10 +79,10 @@ class StandStatisticsWidget extends BaseWidget
                 ->color('warning'),
 
             // Deductible
-            Stat::make('Deductible Stands', $deductibleStands)
-                ->description("{$deductiblePercentage}% of total")
-                ->descriptionIcon('heroicon-o-receipt-percent')
-                ->color('warning'),
+            // Stat::make('Deductible Stands', $deductibleStands)
+            //     ->description("{$deductiblePercentage}% of total")
+            //     ->descriptionIcon('heroicon-o-receipt-percent')
+            //     ->color('warning'),
         ];
     }
 
@@ -121,7 +123,7 @@ class StandStatisticsWidget extends BaseWidget
         // Get last 7 days of total space
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i);
-            $value = Stand::whereDate('created_at', '<=', $date)->sum('space');
+            $value = Stand::where('is_merged', false)->orWhere('parent_stand_id', null)->whereDate('created_at', '<=', $date)->sum('space');
             $data[] = $value;
         }
 

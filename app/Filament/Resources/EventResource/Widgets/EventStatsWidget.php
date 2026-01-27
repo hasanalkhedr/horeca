@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\EventResource\Widgets;
 
 use App\Models\Event;
+use App\Models\Stand;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -18,7 +19,10 @@ class EventStatsWidget extends BaseWidget
         $spaceToSell = Event::sum('space_to_sell');
         $remainingToSell = Event::sum('remaining_space_to_sell');
 
-        $totalStands = Event::withCount('Stands')->get()->sum('stands_count');
+
+        $stands = Stand::where('is_merged', false)->orWhere('parent_stand_id', null)->get();
+
+        $totalStands = $stands->count();
         $soldStands = Event::all()->sum(fn ($event) => $event->soldStands()->count());
 
         return [

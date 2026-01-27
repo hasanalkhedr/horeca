@@ -14,6 +14,7 @@ use Filament\Forms;
 use Filament\Forms\Components\Repeater;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -369,5 +370,12 @@ class ListStands extends ListRecords
     public function getHeaderWidgetsColumns(): int|array
     {
         return 7;
+    }
+
+    protected function getTableQuery(): Builder
+    {
+        return parent::getTableQuery()
+            ->where('is_merged', false)
+            ->orWhere('parent_stand_id', null);
     }
 }

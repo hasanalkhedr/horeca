@@ -420,36 +420,39 @@ class EventResource extends Resource
                     ->suffix(' sqm')
                     ->numeric()
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('space_to_sell')
                     ->label('To Sell')
                     ->suffix(' sqm')
                     ->numeric()
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('remaining_space_to_sell')
                     ->label('Remaining')
                     ->suffix(' sqm')
                     ->numeric()
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('free_space')
                     ->label('Free Space')
                     ->suffix(' sqm')
                     ->numeric()
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('vat_rate')
                     ->label('VAT')
                     ->suffix('%')
                     ->numeric()
                     ->sortable()
-                    ->toggleable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime('d/m/Y H:i')

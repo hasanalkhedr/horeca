@@ -23,7 +23,7 @@ class ListEvents extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
-            EventStatsWidget::class,
+            //EventStatsWidget::class,
         ];
     }
 }

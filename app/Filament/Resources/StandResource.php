@@ -224,6 +224,7 @@ class StandResource extends Resource
                     ->label('Client info')
                     ->default('-'),
             ])
+            ->deferLoading()
             ->filters([
                 Tables\Filters\SelectFilter::make('event_id')
                     ->label('Event')
@@ -244,32 +245,31 @@ class StandResource extends Resource
                         'Available' => 'Available',
                         'Sold' => 'Sold',
                         'Reserved' => 'Reserved',
-                        'Merged' => 'Merged',
                     ]),
 
                 Tables\Filters\TernaryFilter::make('deductable')
                     ->label('Deductible'),
 
                 // Add merge status filter
-                Tables\Filters\SelectFilter::make('merge_status')
-                    ->label('Merge Status')
-                    ->options([
-                        'parent' => 'Parent (Merged Stands)',
-                        'child' => 'Child (Merged into another)',
-                        'none' => 'Not Merged',
-                    ])
-                    ->query(function (Builder $query, array $data) {
-                        if (!isset($data['value'])) {
-                            return $query;
-                        }
+                // Tables\Filters\SelectFilter::make('merge_status')
+                //     ->label('Merge Status')
+                //     ->options([
+                //         'parent' => 'Parent (Merged Stands)',
+                //         'child' => 'Child (Merged into another)',
+                //         'none' => 'Not Merged',
+                //     ])
+                //     ->query(function (Builder $query, array $data) {
+                //         if (!isset($data['value'])) {
+                //             return $query;
+                //         }
 
-                        return match ($data['value']) {
-                            'parent' => $query->where('is_merged', true),
-                            'child' => $query->whereNotNull('parent_stand_id'),
-                            'none' => $query->where('is_merged', false)->whereNull('parent_stand_id'),
-                            default => $query,
-                        };
-                    }),
+                //         return match ($data['value']) {
+                //             'parent' => $query->where('is_merged', true),
+                //             'child' => $query->whereNotNull('parent_stand_id'),
+                //             'none' => $query->where('is_merged', false)->whereNull('parent_stand_id'),
+                //             default => $query,
+                //         };
+                //     }),
             ], layout: FiltersLayout::AboveContent)->filtersFormColumns(5)
             ->actions([
                 Tables\Actions\ActionGroup::make([
@@ -314,18 +314,6 @@ class StandResource extends Resource
                                 ->required()
                                 ->default(fn(Stand $record) => $record->no . '-M')
                                 ->helperText('This will be the main stand number for the merged group'),
-
-                            Forms\Components\Toggle::make('keep_original_stand')
-                                ->label('Keep current stand as parent?')
-                                ->default(true)
-                                ->helperText('If checked, current stand becomes the parent. If unchecked, a new parent stand is created.')
-                                ->reactive(),
-
-                            Forms\Components\TextInput::make('parent_stand_no')
-                                ->label('Parent Stand Number')
-                                ->required()
-                                ->default(fn(Stand $record) => $record->no . '-M')
-                                ->visible(fn(callable $get) => !$get('keep_original_stand')),
                         ])
                         ->action(function (Stand $record, array $data) {
                             $selectedStands = Stand::whereIn('id', $data['stands_to_merge'])->get();
@@ -335,9 +323,6 @@ class StandResource extends Resource
                             foreach ($selectedStands as $stand) {
                                 $totalSpace += $stand->space;
                             }
-
-                            if ($data['keep_original_stand'] ?? true) {
-                                // Use current stand as parent
                                 $parentStand = $record;
                                 $parentStand->update([
                                     'no' => $data['new_stand_no'],
@@ -345,26 +330,6 @@ class StandResource extends Resource
                                     'is_merged' => true,
                                     'original_no' => $record->no,
                                 ]);
-                            } else {
-                                // Create new parent stand
-                                $parentStand = Stand::create([
-                                    'no' => $data['parent_stand_no'],
-                                    'space' => $totalSpace,
-                                    'category_id' => $record->category_id,
-                                    'event_id' => $record->event_id,
-                                    'deductable' => $record->deductable,
-                                    'is_merged' => true,
-                                    'status' => 'Available',
-                                    'original_no' => null,
-                                ]);
-
-                                // Mark current stand as merged child
-                                $record->update([
-                                    'parent_stand_id' => $parentStand->id,
-                                    'is_merged' => true,
-                                    'status' => 'Available',
-                                ]);
-                            }
 
                             // Link selected stands to parent stand as merged children
                             foreach ($selectedStands as $stand) {
@@ -390,7 +355,7 @@ class StandResource extends Resource
                         ->size('xs')
                         ->visible(function (Stand $record) {
                             // Show for any stand that is part of a merge group
-                            return $record->parentStand || $record->is_merged;
+                            return ($record->parentStand || $record->is_merged) && $record->status == 'Available';
                         })
                         ->form(function (Stand $record) {
                             // Get all stands in the merge group
@@ -415,15 +380,6 @@ class StandResource extends Resource
                                     ->default([$record->id]) // Pre-select the current stand
                                     ->helperText('Select one or more stands to separate from the merged group.'),
 
-                                Forms\Components\Radio::make('unmerge_action')
-                                    ->label('Action for Selected Stands')
-                                    ->options([
-                                        'restore' => 'Restore as individual stands',
-                                        'delete' => 'Delete stands',
-                                    ])
-                                    ->default('restore')
-                                    ->required(),
-
                                 Forms\Components\Radio::make('remaining_action')
                                     ->label('Action for Remaining Stands')
                                     ->options([
@@ -447,15 +403,10 @@ class StandResource extends Resource
 
                             // Handle selected stands
                             foreach ($selectedStands as $stand) {
-                                if ($data['unmerge_action'] === 'restore') {
                                     $stand->update([
                                         'parent_stand_id' => null,
                                         'is_merged' => false,
-                                        //'status' => 'Available',
                                     ]);
-                                } else {
-                                    $stand->delete();
-                                }
                             }
 
                             // Handle remaining stands
@@ -468,6 +419,8 @@ class StandResource extends Resource
                                         $newParent->update([
                                             'is_merged' => true,
                                             'parent_stand_id' => null,
+                                            'no' => $newParent->no . '-M',
+                                            'original_no' => $newParent->no
                                         ]);
 
                                         // Update other remaining stands to point to new parent
@@ -483,12 +436,17 @@ class StandResource extends Resource
                                             $newParentSpace += $stand->space;
                                         }
                                         $newParent->update(['space' => $newParentSpace]);
+                                        $mainStand->update([
+                                        'no' => $mainStand->original_no,
+                                        'space' => $mainStand->space - $newParent->space,
+                                        'is_merged' => false,
+                                    ]);
                                     } else {
                                         // Main stand still exists, recalculate its space
-                                        $mainStandSpace = $mainStand->space;
-                                        foreach ($remainingStands->where('id', '!=', $mainStand->id) as $stand) {
-                                            $mainStandSpace += $stand->space;
-                                        }
+                                        $mainStandSpace = $mainStand->space - $selectedStands->sum('space');
+                                        // foreach ($remainingStands->where('id', '!=', $mainStand->id) as $stand) {
+                                        //     $mainStandSpace += $stand->space;
+                                        // }
                                         $mainStand->update(['space' => $mainStandSpace]);
                                     }
                                 } else {
@@ -500,6 +458,12 @@ class StandResource extends Resource
                                             'status' => 'Available',
                                         ]);
                                     }
+                                    $mainStand->update([
+                                        'no' => $mainStand->original_no,
+                                        'space' => $mainStand->space - $mergeGroupStands->whereNotIn('id',[$mainStand->id])->sum('space'),
+                                        'is_merged' => false,
+                                        'parent_stand_id' => null,
+                                    ]);
                                 }
                             }
 
