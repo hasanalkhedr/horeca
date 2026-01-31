@@ -7,12 +7,15 @@ use App\Filament\Resources\ContractResource\Pages;
 use App\Models\Contract;
 use App\Models\Event;
 use App\Models\Report;
+use App\Models\Stand;
 use App\Models\User;
 use App\Models\Company;
 use App\Models\Client;
 use App\Filament\Helpers\ContractCalculations;
+use Closure;
 use Filament\Forms;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -406,7 +409,7 @@ class ContractResource extends Resource
                                         }
                                     })
                                     ->visible(fn(callable $get) => !$get('enable_merge_mode') && $get('show_after_merge')),
-Hidden::make('show_after_merge')->default(true)->dehydrated(),
+                                Hidden::make('show_after_merge')->default(true)->dehydrated(),
                                 // MERGE MODE SECTION (only visible when merge mode is enabled)
                                 Forms\Components\Placeholder::make('merge_mode_header')
                                     ->label('Merge Mode Active')
@@ -705,14 +708,14 @@ Hidden::make('show_after_merge')->default(true)->dehydrated(),
 
                                             $parentStand = null;
 
-                                                 // Use first stand as parent (same logic as Stand resource)
-                                                 $parentStand = $firstStand;
-                                                 $parentStand->update([
-                                                     'no' => $newStandNo,
-                                                     'space' => $totalSpace,
-                                                     'is_merged' => true,
-                                                     'original_no' => $firstStand->no,
-                                                 ]);
+                                            // Use first stand as parent (same logic as Stand resource)
+                                            $parentStand = $firstStand;
+                                            $parentStand->update([
+                                                'no' => $newStandNo,
+                                                'space' => $totalSpace,
+                                                'is_merged' => true,
+                                                'original_no' => $firstStand->no,
+                                            ]);
 
                                             // Mark other stands as merged children
                                             foreach ($otherStands as $stand) {
@@ -875,152 +878,261 @@ Hidden::make('show_after_merge')->default(true)->dehydrated(),
                         //             ]),
                         //     ])->collapsible(),
                         Forms\Components\Section::make('Pricing')
-    ->schema([
-        Forms\Components\Radio::make('price_id')
-            ->label('Select Price Package')
-            ->options(function (callable $get) {
-                $formData = self::loadFormData($get);
-                $currencyId = $get('currency_id');
+                            ->schema([
+                                Forms\Components\Radio::make('price_id')
+                                    ->label('Select Price Package')
+                                    ->options(function (callable $get) {
+                                        $formData = self::loadFormData($get);
+                                        $currencyId = $get('currency_id');
 
-                if (!$currencyId)
-                    return [];
+                                        if (!$currencyId)
+                                            return [];
 
-                $options = [];
-                foreach ($formData['prices'] as $price) {
-                    $amount = $price->currencies
-                        ->firstWhere('id', $currencyId)?->pivot->amount ?? 0;
-                    $options[$price->id] = "{$price->name} | {$amount}";
-                }
-                return $options;
-            })
-            ->reactive()
-            ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                if ($state) {
-                    $set('use_special_price', false);
-                    $set('price_amount', null);
-                } else {
-                    $set('price_id', null);
-                }
-                self::calculateSpaceAmount($set, $get);
-            }),
+                                        $options = [];
+                                        foreach ($formData['prices'] as $price) {
+                                            $amount = $price->currencies
+                                                ->firstWhere('id', $currencyId)?->pivot->amount ?? 0;
+                                            $options[$price->id] = "{$price->name} | {$amount}";
+                                        }
+                                        return $options;
+                                    })
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                        if ($state) {
+                                            $set('use_special_price', false);
+                                            $set('price_amount', null);
+                                        } else {
+                                            $set('price_id', null);
+                                        }
+                                        self::calculateSpaceAmount($set, $get);
+                                    }),
 
-        Forms\Components\Fieldset::make('Special Price')
-            ->schema([
-                Forms\Components\Toggle::make('use_special_price')
-                    ->label('Use Special Price')
-                    ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                        if ($state) {
-                            $set('price_id', null);
-                        } else {
-                            $set('price_amount', null);
-                        }
-                        self::calculateSpaceAmount($set, $get);
-                    }),
+                                Forms\Components\Fieldset::make('Special Price')
+                                    ->schema([
+                                        Forms\Components\Toggle::make('use_special_price')
+                                            ->label('Use Special Price')
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                                if ($state) {
+                                                    $set('price_id', null);
+                                                } else {
+                                                    $set('price_amount', null);
+                                                }
+                                                self::calculateSpaceAmount($set, $get);
+                                            }),
 
-                Forms\Components\TextInput::make('price_amount')
-                    ->label('Special Price Amount')
-                    ->numeric()
-                    ->default(0)
-                    ->minValue(0)
-                    ->visible(fn(callable $get): bool => $get('use_special_price'))
-                    ->reactive()
-                    ->debounce(500)
-                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                        self::calculateSpaceAmount($set, $get);
-                    }),
-            ]),
+                                        Forms\Components\TextInput::make('price_amount')
+                                            ->label('Special Price Amount')
+                                            ->numeric()
+                                            ->default(0)
+                                            ->minValue(0)
+                                            ->visible(fn(callable $get): bool => $get('use_special_price'))
+                                            ->reactive()
+                                            ->debounce(500)
+                                            ->rules([
+                                                function ($get) {
+                                                    return function (string $attribute, $value, Closure $fail) use($get) {
+                                                        $eventId = $get('event_id');
+                                                        $currencyId = $get('currency_id');
+                                                        if (!$eventId || !$currencyId) {
+                                                            return;
+                                                        }
 
-        // Tax per sqm section
-        Forms\Components\Fieldset::make('Additional Taxes')
-            ->schema([
-                Forms\Components\Toggle::make('enable_tax_per_sqm')
-                    ->label('Enable Tax per Square Meter')
-                    ->reactive()
-                    ->default(false)
-                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                        if (!$state) {
-                            $set('tax_per_sqm_amount', 0);
-                        }
-                        self::calculateSpaceAmount($set, $get);
-                    }),
+                                                        $event = Event::find($eventId);
+                                                        if (!$event) {
+                                                            return;
+                                                        }
 
-                Forms\Components\TextInput::make('tax_per_sqm_amount')
-                    ->label('Tax Amount per Sqm')
-                    ->numeric()
-                    ->default(0)
-                    ->minValue(0)
-                    ->visible(fn(callable $get): bool => $get('enable_tax_per_sqm'))
-                    ->prefix(
-                        fn(callable $get): string =>
-                        self::getCurrencyCode($get)
-                    )
-                    ->reactive()
-                    ->debounce(500)
-                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                        self::calculateSpaceAmount($set, $get);
-                    }),
+                                                        $currency = $event->currencies()
+                                                            ->where('currencies.id', $currencyId)
+                                                            ->first();
 
-                Forms\Components\TextInput::make('tax_per_sqm_total')
-                    ->label('Total Tax Amount')
-                    ->readOnly()
-                    // ->content(function (callable $get) {
-                    //     if (!$get('enable_tax_per_sqm')) {
-                    //         return '0.00 ' . self::getCurrencyCode($get);
-                    //     }
+                                                        if ($currency && $value > 0 && $value < $currency->pivot->min_price) {
+                                                            $fail("Price must be at least {$currency->pivot->min_price}");
+                                                        }
+                                                    };
+                                                },
+                                            ])
+                                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                                // if( (float) $get('price_amount')>0 && (float) $get('price_amount')  <  Event::find($get('event_id'))->Currencies()->where('currencies.id', $get('currency_id'))->first()->pivot->min_price) {
+                                                //     $set('price_amount', 0);
+                                                // }
+                                                self::calculateSpaceAmount($set, $get);
+                                            }),
 
-                    //     $standId = $get('stand_id');
-                    //     $taxAmount = (float) ($get('tax_per_sqm_amount') ?? 0);
+                                        Placeholder::make('min_price_alert')
+                                            ->content(function (callable $get) {
+                                                $event = Event::find($get('event_id'));
+                                                $currency = $event?->currencies()->where('currencies.id', $get('currency_id'))->first();
+                                                $minPrice = $currency?->pivot?->min_price ?? 0;
+                                                $currentPrice = (float) $get('price_amount');
 
-                    //     if (!$standId || $taxAmount <= 0) {
-                    //         return '0.00 ' . self::getCurrencyCode($get);
-                    //     }
+                                                return "Price ($currentPrice) is below minimum required price ($minPrice)";
+                                            })
+                                            ->visible(function (callable $get) {
+                                                $event = Event::find($get('event_id'));
+                                                if (!$event)
+                                                    return false;
 
-                    //     $stand = \App\Models\Stand::find($standId);
-                    //     if (!$stand) {
-                    //         return '0.00 ' . self::getCurrencyCode($get);
-                    //     }
+                                                $currency = $event->currencies()->where('currencies.id', $get('currency_id'))->first();
+                                                if (!$currency)
+                                                    return false;
 
-                    //     $totalTax = $stand->space * $taxAmount;
-                    //     return number_format($totalTax, 2) . ' ' . self::getCurrencyCode($get);
-                    // })
-                    ->visible(fn(callable $get): bool => $get('enable_tax_per_sqm')),
-            ]),
+                                                $currentPrice = (float) $get('price_amount');
+                                                $minPrice = (float) $currency->pivot->min_price;
 
-        Forms\Components\Grid::make(3)
-            ->schema([
-                Forms\Components\TextInput::make('space_amount')
-                    ->label('Space Amount')
-                    ->numeric()
-                    ->default(0)
-                    ->readOnly()
-                    ->prefix(
-                        fn(callable $get): string =>
-                        self::getCurrencyCode($get)
-                    ),
+                                                return $currentPrice > 0 && $currentPrice < $minPrice;
+                                            })
+                                            ->helperText('Price must be at least the minimum price')
+                                            ->extraAttributes([
+                                                'class' => 'border-l-4 border-red-500 bg-red-50 p-4 dark:bg-red-900/20',
+                                            ]),
+                                    ]),
 
-                Forms\Components\TextInput::make('space_discount')
-                    ->label('Discount')
-                    ->numeric()
-                    ->minValue(0)
-                    ->reactive()
-                    ->debounce(500)
-                    ->default(0)
-                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                        self::calculateSpaceNet($set, $get);
-                    }),
+                                // Tax per sqm section
+                                Forms\Components\Fieldset::make('Additional Taxes')
+                                    ->schema([
+                                        Forms\Components\Toggle::make('enable_tax_per_sqm')
+                                            ->label('Enable Tax per Square Meter')
+                                            ->reactive()
+                                            ->default(false)
+                                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                                if (!$state) {
+                                                    $set('tax_per_sqm_amount', 0);
+                                                }
+                                                self::calculateSpaceAmount($set, $get);
+                                            }),
 
-                Forms\Components\TextInput::make('space_net')
-                    ->label('Net Amount')
-                    ->numeric()
-                    ->default(0)
-                    ->readOnly()
-                    ->prefix(
-                        fn(callable $get): string =>
-                        self::getCurrencyCode($get)
-                    ),
-            ]),
-    ])->collapsible(),
+                                        Forms\Components\TextInput::make('tax_per_sqm_amount')
+                                            ->label('Tax Amount per Sqm')
+                                            ->numeric()
+                                            ->default(0)
+                                            ->minValue(0)
+                                            ->visible(fn(callable $get): bool => $get('enable_tax_per_sqm'))
+                                            ->prefix(
+                                                fn(callable $get): string =>
+                                                self::getCurrencyCode($get)
+                                            )
+                                            ->reactive()
+                                            ->debounce(500)
+                                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                                self::calculateSpaceAmount($set, $get);
+                                            }),
+
+                                        Forms\Components\TextInput::make('tax_per_sqm_total')
+                                            ->label('Total Tax Amount')
+                                            ->readOnly()
+                                            // ->content(function (callable $get) {
+                                            //     if (!$get('enable_tax_per_sqm')) {
+                                            //         return '0.00 ' . self::getCurrencyCode($get);
+                                            //     }
+
+                                            //     $standId = $get('stand_id');
+                                            //     $taxAmount = (float) ($get('tax_per_sqm_amount') ?? 0);
+
+                                            //     if (!$standId || $taxAmount <= 0) {
+                                            //         return '0.00 ' . self::getCurrencyCode($get);
+                                            //     }
+
+                                            //     $stand = \App\Models\Stand::find($standId);
+                                            //     if (!$stand) {
+                                            //         return '0.00 ' . self::getCurrencyCode($get);
+                                            //     }
+
+                                            //     $totalTax = $stand->space * $taxAmount;
+                                            //     return number_format($totalTax, 2) . ' ' . self::getCurrencyCode($get);
+                                            // })
+                                            ->visible(fn(callable $get): bool => $get('enable_tax_per_sqm')),
+                                    ]),
+
+                                Forms\Components\Grid::make(3)
+                                    ->schema([
+                                        Forms\Components\TextInput::make('space_amount')
+                                            ->label('Space Amount')
+                                            ->numeric()
+                                            ->default(0)
+                                            ->readOnly()
+                                            ->prefix(
+                                                fn(callable $get): string =>
+                                                self::getCurrencyCode($get)
+                                            ),
+
+                                        Forms\Components\TextInput::make('space_discount')
+                                            ->label('Discount')
+                                            ->numeric()
+                                            ->minValue(0)
+                                            ->reactive()
+                                            ->debounce(500)
+                                            ->default(0)
+                                             ->rules([
+                                                function ($get) {
+                                                    return function (string $attribute, $value, Closure $fail) use($get) {
+                                                        $eventId = $get('event_id');
+                                                        $currencyId = $get('currency_id');
+                                                        if (!$eventId || !$currencyId) {
+                                                            return;
+                                                        }
+
+                                                        $event = Event::find($eventId);
+                                                        if (!$event) {
+                                                            return;
+                                                        }
+
+                                                        $currency = $event->currencies()
+                                                            ->where('currencies.id', $currencyId)
+                                                            ->first();
+
+                                                        $minPrice = (float) $currency->pivot->min_price;
+$space = Stand::find($get('stand_id'))?->space;
+$totalSpaceAmount = $get('space_amount');
+                                                        if ($currency && $value > 0 && $totalSpaceAmount - $value < $currency->pivot->min_price * $space) {
+                                                            $fail("With this discount,SQM Price becomes below minimum required price ($minPrice). \nSQM Price must be at least {$currency->pivot->min_price}");
+                                                        }
+                                                    };
+                                                },
+                                            ])
+                                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                                self::calculateSpaceNet($set, $get);
+                                            }),
+
+                                        Forms\Components\TextInput::make('space_net')
+                                            ->label('Net Amount')
+                                            ->numeric()
+                                            ->default(0)
+                                            ->readOnly()
+                                            ->prefix(
+                                                fn(callable $get): string =>
+                                                self::getCurrencyCode($get)
+                                            ),
+                                        Placeholder::make('discount_alert')
+                                            ->content(function (callable $get) {
+                                                $event = Event::find($get('event_id'));
+                                                $currency = $event?->currencies()->where('currencies.id', $get('currency_id'))->first();
+                                                $minPrice = $currency?->pivot?->min_price ?? 0;
+
+                                                return "With this discount,SQM Price becomes below minimum required price ($minPrice)";
+                                            })
+                                            ->visible(function (callable $get) {
+                                                $event = Event::find($get('event_id'));
+                                                if (!$event)
+                                                    return false;
+
+                                                $currency = $event->currencies()->where('currencies.id', $get('currency_id'))->first();
+                                                if (!$currency)
+                                                    return false;
+
+                                                $minPrice = (float) $currency->pivot->min_price;
+$space = Stand::find($get('stand_id'))?->space;
+$totalSpaceAmount = $get('space_amount');
+$discount = $get('space_discount');
+                                                return ($totalSpaceAmount - $discount)>0 && ($totalSpaceAmount - $discount) < $space * $minPrice;
+                                            })
+                                            ->helperText('SQM Price must be at least the minimum price')
+                                            ->extraAttributes([
+                                                'class' => 'border-l-4 border-red-500 bg-red-50 p-4 dark:bg-red-900/20',
+                                            ]),
+                                    ]),
+                            ])->collapsible(),
                     ])->collapsible()
                     ->collapsed()
                     ->visible(function ($get): bool {
@@ -1398,14 +1510,14 @@ Hidden::make('show_after_merge')->default(true)->dehydrated(),
                                                 return number_format($get('sub_total_2') ?? 0, 2) . ' ' .
                                                     $formData['currencyCode'];
                                             }),
-Forms\Components\Placeholder::make('tax_per_sqm_display')
-    ->label('Tax per Sqm Total')
-    ->content(function (callable $get) {
-        $taxPerSqmTotal = $get('tax_per_sqm_total') ?? 0;
-        $formData = self::loadFormData($get);
-        return number_format($taxPerSqmTotal, 2) . ' ' . $formData['currencyCode'];
-    })
-    ->visible(fn(callable $get) => ($get('tax_per_sqm_total') ?? 0) > 0),
+                                        Forms\Components\Placeholder::make('tax_per_sqm_display')
+                                            ->label('Tax per Sqm Total')
+                                            ->content(function (callable $get) {
+                                                $taxPerSqmTotal = $get('tax_per_sqm_total') ?? 0;
+                                                $formData = self::loadFormData($get);
+                                                return number_format($taxPerSqmTotal, 2) . ' ' . $formData['currencyCode'];
+                                            })
+                                            ->visible(fn(callable $get) => ($get('tax_per_sqm_total') ?? 0) > 0),
                                         Forms\Components\Placeholder::make('vat_amount_display')
                                             ->label('VAT Amount')
                                             ->content(function (callable $get) {
@@ -1790,25 +1902,25 @@ Forms\Components\Placeholder::make('tax_per_sqm_display')
         return $data;
     }
 
-private function processContractData(array $data): array
-{
-    // Process stand selection
-    $data = $this->processStandSelection($data);
+    private function processContractData(array $data): array
+    {
+        // Process stand selection
+        $data = $this->processStandSelection($data);
 
-    // Ensure tax per sqm fields are properly set
-    $enableTaxPerSqm = $data['enable_tax_per_sqm'] ?? false;
-    if (!$enableTaxPerSqm) {
-        $data['tax_per_sqm_amount'] = 0;
-        $data['tax_per_sqm_total'] = 0;
+        // Ensure tax per sqm fields are properly set
+        $enableTaxPerSqm = $data['enable_tax_per_sqm'] ?? false;
+        if (!$enableTaxPerSqm) {
+            $data['tax_per_sqm_amount'] = 0;
+            $data['tax_per_sqm_total'] = 0;
+        }
+
+        // Calculate base space amount if not already calculated
+        if (!isset($data['base_space_amount'])) {
+            $data['base_space_amount'] = $data['space_amount'] - ($data['tax_per_sqm_total'] ?? 0);
+        }
+
+        return $data;
     }
-
-    // Calculate base space amount if not already calculated
-    if (!isset($data['base_space_amount'])) {
-        $data['base_space_amount'] = $data['space_amount'] - ($data['tax_per_sqm_total'] ?? 0);
-    }
-
-    return $data;
-}
     protected function beforeCreate(array $data): array
     {
         return $this->processStandSelection($data);
