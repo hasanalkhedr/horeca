@@ -93,7 +93,8 @@ class StandResource extends Resource
                         Forms\Components\Placeholder::make('merge_status')
                             ->label('Merge Status')
                             ->content(function ($record) {
-                                if (!$record) return '-';
+                                if (!$record)
+                                    return '-';
 
                                 if ($record->parentStand) {
                                     return "Child of Stand #{$record->parentStand->no}";
@@ -107,7 +108,8 @@ class StandResource extends Resource
                         Forms\Components\Placeholder::make('merged_stands_count')
                             ->label('Merged Stands')
                             ->content(function ($record) {
-                                if (!$record) return '-';
+                                if (!$record)
+                                    return '-';
 
                                 if ($record->parentStand) {
                                     $main = $record->parentStand;
@@ -122,7 +124,8 @@ class StandResource extends Resource
                         Forms\Components\Placeholder::make('total_merged_space')
                             ->label('Total Merged Space')
                             ->content(function ($record) {
-                                if (!$record) return '-';
+                                if (!$record)
+                                    return '-';
 
                                 if ($record->parentStand) {
                                     $main = $record->parentStand;
@@ -150,6 +153,13 @@ class StandResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(
+                fn(Builder $query) =>
+                $query->where(function ($q) {
+                    $q->where('is_merged', false)
+                        ->orWhereNull('parent_stand_id');
+                })
+            )
             ->columns([
                 Tables\Columns\TextColumn::make('no')
                     ->label('Stand No.')
@@ -236,8 +246,9 @@ class StandResource extends Resource
 
                 Tables\Filters\SelectFilter::make('category_id')
                     ->label('Category')
-                    ->relationship('Category', 'name')
+                    ->relationship('category', 'name')
                     ->searchable()
+                    ->multiple()
                     ->preload(),
 
                 Tables\Filters\SelectFilter::make('status')
@@ -323,13 +334,13 @@ class StandResource extends Resource
                             foreach ($selectedStands as $stand) {
                                 $totalSpace += $stand->space;
                             }
-                                $parentStand = $record;
-                                $parentStand->update([
-                                    'no' => $data['new_stand_no'],
-                                    'space' => $totalSpace,
-                                    'is_merged' => true,
-                                    'original_no' => $record->no,
-                                ]);
+                            $parentStand = $record;
+                            $parentStand->update([
+                                'no' => $data['new_stand_no'],
+                                'space' => $totalSpace,
+                                'is_merged' => true,
+                                'original_no' => $record->no,
+                            ]);
 
                             // Link selected stands to parent stand as merged children
                             foreach ($selectedStands as $stand) {
@@ -403,10 +414,10 @@ class StandResource extends Resource
 
                             // Handle selected stands
                             foreach ($selectedStands as $stand) {
-                                    $stand->update([
-                                        'parent_stand_id' => null,
-                                        'is_merged' => false,
-                                    ]);
+                                $stand->update([
+                                    'parent_stand_id' => null,
+                                    'is_merged' => false,
+                                ]);
                             }
 
                             // Handle remaining stands
@@ -437,10 +448,10 @@ class StandResource extends Resource
                                         }
                                         $newParent->update(['space' => $newParentSpace]);
                                         $mainStand->update([
-                                        'no' => $mainStand->original_no,
-                                        'space' => $mainStand->space - $newParent->space,
-                                        'is_merged' => false,
-                                    ]);
+                                            'no' => $mainStand->original_no,
+                                            'space' => $mainStand->space - $newParent->space,
+                                            'is_merged' => false,
+                                        ]);
                                     } else {
                                         // Main stand still exists, recalculate its space
                                         $mainStandSpace = $mainStand->space - $selectedStands->sum('space');
@@ -460,7 +471,7 @@ class StandResource extends Resource
                                     }
                                     $mainStand->update([
                                         'no' => $mainStand->original_no,
-                                        'space' => $mainStand->space - $mergeGroupStands->whereNotIn('id',[$mainStand->id])->sum('space'),
+                                        'space' => $mainStand->space - $mergeGroupStands->whereNotIn('id', [$mainStand->id])->sum('space'),
                                         'is_merged' => false,
                                         'parent_stand_id' => null,
                                     ]);

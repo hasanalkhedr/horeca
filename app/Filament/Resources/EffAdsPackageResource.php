@@ -20,7 +20,7 @@ class EffAdsPackageResource extends Resource
 {
     protected static ?string $model = EffAdsPackage::class;
 
-    protected static ?string $navigationIcon = 'heroicon-s-gift';
+    protected static ?string $navigationIcon = 'heroicon-s-eye';
     protected static ?string $navigationGroup = 'Settings';
     protected static ?int $navigationSort = 11;
     protected static ?string $navigationLabel = 'Effective Advertisement Packages';

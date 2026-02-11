@@ -19,7 +19,7 @@ class AdsPackageResource extends Resource
 {
     protected static ?string $model = AdsPackage::class;
 
-    protected static ?string $navigationIcon = 'heroicon-s-gift';
+    protected static ?string $navigationIcon = 'heroicon-s-gift-top';
     protected static ?string $navigationGroup = 'Settings';
     protected static ?int $navigationSort = 11;
     protected static ?string $navigationLabel = 'Advertisement Packages';

@@ -497,7 +497,7 @@ class ContractResource extends Resource
 
                                                 foreach ($mergeStands as $item) {
                                                     if (!empty($item['stand_id'])) {
-                                                        $stand = \App\Models\Stand::find($item['stand_id']);
+                                                        $stand = Stand::find($item['stand_id']);
                                                         if ($stand) {
                                                             $totalSpace += $stand->space;
                                                             $standNumbers[] = $stand->no;
@@ -536,7 +536,7 @@ class ContractResource extends Resource
                                             return 'Select at least 2 stands to merge';
                                         }
 
-                                        $stands = \App\Models\Stand::whereIn('id', $standIds)->get();
+                                        $stands = Stand::whereIn('id', $standIds)->get();
                                         $firstStand = $stands->first();
                                         $totalSpace = $stands->sum('space');
                                         $standNumbers = $stands->pluck('no')->sort()->values();
@@ -567,7 +567,7 @@ class ContractResource extends Resource
                                                     ->toArray();
 
                                                 if (count($standIds) >= 1) {
-                                                    $stands = \App\Models\Stand::whereIn('id', $standIds)->get();
+                                                    $stands = Stand::whereIn('id', $standIds)->get();
                                                     $standNumbers = $stands->pluck('no')->sort()->values();
                                                     return $standNumbers->implode('-') . '-M';
                                                     // }
@@ -599,7 +599,7 @@ class ContractResource extends Resource
                                                 ->unique()
                                                 ->toArray();
 
-                                            $stands = \App\Models\Stand::whereIn('id', $standIds)->get();
+                                            $stands = Stand::whereIn('id', $standIds)->get();
                                             $standList = $stands->pluck('no')->sort()->implode(', ');
                                             $totalSpace = $stands->sum('space');
                                             $suggestedNo = $get('suggested_merge_no');
@@ -634,7 +634,7 @@ class ContractResource extends Resource
                                             }
 
                                             // Get the stands from database
-                                            $stands = \App\Models\Stand::whereIn('id', $standIds)->get();
+                                            $stands = Stand::whereIn('id', $standIds)->get();
 
                                             // Sort stands by selection order (maintain first stand)
                                             $firstStandId = $standIds[0];
@@ -693,7 +693,7 @@ class ContractResource extends Resource
                                             $newStandNo = $get('suggested_merge_no');
 
                                             // Check if stand number already exists
-                                            $existingStand = \App\Models\Stand::where('event_id', $eventId)
+                                            $existingStand = Stand::where('event_id', $eventId)
                                                 ->where('no', $newStandNo)
                                                 ->first();
 
@@ -760,7 +760,7 @@ class ContractResource extends Resource
                                             return '';
                                         }
 
-                                        $stand = \App\Models\Stand::find($mergedStandId);
+                                        $stand = Stand::find($mergedStandId);
                                         if (!$stand) {
                                             return '';
                                         }
@@ -1034,7 +1034,7 @@ class ContractResource extends Resource
                                             //         return '0.00 ' . self::getCurrencyCode($get);
                                             //     }
 
-                                            //     $stand = \App\Models\Stand::find($standId);
+                                            //     $stand = Stand::find($standId);
                                             //     if (!$stand) {
                                             //         return '0.00 ' . self::getCurrencyCode($get);
                                             //     }
@@ -1762,7 +1762,7 @@ $discount = $get('space_discount');
 
                 Tables\Actions\EditAction::make()
                     ->label('')
-                    ->visible(fn(Contract $record) => $record->status === Contract::STATUS_DRAFT),
+                    ->visible(fn(Contract $record) => $record->status !== Contract::STATUS_SIGNED_PAID),
                 // Tables\Actions\DeleteAction::make()
                 //     ->before(function (Contract $record) {
                 //         if ($record->Stand) {
@@ -1822,12 +1822,12 @@ $discount = $get('space_discount');
     {
         return [
             NavigationItem::make('All Contracts')
-                ->icon('heroicon-o-list-bullet')
+                ->icon('heroicon-s-list-bullet')
                 ->url(static::getUrl('index'))
                 ->isActiveWhen(fn(): bool => request()->routeIs(static::getRouteBaseName() . '.index')),
 
             NavigationItem::make('New Contract')
-                ->icon('heroicon-o-plus-circle')
+                ->icon('heroicon-s-plus-circle')
                 ->url(static::getUrl('create'))
                 ->isActiveWhen(fn(): bool => request()->routeIs(static::getRouteBaseName() . '.create'))
                 ->badge(function () {
@@ -1839,23 +1839,23 @@ $discount = $get('space_discount');
 
             // Optional: Add quick filters
             NavigationItem::make('Drafts')
-                ->icon('heroicon-o-document')
+                ->icon('heroicon-s-document')
                 ->url(static::getUrl('index', ['tableFilters[status][value]' => Contract::STATUS_DRAFT]))
                 ->badge(fn() => static::getModel()::where('status', Contract::STATUS_DRAFT)->count())
             ,
 
             NavigationItem::make('INT')
-                ->icon('heroicon-o-document-check')
+                ->icon('heroicon-s-document-arrow-up')
                 ->url(static::getUrl('index', ['tableFilters[status][value]' => Contract::STATUS_INTERESTED]))
                 ->badge(fn() => static::getModel()::where('status', Contract::STATUS_INTERESTED)->count())
             ,
             NavigationItem::make('S&NP')
-                ->icon('heroicon-o-document-check')
+                ->icon('heroicon-s-document-check')
                 ->url(static::getUrl('index', ['tableFilters[status][value]' => Contract::STATUS_SIGNED_NOT_PAID]))
                 ->badge(fn() => static::getModel()::where('status', Contract::STATUS_SIGNED_NOT_PAID)->count())
             ,
             NavigationItem::make('S&P')
-                ->icon('heroicon-o-document-check')
+                ->icon('heroicon-s-document-currency-dollar')
                 ->url(static::getUrl('index', ['tableFilters[status][value]' => Contract::STATUS_SIGNED_PAID]))
                 ->badge(fn() => static::getModel()::where('status', Contract::STATUS_SIGNED_PAID)->count())
             ,
@@ -1882,7 +1882,7 @@ $discount = $get('space_discount');
     {
         // When editing, check if the stand is merged
         if (!empty($data['stand_id'])) {
-            $stand = \App\Models\Stand::find($data['stand_id']);
+            $stand = Stand::find($data['stand_id']);
             if ($stand && $stand->is_merged && !$stand->parent_stand_id) {
                 $data['merged_stand_id'] = $stand->id;
 
@@ -1923,14 +1923,14 @@ $discount = $get('space_discount');
     }
     protected function beforeCreate(array $data): array
     {
-        return $this->processStandSelection($data);
+        // return $this->processStandSelection($data);
         return $this->processContractData($data);
 
     }
 
     protected function beforeSave(array $data): array
     {
-        return $this->processStandSelection($data);
+        // return $this->processStandSelection($data);
         return $this->processContractData($data);
     }
 
@@ -1938,15 +1938,15 @@ $discount = $get('space_discount');
     {
         // Validate stand exists and is available
         if (!empty($data['stand_id'])) {
-            $stand = \App\Models\Stand::find($data['stand_id']);
+            $stand = Stand::find($data['stand_id']);
             if ($stand && $stand->status === 'Available') {
                 $data['stand_id'] = $stand->id;
 
                 // Update stand status based on contract status
-                $contractStatus = $data['status'] ?? \App\Models\Contract::STATUS_DRAFT;
+                $contractStatus = $data['status'] ?? Contract::STATUS_DRAFT;
                 if (
-                    $contractStatus === \App\Models\Contract::STATUS_SIGNED_PAID ||
-                    $contractStatus === \App\Models\Contract::STATUS_SIGNED_NOT_PAID
+                    $contractStatus === Contract::STATUS_SIGNED_PAID ||
+                    $contractStatus === Contract::STATUS_SIGNED_NOT_PAID
                 ) {
                     $stand->update(['status' => 'Sold']);
                 }

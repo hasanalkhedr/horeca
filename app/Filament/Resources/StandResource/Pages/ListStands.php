@@ -372,10 +372,10 @@ class ListStands extends ListRecords
         return 7;
     }
 
-    protected function getTableQuery(): Builder
-    {
-        return parent::getTableQuery()
-            ->where('is_merged', false)
-            ->orWhere('parent_stand_id', null);
-    }
+    // protected function getTableQuery(): Builder
+    // {
+    //     return parent::getTableQuery()
+    //         ->where('is_merged', false)
+    //         ->orWhere('parent_stand_id', null);
+    // }
 }
