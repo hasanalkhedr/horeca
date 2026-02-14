@@ -359,7 +359,7 @@ class ContractResource extends Resource
                                     ->afterStateUpdated(function ($state, callable $set) {
                                         if ($state) {
                                             // When enabling merge mode, clear single stand selection
-                                            $set('stand_id', null);
+                                            //$set('stand_id', null);
                                             $set('merge_stands', []);
                                             $set('merged_stand_id', null);
                                         } else {
@@ -408,7 +408,7 @@ class ContractResource extends Resource
                                             $set('merged_stand_id', null);
                                         }
                                     })
-                                    ->visible(fn(callable $get) => !$get('enable_merge_mode') && $get('show_after_merge')),
+                                    ->visible(fn ($state, callable $get) => (!$get('enable_merge_mode') && $get('show_after_merge')) || ($state) ),
                                 Hidden::make('show_after_merge')->default(true)->dehydrated(),
                                 // MERGE MODE SECTION (only visible when merge mode is enabled)
                                 Forms\Components\Placeholder::make('merge_mode_header')
@@ -786,97 +786,7 @@ class ContractResource extends Resource
                                 return $eventId && $reportId;
                             }),
 
-                        // Forms\Components\Section::make('Pricing')
-                        //     ->schema([
-                        //         Forms\Components\Radio::make('price_id')
-                        //             ->label('Select Price Package')
-                        //             ->options(function (callable $get) {
-                        //                 $formData = self::loadFormData($get);
-                        //                 $currencyId = $get('currency_id');
 
-                        //                 if (!$currencyId)
-                        //                     return [];
-
-                        //                 $options = [];
-                        //                 foreach ($formData['prices'] as $price) {
-                        //                     $amount = $price->currencies
-                        //                         ->firstWhere('id', $currencyId)?->pivot->amount ?? 0;
-                        //                     $options[$price->id] = "{$price->name} | {$amount}";
-                        //                 }
-                        //                 return $options;
-                        //             })
-                        //             ->reactive()
-                        //             ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                        //                 if ($state) {
-                        //                     $set('use_special_price', false);
-                        //                     $set('price_amount', null);
-                        //                 } else {
-                        //                     $set('price_id', null);
-                        //                 }
-                        //                 self::calculateSpaceAmount($set, $get);
-                        //             }),
-
-                        //         Forms\Components\Fieldset::make('Special Price')
-                        //             ->schema([
-                        //                 Forms\Components\Toggle::make('use_special_price')
-                        //                     ->label('Use Special Price')
-                        //                     ->reactive()
-                        //                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                        //                         if ($state) {
-                        //                             $set('price_id', null);
-                        //                         } else {
-                        //                             $set('price_amount', null);
-                        //                         }
-                        //                         self::calculateSpaceAmount($set, $get);
-                        //                     }),
-
-                        //                 Forms\Components\TextInput::make('price_amount')
-                        //                     ->label('Special Price Amount')
-                        //                     ->numeric()
-                        //                     ->default(0)
-                        //                     ->minValue(0)
-                        //                     ->visible(fn(callable $get): bool => $get('use_special_price'))
-                        //                     ->reactive()
-                        //                     ->debounce(500)
-                        //                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                        //                         self::calculateSpaceAmount($set, $get);
-                        //                     }),
-                        //             ]),
-
-                        //         Forms\Components\Grid::make(3)
-                        //             ->schema([
-                        //                 Forms\Components\TextInput::make('space_amount')
-                        //                     ->label('Space Amount')
-                        //                     ->numeric()
-                        //                     ->default(0)
-                        //                     ->readOnly()
-                        //                     ->prefix(
-                        //                         fn(callable $get): string =>
-                        //                         self::getCurrencyCode($get)
-                        //                     ),
-
-                        //                 Forms\Components\TextInput::make('space_discount')
-                        //                     ->label('Discount')
-                        //                     ->numeric()
-                        //                     ->minValue(0)
-                        //                     ->reactive()
-                        //                     ->debounce(500)
-                        //                     ->default(0)
-                        //                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                        //                         self::calculateSpaceNet($set, $get);
-                        //                     }),
-
-                        //                 Forms\Components\TextInput::make('space_net')
-                        //                     ->label('Net Amount')
-                        //                     ->numeric()
-                        //                     ->default(0)
-                        //                     ->readOnly()
-                        //                     ->prefix(
-                        //                         fn(callable $get): string =>
-                        //                         self::getCurrencyCode($get)
-                        //                     ),
-                        //             ]),
-                        //     ])->collapsible(),
                         Forms\Components\Section::make('Pricing')
                             ->schema([
                                 Forms\Components\Radio::make('price_id')
@@ -1862,102 +1772,66 @@ $discount = $get('space_discount');
         ];
     }
 
-    protected function mutateFormDataBeforeSave(array $data): array
-    {
-        // If we have a merged stand, use it
-        if (!empty($data['merged_stand_id'])) {
-            $data['stand_id'] = $data['merged_stand_id'];
-        }
 
-        // Remove temporary merge data from database storage
-        unset($data['merged_stand_id']);
-        unset($data['merge_stands']);
-        unset($data['merge_stand_count']);
-        unset($data['suggested_merge_no']);
 
-        return $data;
-    }
 
-    protected function mutateFormDataBeforeFill(array $data): array
-    {
-        // When editing, check if the stand is merged
-        if (!empty($data['stand_id'])) {
-            $stand = Stand::find($data['stand_id']);
-            if ($stand && $stand->is_merged && !$stand->parent_stand_id) {
-                $data['merged_stand_id'] = $stand->id;
+    // private function processContractData(array $data): array
+    // {
+    //     // Process stand selection
+    //     $data = $this->processStandSelection($data);
 
-                // Populate the merge stands repeater with child stands
-                $childStands = $stand->getAllMergeGroupStands()
-                    ->where('id', '!=', $stand->id)
-                    ->map(function ($childStand) {
-                        return ['stand_id' => $childStand->id];
-                    })
-                    ->values()
-                    ->toArray();
+    //     // Ensure tax per sqm fields are properly set
+    //     $enableTaxPerSqm = $data['enable_tax_per_sqm'] ?? false;
+    //     if (!$enableTaxPerSqm) {
+    //         $data['tax_per_sqm_amount'] = 0;
+    //         $data['tax_per_sqm_total'] = 0;
+    //     }
 
-                $data['merge_stands'] = $childStands;
-            }
-        }
+    //     // Calculate base space amount if not already calculated
+    //     if (!isset($data['base_space_amount'])) {
+    //         $data['base_space_amount'] = $data['space_amount'] - ($data['tax_per_sqm_total'] ?? 0);
+    //     }
 
-        return $data;
-    }
+    //     return $data;
+    // }
+    // protected function beforeCreate(array $data): array
+    // {
+    //     // return $this->processStandSelection($data);
+    //     return $this->processContractData($data);
 
-    private function processContractData(array $data): array
-    {
-        // Process stand selection
-        $data = $this->processStandSelection($data);
+    // }
 
-        // Ensure tax per sqm fields are properly set
-        $enableTaxPerSqm = $data['enable_tax_per_sqm'] ?? false;
-        if (!$enableTaxPerSqm) {
-            $data['tax_per_sqm_amount'] = 0;
-            $data['tax_per_sqm_total'] = 0;
-        }
+    // protected function beforeSave(array $data): array
+    // {
+    //     dd($data);
+    //     // return $this->processStandSelection($data);
+    //     return $this->processContractData($data);
+    // }
 
-        // Calculate base space amount if not already calculated
-        if (!isset($data['base_space_amount'])) {
-            $data['base_space_amount'] = $data['space_amount'] - ($data['tax_per_sqm_total'] ?? 0);
-        }
+    // private function processStandSelection(array $data): array
+    // {
+    //     // Validate stand exists and is available
+    //     if (!empty($data['stand_id'])) {
+    //         $stand = Stand::find($data['stand_id']);
+    //         if ($stand && $stand->status === 'Available') {
+    //             $data['stand_id'] = $stand->id;
 
-        return $data;
-    }
-    protected function beforeCreate(array $data): array
-    {
-        // return $this->processStandSelection($data);
-        return $this->processContractData($data);
+    //             // Update stand status based on contract status
+    //             $contractStatus = $data['status'] ?? Contract::STATUS_DRAFT;
+    //             if (
+    //                 $contractStatus === Contract::STATUS_SIGNED_PAID ||
+    //                 $contractStatus === Contract::STATUS_SIGNED_NOT_PAID
+    //             ) {
+    //                 $stand->update(['status' => 'Sold']);
+    //             }
 
-    }
+    //             // Clear caches
+    //             self::clearFormCache($data['event_id'] ?? null, $data['report_id'] ?? null);
+    //         } else {
+    //             throw new \Exception('Selected stand is not available or does not exist');
+    //         }
+    //     }
 
-    protected function beforeSave(array $data): array
-    {
-        // return $this->processStandSelection($data);
-        return $this->processContractData($data);
-    }
-
-    private function processStandSelection(array $data): array
-    {
-        // Validate stand exists and is available
-        if (!empty($data['stand_id'])) {
-            $stand = Stand::find($data['stand_id']);
-            if ($stand && $stand->status === 'Available') {
-                $data['stand_id'] = $stand->id;
-
-                // Update stand status based on contract status
-                $contractStatus = $data['status'] ?? Contract::STATUS_DRAFT;
-                if (
-                    $contractStatus === Contract::STATUS_SIGNED_PAID ||
-                    $contractStatus === Contract::STATUS_SIGNED_NOT_PAID
-                ) {
-                    $stand->update(['status' => 'Sold']);
-                }
-
-                // Clear caches
-                self::clearFormCache($data['event_id'] ?? null, $data['report_id'] ?? null);
-            } else {
-                throw new \Exception('Selected stand is not available or does not exist');
-            }
-        }
-
-        return $data;
-    }
+    //     return $data;
+    // }
 }

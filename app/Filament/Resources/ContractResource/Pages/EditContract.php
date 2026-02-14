@@ -27,6 +27,25 @@ class EditContract extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
+
+        // When editing, check if the stand is merged
+        if (!empty($data['stand_id'])) {
+            $stand = Stand::find($data['stand_id']);
+            if ($stand && $stand->is_merged && !$stand->parent_stand_id) {
+                $data['merged_stand_id'] = $stand->id;
+
+                // Populate the merge stands repeater with child stands
+                $childStands = $stand->getAllMergeGroupStands()
+                    ->where('id', '!=', $stand->id)
+                    ->map(function ($childStand) {
+                        return ['stand_id' => $childStand->id];
+                    })
+                    ->values()
+                    ->toArray();
+
+                $data['merge_stands'] = $childStands;
+            }
+        }
         $contract = $this->record;
 
         // $data['category_id'] = [$contract->category_id];
@@ -65,6 +84,21 @@ class EditContract extends EditRecord
         return $data;
     }
 
+     protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // If we have a merged stand, use it
+        if (!empty($data['merged_stand_id'])) {
+            $data['stand_id'] = $data['merged_stand_id'];
+        }
+
+        // Remove temporary merge data from database storage
+        unset($data['merged_stand_id']);
+        unset($data['merge_stands']);
+        unset($data['merge_stand_count']);
+        unset($data['suggested_merge_no']);
+
+        return $data;
+    }
     protected function handleRecordUpdate($record, array $data): Model
     {
         $oldStandId = $record->stand_id;

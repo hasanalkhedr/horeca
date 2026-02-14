@@ -40,6 +40,21 @@ class CreateContract extends CreateRecord
         return $contract;
     }
 
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // If we have a merged stand, use it
+        if (!empty($data['merged_stand_id'])) {
+            $data['stand_id'] = $data['merged_stand_id'];
+        }
+
+        // Remove temporary merge data from database storage
+        unset($data['merged_stand_id']);
+        unset($data['merge_stands']);
+        unset($data['merge_stand_count']);
+        unset($data['suggested_merge_no']);
+
+        return $data;
+    }
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');

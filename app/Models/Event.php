@@ -2,10 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\Settings\BankAccount;
 use App\Models\Settings\Category;
 use App\Models\Settings\Currency;
-use App\Models\Settings\PaymentRate;
 use App\Models\Settings\Price;
 use Illuminate\Database\Eloquent\Model;
 
@@ -122,6 +120,4 @@ class Event extends Model
     {
         return $this->belongsToMany(EffAdsPackage::class);
     }
-
-
 }

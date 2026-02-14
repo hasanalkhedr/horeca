@@ -14,15 +14,18 @@ class Currency extends Model
 {
     protected $fillable = ['id', 'CODE', 'name', 'rate_to_usd', 'country'];
 
-    public function Events(){
-    return $this->belongsToMany(\App\Models\Event::class, 'currency_event') // Specify table name
-        ->withPivot('min_price')
-        ->withTimestamps();
-}
-    public function Reports() {
+    public function Events()
+    {
+        return $this->belongsToMany(\App\Models\Event::class, 'currency_event')
+            ->withPivot('min_price')
+            ->withTimestamps();
+    }
+    public function Reports()
+    {
         return $this->hasMany(Report::class);
     }
-    public function Prices(){
+    public function Prices()
+    {
         return $this->belongsToMany(Price::class)
             ->withPivot('amount');
     }
