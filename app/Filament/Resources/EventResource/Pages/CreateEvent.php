@@ -37,11 +37,11 @@ class CreateEvent extends CreateRecord
 
         foreach ($currencies as $currency) {
             $enabledField = "event_currency_{$currency->id}_enabled";
-            $minPriceField = "event_currency_{$currency->id}_min_price";
+            //$minPriceField = "event_currency_{$currency->id}_min_price";
 
             if (isset($data[$enabledField]) && $data[$enabledField]) {
-                $minPrice = $data[$minPriceField] ?? 0;
-                $eventCurrenciesData[$currency->id] = ['min_price' => $minPrice];
+                //$minPrice = $data[$minPriceField] ?? 0;
+                $eventCurrenciesData[$currency->id] = ['min_price' => 0];
             }
         }
 

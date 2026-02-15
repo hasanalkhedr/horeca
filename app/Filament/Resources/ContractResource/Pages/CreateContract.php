@@ -5,12 +5,6 @@ namespace App\Filament\Resources\ContractResource\Pages;
 use App\Filament\Resources\ContractResource;
 use App\Models\Contract;
 use App\Models\Stand;
-use App\Models\Event;
-use App\Models\Settings\Price;
-use App\Models\SponsorPackage;
-use App\Models\AdsPackage;
-use App\Models\EffAdsPackage;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 

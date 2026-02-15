@@ -30,7 +30,7 @@ protected function mutateFormDataBeforeFill(array $data): array
     foreach ($currencies as $currency) {
         $currencyData = $record->Currencies->where('id', $currency->id)->first();
         $data["event_currency_{$currency->id}_enabled"] = $currencyData ? true : false;
-        $data["event_currency_{$currency->id}_min_price"] = $currencyData ? $currencyData->pivot->min_price : 0;
+        //$data["event_currency_{$currency->id}_min_price"] = $currencyData ? $currencyData->pivot->min_price : 0;
     }
 
     // Fill price packages data - FIXED VERSION
@@ -103,11 +103,10 @@ protected function mutateFormDataBeforeFill(array $data): array
 
         foreach ($currencies as $currency) {
             $enabledField = "event_currency_{$currency->id}_enabled";
-            $minPriceField = "event_currency_{$currency->id}_min_price";
+            //$minPriceField = "event_currency_{$currency->id}_min_price";
 
             if (isset($data[$enabledField]) && $data[$enabledField]) {
-                $minPrice = $data[$minPriceField] ?? 0;
-                $eventCurrenciesData[$currency->id] = ['min_price' => $minPrice];
+                $eventCurrenciesData[$currency->id] = ['min_price' => 0];
             }
         }
 

@@ -25,16 +25,18 @@
                 <div class="flex justify-between items-center my-1">
                     <div class="flex items-center text-xs gap-2">
                         <input disabled type="checkbox" class="mr-2" @checked($price->id == $contract->price_id)>
-                        <label class="font-bold">{{ $price->name }}</label>
+                        <label class="font-bold">{{ $price->name }} <span class="text-[9px]">(Min {{ $price->Currencies()->find($currency->id)->pivot->amount }} {{ $currency->CODE }} / m²)</span></label>
                         <span class="text-[8px] ml-1">{{ $price->description }}</span>
                     </div>
+                    @if($price->id == $contract->price_id)
                     <div class="text-xs">
                         {{ $contract->Stand->space }} m² x
-                        {{ $price->Currencies()->find($currency->id)->pivot->amount }} {{ $currency->CODE }} / m²
+                        {{ $contract->price_amount }} {{ $currency->CODE }} / m²
                     </div>
+                    @endif
                 </div>
             @endforeach
-            @if ($special_price)
+            {{-- @if ($special_price)
                 <div class="flex justify-between items-center my-1">
                     <div class="flex items-center text-xs gap-2">
                         <input disabled type="checkbox" class="mr-2" @checked($contract->contract_no != 'temp' && $contract->price_id == 0)>
@@ -46,7 +48,7 @@
                     @endif
                     </div>
                 </div>
-            @endif
+            @endif --}}
 @if($contract->enable_tax_per_sqm)
                 <div class="text-right font-bold  mb-[2px] pb-[5px]">
                     <p>Tax per SQM: {{ $contract->tax_per_sqm_amount }} {{ $currency->CODE }}/SQM</p>

@@ -12,6 +12,7 @@ use App\Models\Settings\SponsorPackage;
 use App\Models\Settings\AdsPackage;
 use App\Models\Settings\EffAdsPackage;
 use Filament\Forms;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -155,10 +156,10 @@ class EventResource extends Resource
                     // Step 2: Event Currencies with Minimum Prices
                     Wizard\Step::make('Event Currencies')
                         ->icon('heroicon-o-currency-dollar')
-                        ->description('Select currencies and set minimum prices')
+                        ->description('Select currencies')
                         ->schema([
                             Forms\Components\Section::make('Event Currencies')
-                                ->description('Select which currencies are accepted for this event and set minimum prices')
+                                ->description('Select which currencies are accepted for this event')
                                 ->schema([
                                     Forms\Components\Grid::make(3)
                                         ->schema(function () use ($currencies) {
@@ -168,21 +169,7 @@ class EventResource extends Resource
                                                     ->schema([
                                                         Forms\Components\Checkbox::make("event_currency_{$currency->id}_enabled")
                                                             ->label($currency->name)
-                                                            ->helperText($currency->CODE)
-                                                            ->reactive()
-                                                            ->afterStateUpdated(function ($state, callable $set) use ($currency) {
-                                                                if (!$state) {
-                                                                    $set("event_currency_{$currency->id}_min_price", 0);
-                                                                }
-                                                            }),
-                                                        Forms\Components\TextInput::make("event_currency_{$currency->id}_min_price")
-                                                            ->label('Minimum Price')
-                                                            ->numeric()
-                                                            ->minValue(0)
-                                                            ->required()
-                                                            ->prefix($currency->CODE . ' ')
-                                                            ->disabled(fn(callable $get): bool => !$get("event_currency_{$currency->id}_enabled"))
-                                                            ->visible(fn(callable $get): bool => $get("event_currency_{$currency->id}_enabled")),
+                                                            ->helperText($currency->CODE),
                                                     ])
                                                     ->columnSpan(1);
                                             }
@@ -220,7 +207,7 @@ class EventResource extends Resource
 
                                     // Currency Prices for this Package
                                     Forms\Components\Section::make('Package Pricing by Currency')
-                                        ->description('Set prices for each currency (must meet minimum from previous step)')
+                                        ->description('Set minimum SQM prices for each currency')
                                         ->schema([
                                             Forms\Components\Grid::make(3)
                                                 ->schema(function (callable $get) use ($currencies) {
@@ -247,13 +234,13 @@ class EventResource extends Resource
                                                     }
 
                                                     foreach ($enabledCurrencies as $currency) {
-                                                        $minPrice = $get("../../event_currency_{$currency->id}_min_price") ?? 0;
+                                                        //$minPrice = $get("../../event_currency_{$currency->id}_min_price") ?? 0;
 
                                                         $schema[] = Forms\Components\Card::make()
                                                             ->schema([
                                                                 Forms\Components\Checkbox::make("price_package_currency_{$currency->id}_enabled")
                                                                     ->label($currency->name)
-                                                                    ->helperText($currency->CODE . ' - Min: ' . $minPrice)
+                                                                    //->helperText($currency->CODE . ' - Min: ' . $minPrice)
                                                                     ->reactive()
                                                                     ->default(function ($record, $get) use ($currency, $currentPackageIndex) {
                                                                         // Get existing value for this price package
@@ -263,33 +250,25 @@ class EventResource extends Resource
                                                                             return $packageData["price_package_currency_{$currency->id}_enabled"] ?? false;
                                                                         }
                                                                         return false;
-                                                                    })
-                                                                    ->afterStateUpdated(function ($state, callable $set) use ($currency, $minPrice) {
-                                                                        if (!$state) {
-                                                                            $set("price_package_currency_{$currency->id}_price", 0);
-                                                                        } else {
-                                                                            // Set to minimum price if enabled
-                                                                            $set("price_package_currency_{$currency->id}_price", $minPrice);
-                                                                        }
                                                                     }),
+                                                                    // ->afterStateUpdated(function ($state, callable $set) use ($currency, $minPrice) {
+                                                                    //     if (!$state) {
+                                                                    //         $set("price_package_currency_{$currency->id}_price", 0);
+                                                                    //     } else {
+                                                                    //         // Set to minimum price if enabled
+                                                                    //         $set("price_package_currency_{$currency->id}_price", $minPrice);
+                                                                    //     }
+                                                                    // }),
                                                                 Forms\Components\TextInput::make("price_package_currency_{$currency->id}_price")
-                                                                    ->label('Price')
+                                                                    ->label('Minimum SQM Price')
                                                                     ->numeric()
-                                                                    ->minValue($minPrice)
+                                                                    //->minValue($minPrice)
                                                                     ->required()
                                                                     ->prefix($currency->CODE . ' ')
                                                                     ->disabled(fn(callable $get): bool => !$get("price_package_currency_{$currency->id}_enabled"))
                                                                     ->visible(fn(callable $get): bool => $get("price_package_currency_{$currency->id}_enabled"))
-                                                                    ->default(function ($record, $get) use ($currency, $currentPackageIndex, $minPrice) {
-                                                                        // Get existing value for this price package
-                                                                        $pricePackages = $get('../../price_packages') ?? [];
-                                                                        if (isset($pricePackages[$currentPackageIndex])) {
-                                                                            $packageData = $pricePackages[$currentPackageIndex];
-                                                                            return $packageData["price_package_currency_{$currency->id}_price"] ?? $minPrice;
-                                                                        }
-                                                                        return $minPrice;
-                                                                    })
-                                                                    ->rule('gte:' . $minPrice),
+                                                                    ->default(0),
+                                                                    //->rule('gte:' . $minPrice),
                                                             ])
                                                             ->columnSpan(1);
                                                     }

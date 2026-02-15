@@ -152,16 +152,9 @@ class ViewEvent extends ViewRecord
 
                 Infolists\Components\Section::make('Currencies')
                     ->schema([
-                        Infolists\Components\RepeatableEntry::make('Currencies')
-                            ->schema([
-                                Infolists\Components\TextEntry::make('currency.name')
-                                    ->label('Currency'),
-
-                                Infolists\Components\TextEntry::make('min_price')
-                                    ->label('Min Price')
-                                    ->money('USD'),
-                            ])
-                            ->columns(2),
+                        Infolists\Components\TextEntry::make('Currencies.name')
+                            ->badge()
+                            ->separator(','),
                     ])
                     ->collapsible(),
 

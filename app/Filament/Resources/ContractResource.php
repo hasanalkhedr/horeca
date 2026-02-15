@@ -16,6 +16,7 @@ use Closure;
 use Filament\Forms;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -408,7 +409,7 @@ class ContractResource extends Resource
                                             $set('merged_stand_id', null);
                                         }
                                     })
-                                    ->visible(fn ($state, callable $get) => (!$get('enable_merge_mode') && $get('show_after_merge')) || ($state) ),
+                                    ->visible(fn($state, callable $get) => (!$get('enable_merge_mode') && $get('show_after_merge')) || ($state)),
                                 Hidden::make('show_after_merge')->default(true)->dehydrated(),
                                 // MERGE MODE SECTION (only visible when merge mode is enabled)
                                 Forms\Components\Placeholder::make('merge_mode_header')
@@ -789,115 +790,85 @@ class ContractResource extends Resource
 
                         Forms\Components\Section::make('Pricing')
                             ->schema([
-                                Forms\Components\Radio::make('price_id')
-                                    ->label('Select Price Package')
-                                    ->options(function (callable $get) {
-                                        $formData = self::loadFormData($get);
-                                        $currencyId = $get('currency_id');
+                                Section::make([
+                                    Forms\Components\Radio::make('price_id')
+                                        ->label('Select Price Package')
+                                        ->options(function (callable $get) {
+                                            $formData = self::loadFormData($get);
+                                            $currencyId = $get('currency_id');
 
-                                        if (!$currencyId)
-                                            return [];
+                                            if (!$currencyId)
+                                                return [];
 
-                                        $options = [];
-                                        foreach ($formData['prices'] as $price) {
-                                            $amount = $price->currencies
-                                                ->firstWhere('id', $currencyId)?->pivot->amount ?? 0;
-                                            $options[$price->id] = "{$price->name} | {$amount}";
-                                        }
-                                        return $options;
-                                    })
-                                    ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                        if ($state) {
-                                            $set('use_special_price', false);
-                                            $set('price_amount', null);
-                                        } else {
-                                            $set('price_id', null);
-                                        }
-                                        self::calculateSpaceAmount($set, $get);
-                                    }),
+                                            $options = [];
+                                            foreach ($formData['prices'] as $price) {
+                                                $amount = $price->currencies
+                                                    ->firstWhere('id', $currencyId)?->pivot->amount ?? 0;
+                                                $options[$price->id] = "{$price->name} | Min: {$amount}";
+                                            }
+                                            return $options;
+                                        })
+                                        ->reactive()
+                                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                            self::calculateSpaceAmount($set, $get);
+                                        }),
 
-                                Forms\Components\Fieldset::make('Special Price')
-                                    ->schema([
-                                        Forms\Components\Toggle::make('use_special_price')
-                                            ->label('Use Special Price')
-                                            ->reactive()
-                                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                                if ($state) {
-                                                    $set('price_id', null);
-                                                } else {
-                                                    $set('price_amount', null);
-                                                }
-                                                self::calculateSpaceAmount($set, $get);
-                                            }),
+                                    Forms\Components\TextInput::make('price_amount')
+                                        ->label('SQM Price Amount')
+                                        ->numeric()
+                                        ->default(0)
+                                        ->minValue(0)
+                                        ->reactive()
+                                        ->debounce(500)
+                                        ->rules([
+                                            function ($get) {
+                                                return function (string $attribute, $value, Closure $fail) use ($get) {
+                                                    $eventId = $get('event_id');
+                                                    $priceID = $get('price_id');
+                                                    if (!$eventId || !$priceID) {
+                                                        return;
+                                                    }
 
-                                        Forms\Components\TextInput::make('price_amount')
-                                            ->label('Special Price Amount')
-                                            ->numeric()
-                                            ->default(0)
-                                            ->minValue(0)
-                                            ->visible(fn(callable $get): bool => $get('use_special_price'))
-                                            ->reactive()
-                                            ->debounce(500)
-                                            ->rules([
-                                                function ($get) {
-                                                    return function (string $attribute, $value, Closure $fail) use($get) {
-                                                        $eventId = $get('event_id');
-                                                        $currencyId = $get('currency_id');
-                                                        if (!$eventId || !$currencyId) {
-                                                            return;
-                                                        }
+                                                    $event = Event::find($eventId);
+                                                    if (!$event) {
+                                                        return;
+                                                    }
 
-                                                        $event = Event::find($eventId);
-                                                        if (!$event) {
-                                                            return;
-                                                        }
+                                                    $price = self::getPriceWithCurrency($priceID, $get('currency_id'));
 
-                                                        $currency = $event->currencies()
-                                                            ->where('currencies.id', $currencyId)
-                                                            ->first();
+                                                    if ($price && $value > 0 && $value < $price->Currencies->first()?->pivot->amount) {
+                                                        $fail("Price must be at least {$price->Currencies->first()?->pivot->amount}");
+                                                    }
+                                                };
+                                            },
+                                        ])
+                                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                            self::calculateSpaceAmount($set, $get);
+                                        }),
 
-                                                        if ($currency && $value > 0 && $value < $currency->pivot->min_price) {
-                                                            $fail("Price must be at least {$currency->pivot->min_price}");
-                                                        }
-                                                    };
-                                                },
-                                            ])
-                                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                                // if( (float) $get('price_amount')>0 && (float) $get('price_amount')  <  Event::find($get('event_id'))->Currencies()->where('currencies.id', $get('currency_id'))->first()->pivot->min_price) {
-                                                //     $set('price_amount', 0);
-                                                // }
-                                                self::calculateSpaceAmount($set, $get);
-                                            }),
+                                    Placeholder::make('min_price_alert')
+                                        ->content(function (callable $get) {
+                                            $event = Event::find($get('event_id'));
+                                            $price = $event?->Prices()->where('prices.id', $get('price_id'))->first();
+                                            $minPrice = $price?->Currencies->first()?->pivot->amount ?? 0;
+                                            $currentPrice = (float) $get('price_amount');
 
-                                        Placeholder::make('min_price_alert')
-                                            ->content(function (callable $get) {
-                                                $event = Event::find($get('event_id'));
-                                                $currency = $event?->currencies()->where('currencies.id', $get('currency_id'))->first();
-                                                $minPrice = $currency?->pivot?->min_price ?? 0;
-                                                $currentPrice = (float) $get('price_amount');
+                                            return "Price ($currentPrice) is below minimum required price ($minPrice)";
+                                        })
+                                        ->visible(function (callable $get) {
+                                           $price = self::getPriceWithCurrency($get('price_id'), $get('currency_id'));
+                                            if (!$price)
+                                                return false;
 
-                                                return "Price ($currentPrice) is below minimum required price ($minPrice)";
-                                            })
-                                            ->visible(function (callable $get) {
-                                                $event = Event::find($get('event_id'));
-                                                if (!$event)
-                                                    return false;
+                                            $currentPrice = (float) $get('price_amount');
+                                            $minPrice = (float) $price->Currencies->first()?->pivot->amount;
 
-                                                $currency = $event->currencies()->where('currencies.id', $get('currency_id'))->first();
-                                                if (!$currency)
-                                                    return false;
-
-                                                $currentPrice = (float) $get('price_amount');
-                                                $minPrice = (float) $currency->pivot->min_price;
-
-                                                return $currentPrice > 0 && $currentPrice < $minPrice;
-                                            })
-                                            ->helperText('Price must be at least the minimum price')
-                                            ->extraAttributes([
-                                                'class' => 'border-l-4 border-red-500 bg-red-50 p-4 dark:bg-red-900/20',
-                                            ]),
-                                    ]),
+                                            return $currentPrice > 0 && $currentPrice < $minPrice;
+                                        })
+                                        ->extraAttributes([
+                                            'class' => 'border-l-4 border-red-500 bg-red-50 p-4 dark:bg-red-900/20',
+                                        ]),
+                                ])->columns(2),
 
                                 // Tax per sqm section
                                 Forms\Components\Fieldset::make('Additional Taxes')
@@ -974,9 +945,9 @@ class ContractResource extends Resource
                                             ->reactive()
                                             ->debounce(500)
                                             ->default(0)
-                                             ->rules([
+                                            ->rules([
                                                 function ($get) {
-                                                    return function (string $attribute, $value, Closure $fail) use($get) {
+                                                    return function (string $attribute, $value, Closure $fail) use ($get) {
                                                         $eventId = $get('event_id');
                                                         $currencyId = $get('currency_id');
                                                         if (!$eventId || !$currencyId) {
@@ -988,15 +959,13 @@ class ContractResource extends Resource
                                                             return;
                                                         }
 
-                                                        $currency = $event->currencies()
-                                                            ->where('currencies.id', $currencyId)
-                                                            ->first();
+                                                        $price = self::getPriceWithCurrency($get('price_id'), $currencyId);
 
-                                                        $minPrice = (float) $currency->pivot->min_price;
-$space = Stand::find($get('stand_id'))?->space;
-$totalSpaceAmount = $get('space_amount');
-                                                        if ($currency && $value > 0 && $totalSpaceAmount - $value < $currency->pivot->min_price * $space) {
-                                                            $fail("With this discount,SQM Price becomes below minimum required price ($minPrice). \nSQM Price must be at least {$currency->pivot->min_price}");
+                                                        $minPrice = (float) $price->Currencies->first()?->pivot->amount;
+                                                        $space = Stand::find($get('stand_id'))?->space;
+                                                        $totalSpaceAmount = $get('space_amount');
+                                                        if ($price && $value > 0 && $totalSpaceAmount - $value < $minPrice * $space) {
+                                                            $fail("With this discount,SQM Price becomes below minimum required price ($minPrice). \nSQM Price must be at least {$minPrice}");
                                                         }
                                                     };
                                                 },
@@ -1016,28 +985,24 @@ $totalSpaceAmount = $get('space_amount');
                                             ),
                                         Placeholder::make('discount_alert')
                                             ->content(function (callable $get) {
-                                                $event = Event::find($get('event_id'));
-                                                $currency = $event?->currencies()->where('currencies.id', $get('currency_id'))->first();
-                                                $minPrice = $currency?->pivot?->min_price ?? 0;
+                                                $price = self::getPriceWithCurrency($get('price_id'), $get('currency_id'));
+                                                if (!$price)
+                                                    return false;
+
+                                                $minPrice = (float) $price->Currencies->first()?->pivot->amount;
 
                                                 return "With this discount,SQM Price becomes below minimum required price ($minPrice)";
                                             })
                                             ->visible(function (callable $get) {
-                                                $event = Event::find($get('event_id'));
-                                                if (!$event)
+                                                $price = self::getPriceWithCurrency($get('price_id'), $get('currency_id'));
+                                                if (!$price)
                                                     return false;
-
-                                                $currency = $event->currencies()->where('currencies.id', $get('currency_id'))->first();
-                                                if (!$currency)
-                                                    return false;
-
-                                                $minPrice = (float) $currency->pivot->min_price;
-$space = Stand::find($get('stand_id'))?->space;
-$totalSpaceAmount = $get('space_amount');
-$discount = $get('space_discount');
-                                                return ($totalSpaceAmount - $discount)>0 && ($totalSpaceAmount - $discount) < $space * $minPrice;
+                                                $minPrice = (float) $price->Currencies->first()?->pivot->amount;
+                                                $space = Stand::find($get('stand_id'))?->space;
+                                                $totalSpaceAmount = $get('space_amount');
+                                                $discount = $get('space_discount');
+                                                return ($totalSpaceAmount - $discount) > 0 && ($totalSpaceAmount - $discount) < $space * $minPrice;
                                             })
-                                            ->helperText('SQM Price must be at least the minimum price')
                                             ->extraAttributes([
                                                 'class' => 'border-l-4 border-red-500 bg-red-50 p-4 dark:bg-red-900/20',
                                             ]),

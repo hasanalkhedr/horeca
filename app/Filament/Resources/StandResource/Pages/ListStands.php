@@ -86,7 +86,7 @@ class ListStands extends ListRecords
                         ->maxValue(100)
                         ->label('Number of Stands to Create')
                         ->helperText('Maximum 100 stands at once')
-                        ->reactive()
+                        //->reactive()
                         ->afterStateUpdated(function ($state, callable $set) {
                             $numbers = [];
                             for ($i = 0; $i < $state; $i++) {

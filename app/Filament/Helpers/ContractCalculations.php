@@ -226,19 +226,19 @@ public static function calculateSpaceAmount(callable $set, callable $get): void
 
     $space = $stand->space;
     $priceId = $get('price_id');
-    $useSpecialPrice = $get('use_special_price');
+    //$useSpecialPrice = $get('use_special_price');
     $specialPrice = $get('price_amount');
     $currencyId = $get('currency_id');
 
     // Calculate base space amount (without tax)
     $baseAmount = 0;
-    if ($useSpecialPrice) {
+    //if ($useSpecialPrice) {
         $baseAmount = $space * ((float) $specialPrice ?? 0);
-    } elseif ($priceId && $currencyId) {
-        $price = self::getPriceWithCurrency($priceId, $currencyId);
-        $priceAmount = $price?->Currencies->first()?->pivot->amount ?? 0;
-        $baseAmount = $space * $priceAmount;
-    }
+    // } elseif ($priceId && $currencyId) {
+    //     $price = self::getPriceWithCurrency($priceId, $currencyId);
+    //     $priceAmount = $price?->Currencies->first()?->pivot->amount ?? 0;
+    //     $baseAmount = $space * $priceAmount;
+    // }
 
     // Calculate tax per sqm if enabled
     $taxPerSqmTotal = 0;
