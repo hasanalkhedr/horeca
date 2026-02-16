@@ -435,6 +435,7 @@ class Contract extends Model
         'enable_tax_per_sqm',
         'tax_per_sqm_amount',
         'tax_per_sqm_total',
+        'free_space',
     ];
     protected $casts = [
         'contrat_date' => 'date',
@@ -443,6 +444,7 @@ class Contract extends Model
         'enable_tax_per_sqm' => 'boolean',
         'tax_per_sqm_amount' => 'decimal:2',
         'tax_per_sqm_total' => 'decimal:2',
+        'free_space' => 'decimal:0'
     ];
 
     protected $appends = [

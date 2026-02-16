@@ -107,12 +107,12 @@ class ContractResource extends Resource
                 return [
                     'event' => $event,
                     'report' => $report,
-                    'categories' => $event?->Categories ?? collect(), // Capital C!
-                    'stands' => $event?->Stands ?? collect(), // Capital S!
-                    'prices' => $event?->Prices ?? collect(), // Capital P!
-                    'sponsorPackages' => $event?->SponsorPackages ?? collect(), // Capital SP!
-                    'adsPackages' => $event?->AdsPackages ?? collect(), // Capital AP!
-                    'effAdsPackages' => $event?->EffAdsPackages ?? collect(), // Capital EAP!
+                    'categories' => $event?->Categories ?? collect(),
+                    'stands' => $event?->Stands->where('status', 'Available')->where('is_merged',false)->whereNull('parent_stand_id') ?? collect(),
+                    'prices' => $event?->Prices ?? collect(),
+                    'sponsorPackages' => $event?->SponsorPackages ?? collect(),
+                    'adsPackages' => $event?->AdsPackages ?? collect(),
+                    'effAdsPackages' => $event?->EffAdsPackages ?? collect(),
                     'currencyCode' => $report?->currency?->CODE ?? 'USD',
                     'vatRate' => $event?->vat_rate ?? 0,
                     'components' => $report?->components ?? [],
@@ -778,6 +778,23 @@ class ContractResource extends Resource
                                     ->extraAttributes(['class' => 'bg-green-50 p-3 rounded-md'])
                                     ->columnSpanFull()
                                     ->visible(fn(callable $get) => !$get('enable_merge_mode') && !empty($get('merged_stand_id'))),
+
+                                Section::make('Free Space')->schema([
+                                    Forms\Components\TextInput::make('free_space')
+                                        ->label('Free SQM')
+                                        ->numeric()
+                                        ->default(0)
+                                        ->minValue(0)
+                                        ->reactive()
+                                        ->debounce(500)
+                                        ->maxValue(function (callable $get) {
+                                            $stand = Stand::find($get('stand_id'));
+                                            return $stand?->space ?? 0;
+                                        })
+                                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                            self::calculateSpaceAmount($set, $get);
+                                        }),
+                                ]),
                             ])
                             ->collapsible()
                             ->columns(2)
@@ -903,27 +920,7 @@ class ContractResource extends Resource
                                         Forms\Components\TextInput::make('tax_per_sqm_total')
                                             ->label('Total Tax Amount')
                                             ->readOnly()
-                                            // ->content(function (callable $get) {
-                                            //     if (!$get('enable_tax_per_sqm')) {
-                                            //         return '0.00 ' . self::getCurrencyCode($get);
-                                            //     }
-
-                                            //     $standId = $get('stand_id');
-                                            //     $taxAmount = (float) ($get('tax_per_sqm_amount') ?? 0);
-
-                                            //     if (!$standId || $taxAmount <= 0) {
-                                            //         return '0.00 ' . self::getCurrencyCode($get);
-                                            //     }
-
-                                            //     $stand = Stand::find($standId);
-                                            //     if (!$stand) {
-                                            //         return '0.00 ' . self::getCurrencyCode($get);
-                                            //     }
-
-                                            //     $totalTax = $stand->space * $taxAmount;
-                                            //     return number_format($totalTax, 2) . ' ' . self::getCurrencyCode($get);
-                                            // })
-                                            ->visible(fn(callable $get): bool => $get('enable_tax_per_sqm')),
+                                           ->visible(fn(callable $get): bool => $get('enable_tax_per_sqm')),
                                     ]),
 
                                 Forms\Components\Grid::make(3)
@@ -962,7 +959,7 @@ class ContractResource extends Resource
                                                         $price = self::getPriceWithCurrency($get('price_id'), $currencyId);
 
                                                         $minPrice = (float) $price->Currencies->first()?->pivot->amount;
-                                                        $space = Stand::find($get('stand_id'))?->space;
+                                                        $space = Stand::find($get('stand_id'))?->space - $get('free_space');
                                                         $totalSpaceAmount = $get('space_amount');
                                                         if ($price && $value > 0 && $totalSpaceAmount - $value < $minPrice * $space) {
                                                             $fail("With this discount,SQM Price becomes below minimum required price ($minPrice). \nSQM Price must be at least {$minPrice}");
@@ -998,7 +995,7 @@ class ContractResource extends Resource
                                                 if (!$price)
                                                     return false;
                                                 $minPrice = (float) $price->Currencies->first()?->pivot->amount;
-                                                $space = Stand::find($get('stand_id'))?->space;
+                                                $space = Stand::find($get('stand_id'))?->space - $get('free_space');
                                                 $totalSpaceAmount = $get('space_amount');
                                                 $discount = $get('space_discount');
                                                 return ($totalSpaceAmount - $discount) > 0 && ($totalSpaceAmount - $discount) < $space * $minPrice;

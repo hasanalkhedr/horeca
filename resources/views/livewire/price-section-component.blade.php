@@ -25,13 +25,20 @@
                 <div class="flex justify-between items-center my-1">
                     <div class="flex items-center text-xs gap-2">
                         <input disabled type="checkbox" class="mr-2" @checked($price->id == $contract->price_id)>
-                        <label class="font-bold">{{ $price->name }} <span class="text-[9px]">(Min {{ $price->Currencies()->find($currency->id)->pivot->amount }} {{ $currency->CODE }} / m²)</span></label>
+                        <label class="font-bold">{{ $price->name }}
+                            {{-- <span class="text-[9px]">(Min {{ $price->Currencies()->find($currency->id)->pivot->amount }} {{ $currency->CODE }} / m²)</span> --}}
+                        </label>
                         <span class="text-[8px] ml-1">{{ $price->description }}</span>
                     </div>
                     @if($price->id == $contract->price_id)
                     <div class="text-xs">
-                        {{ $contract->Stand->space }} m² x
-                        {{ $contract->price_amount }} {{ $currency->CODE }} / m²
+                        @if($contract->free_space == 0)
+                            {{ $contract->Stand->space }} m² x
+                            {{ $contract->price_amount }} {{ $currency->CODE }} / m²
+                        @else
+                            {{ $contract->Stand->space - $contract->free_space }} + {{ $contract->free_space }} free m² x
+                            {{ $contract->price_amount }} {{ $currency->CODE }} / m²
+                        @endif
                     </div>
                     @endif
                 </div>

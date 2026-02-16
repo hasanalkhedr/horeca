@@ -25,6 +25,7 @@ class Stand extends Model
 
     protected $casts = [
         'is_merged' => 'boolean',
+        'space' => 'decimal:2'
     ];
 
     protected static function booted()

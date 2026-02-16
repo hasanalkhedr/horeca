@@ -223,8 +223,12 @@ public static function calculateSpaceAmount(callable $set, callable $get): void
         $set('base_space_amount', 0);
         return;
     }
-
-    $space = $stand->space;
+    $freeSpace = $get('free_space');
+    if($freeSpace < $stand->space) {
+        $space = $stand->space - $freeSpace;
+    } else {
+        $space = 0;
+    }
     $priceId = $get('price_id');
     //$useSpecialPrice = $get('use_special_price');
     $specialPrice = $get('price_amount');
