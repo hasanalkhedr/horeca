@@ -108,7 +108,7 @@ class ContractResource extends Resource
                     'event' => $event,
                     'report' => $report,
                     'categories' => $event?->Categories ?? collect(),
-                    'stands' => $event?->Stands->where('status', 'Available')->where('is_merged',false)->whereNull('parent_stand_id') ?? collect(),
+                    'stands' => $event?->Stands ?? collect(),
                     'prices' => $event?->Prices ?? collect(),
                     'sponsorPackages' => $event?->SponsorPackages ?? collect(),
                     'adsPackages' => $event?->AdsPackages ?? collect(),
