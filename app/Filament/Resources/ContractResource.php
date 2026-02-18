@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use AlperenErsoy\FilamentExport\Actions\FilamentExportBulkAction;
 use AlperenErsoy\FilamentExport\Actions\FilamentExportHeaderAction;
 use App\Filament\Resources\ContractResource\Pages;
 use App\Models\Contract;
@@ -1500,7 +1501,7 @@ class ContractResource extends Resource
                         "{$state} | {$record->Stand?->space} sqm"
                     ),
 
-                Tables\Columns\TextColumn::make('status_full_display')
+                Tables\Columns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()
                     ->color(fn($record) => $record->status_color)
@@ -1653,10 +1654,11 @@ class ContractResource extends Resource
                 //             }
                 //         }),
                 // ]),
+                FilamentExportBulkAction::make('export')->label('Export to Excel/PDF')
             ])
-            ->headerActions([
-                FilamentExportHeaderAction::make('export')->label('Export Contracts')
-            ])
+            // ->headerActions([
+            //     FilamentExportHeaderAction::make('export')->label('Export Contracts')
+            // ])
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make(),
             ])

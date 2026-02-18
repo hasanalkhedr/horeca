@@ -13,9 +13,14 @@ class EditCurrency extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
-            Actions\ForceDeleteAction::make(),
-            Actions\RestoreAction::make(),
+            Actions\DeleteAction::make()
+            ->before(function ($record) {
+                    if ($record->Contracts()->exists()) {
+                        throw new \Exception('Cannot delete package with existing contracts. Delete the contracts first.');
+                    }
+                }),
+            //Actions\ForceDeleteAction::make(),
+            //Actions\RestoreAction::make(),
         ];
     }
 

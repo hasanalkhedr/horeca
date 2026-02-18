@@ -16,7 +16,7 @@ class EditEvent extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            //Actions\DeleteAction::make(),
         ];
     }
 
@@ -54,8 +54,25 @@ protected function mutateFormDataBeforeFill(array $data): array
         $pricePackagesData[] = $packageData;
     }
 
-    $data['price_packages'] = $pricePackagesData;
+    $data['prices'] = $pricePackagesData;
 
+    // Load the event with its price packages
+    $event = $this->record;
+
+    // Manually set the IDs in the price_packages array
+    if ($event->relationLoaded('Prices') || $event->Prices) {
+        $data['prices'] = $event->Prices->map(function ($price) {
+            $priceData = $price->toArray();
+
+            // Add currency data for each price package
+            foreach ($price->Currencies as $currency) {
+                $priceData["price_package_currency_{$currency->id}_enabled"] = true;
+                $priceData["price_package_currency_{$currency->id}_price"] = $currency->pivot->amount ?? 0;
+            }
+
+            return $priceData;
+        })->toArray();
+    }
     // Fill categories and packages data
     $data['categories'] = $record->Categories->pluck('id')->toArray();
     $data['sponsor_packages'] = $record->SponsorPackages->pluck('id')->toArray();
@@ -113,44 +130,111 @@ protected function mutateFormDataBeforeFill(array $data): array
         $event->Currencies()->sync($eventCurrenciesData);
     }
 
+    // private function syncPricePackages($event, $data): void
+    // {
+    //     // Delete all existing price packages
+    //     $event->Prices()->delete();
+
+    //     // Create new price packages
+    //     if (isset($data['prices'])) {
+    //         foreach ($data['prices'] as $packageData) {
+    //             if (!empty($packageData['name'])) {
+    //                 // Create price package
+    //                 $price = Price::create([
+    //                     'event_id' => $event->id,
+    //                     'name' => $packageData['name'],
+    //                     'description' => $packageData['description'] ?? null,
+    //                 ]);
+
+    //                 // Set currency prices for this package
+    //                 $currencies = Currency::all();
+    //                 $priceCurrenciesData = [];
+
+    //                 foreach ($currencies as $currency) {
+    //                     $enabledField = "price_package_currency_{$currency->id}_enabled";
+    //                     $priceField = "price_package_currency_{$currency->id}_price";
+
+    //                     if (isset($packageData[$enabledField]) && $packageData[$enabledField]) {
+    //                         $priceAmount = $packageData[$priceField] ?? 0;
+    //                         $priceCurrenciesData[$currency->id] = ['amount' => $priceAmount];
+    //                     }
+    //                 }
+
+    //                 if (!empty($priceCurrenciesData)) {
+    //                     $price->Currencies()->sync($priceCurrenciesData);
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+
+
     private function syncPricePackages($event, $data): void
-    {
-        // Delete all existing price packages
-        $event->Prices()->delete();
-
-        // Create new price packages
-        if (isset($data['price_packages'])) {
-            foreach ($data['price_packages'] as $packageData) {
-                if (!empty($packageData['name'])) {
-                    // Create price package
-                    $price = Price::create([
-                        'event_id' => $event->id,
-                        'name' => $packageData['name'],
-                        'description' => $packageData['description'] ?? null,
-                    ]);
-
-                    // Set currency prices for this package
-                    $currencies = Currency::all();
-                    $priceCurrenciesData = [];
-
-                    foreach ($currencies as $currency) {
-                        $enabledField = "price_package_currency_{$currency->id}_enabled";
-                        $priceField = "price_package_currency_{$currency->id}_price";
-
-                        if (isset($packageData[$enabledField]) && $packageData[$enabledField]) {
-                            $priceAmount = $packageData[$priceField] ?? 0;
-                            $priceCurrenciesData[$currency->id] = ['amount' => $priceAmount];
-                        }
-                    }
-
-                    if (!empty($priceCurrenciesData)) {
-                        $price->Currencies()->sync($priceCurrenciesData);
-                    }
-                }
-            }
-        }
+{
+    if (!isset($data['prices'])) {
+        return;
     }
 
+    // Get existing price packages
+    $existingPrices = $event->Prices()->get()->keyBy('id');
+    $processedIds = [];
+
+    foreach ($data['prices'] as $packageData) {
+        if (empty($packageData['name'])) {
+            continue;
+        }
+
+        // Check if this package has an ID (existing) or is new
+        $priceId = $packageData['id'] ?? null;
+        $price = null;
+
+        if ($priceId && $existingPrices->has($priceId)) {
+            // Update existing price package
+            $price = $existingPrices->get($priceId);
+            $price->update([
+                'name' => $packageData['name'],
+                'description' => $packageData['description'] ?? null,
+            ]);
+            $processedIds[] = $priceId;
+        } else {
+            // Create new price package
+            $price = Price::create([
+                'event_id' => $event->id,
+                'name' => $packageData['name'],
+                'description' => $packageData['description'] ?? null,
+            ]);
+        }
+
+        // Handle currency prices for this package
+        $currencies = Currency::all();
+        $priceCurrenciesData = [];
+
+        foreach ($currencies as $currency) {
+            $enabledField = "price_package_currency_{$currency->id}_enabled";
+            $priceField = "price_package_currency_{$currency->id}_price";
+
+            if (isset($packageData[$enabledField]) && $packageData[$enabledField]) {
+                $priceAmount = $packageData[$priceField] ?? 0;
+                $priceCurrenciesData[$currency->id] = ['amount' => $priceAmount];
+            }
+        }
+
+        // Sync currencies for this price package
+        if (!empty($priceCurrenciesData)) {
+            $price->Currencies()->sync($priceCurrenciesData);
+        } else {
+            // If no currencies selected, detach all
+            $price->Currencies()->detach();
+        }
+    }
+    // Delete price packages that were not in the submitted data
+    $pricesToDelete = $existingPrices->whereNotIn('id', $processedIds);
+    foreach ($pricesToDelete as $priceToDelete) {
+        // This will also detach related currencies due to database cascade or you can explicitly detach
+        $priceToDelete->Currencies()->detach();
+        $priceToDelete->delete();
+    }
+}
     private function syncCategoriesAndPackages($event, $data): void
     {
         // Sync Categories

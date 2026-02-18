@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use AlperenErsoy\FilamentExport\Actions\FilamentExportBulkAction;
 use AlperenErsoy\FilamentExport\Actions\FilamentExportHeaderAction;
 use App\Filament\Resources\StandResource\Pages;
 use App\Filament\Resources\StandResource\RelationManagers;
@@ -551,8 +552,7 @@ class StandResource extends Resource
                         }
                     })
                     ->deselectRecordsAfterCompletion(),
-
-
+FilamentExportBulkAction::make('export')->label('Export to Excel/PDF'),
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
                         ->before(function ($records) {
@@ -564,9 +564,9 @@ class StandResource extends Resource
                         }),
                 ]),
             ])
-            ->headerActions([
-                FilamentExportHeaderAction::make('export')->label('Export Stands')
-            ])
+            // ->headerActions([
+            //     FilamentExportHeaderAction::make('export')->label('Export Stands')
+            // ])
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make(),
             ])

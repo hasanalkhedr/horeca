@@ -185,9 +185,10 @@ class EventResource extends Resource
                         ->icon('heroicon-o-tag')
                         ->description('Create price packages with currency-specific pricing')
                         ->schema([
-                            Repeater::make('price_packages')
+                            Repeater::make('prices')
                                 ->label('Price Packages')
                                 ->schema([
+                                    Forms\Components\Hidden::make('id'),
                                     // Price Package Details
                                     Forms\Components\Section::make('Package Details')
                                         ->schema([
@@ -244,7 +245,7 @@ class EventResource extends Resource
                                                                     ->reactive()
                                                                     ->default(function ($record, $get) use ($currency, $currentPackageIndex) {
                                                                         // Get existing value for this price package
-                                                                        $pricePackages = $get('../../price_packages') ?? [];
+                                                                        $pricePackages = $get('../../prices') ?? [];
                                                                         if (isset($pricePackages[$currentPackageIndex])) {
                                                                             $packageData = $pricePackages[$currentPackageIndex];
                                                                             return $packageData["price_package_currency_{$currency->id}_enabled"] ?? false;

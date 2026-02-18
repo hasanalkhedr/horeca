@@ -50,8 +50,8 @@ class CreateEvent extends CreateRecord
 
     private function syncPricePackages($event, $data): void
     {
-        if (isset($data['price_packages'])) {
-            foreach ($data['price_packages'] as $packageData) {
+        if (isset($data['prices'])) {
+            foreach ($data['prices'] as $packageData) {
                 if (!empty($packageData['name'])) {
                     // Create price package
                     $price = Price::create([
