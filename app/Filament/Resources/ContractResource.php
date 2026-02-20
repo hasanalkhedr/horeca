@@ -398,7 +398,7 @@ class ContractResource extends Resource
                                             ->toArray();
                                     })
                                     ->searchable()
-                                    ->required()
+                                    //->required()
                                     ->reactive()
                                     ->disabled(fn(callable $get) => $get('enable_merge_mode'))
                                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
@@ -958,12 +958,19 @@ class ContractResource extends Resource
                                                         }
 
                                                         $price = self::getPriceWithCurrency($get('price_id'), $currencyId);
-
+if($price) {
                                                         $minPrice = (float) $price->Currencies->first()?->pivot->amount;
                                                         $space = Stand::find($get('stand_id'))?->space - $get('free_space');
                                                         $totalSpaceAmount = $get('space_amount');
                                                         if ($price && $value > 0 && $totalSpaceAmount - $value < $minPrice * $space) {
                                                             $fail("With this discount,SQM Price becomes below minimum required price ($minPrice). \nSQM Price must be at least {$minPrice}");
+                                                        }}
+                                                        else {
+                                                            if($get('stand_id')) {
+                                                                $fail('NO Price package selected');
+                                                            } else {
+                                                                return;
+                                                            }
                                                         }
                                                     };
                                                 },
@@ -1355,11 +1362,11 @@ class ContractResource extends Resource
                             ->schema([
                                 Forms\Components\Grid::make(2)
                                     ->schema([
-                                        Hidden::make('sub_total_1'),
-                                        Hidden::make('d_i_a'),
-                                        Hidden::make('sub_total_2'),
-                                        Hidden::make('vat_amount'),
-                                        Hidden::make('net_total'),
+                                        Hidden::make('sub_total_1')->default(0),
+                                        Hidden::make('d_i_a')->default(0),
+                                        Hidden::make('sub_total_2')->default(0),
+                                        Hidden::make('vat_amount')->default(0),
+                                        Hidden::make('net_total')->default(0),
                                         Forms\Components\Placeholder::make('sub_total_1_display')
                                             ->label('Sub Total 1')
                                             ->content(function (callable $get) {
