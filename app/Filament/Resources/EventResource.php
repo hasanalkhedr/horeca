@@ -267,7 +267,7 @@ class EventResource extends Resource
                                                                     ->required()
                                                                     ->prefix($currency->CODE . ' ')
                                                                     ->disabled(fn(callable $get): bool => !$get("price_package_currency_{$currency->id}_enabled"))
-                                                                    ->visible(fn(callable $get): bool => $get("price_package_currency_{$currency->id}_enabled"))
+                                                                    ->hidden(fn(callable $get): bool => !$get("price_package_currency_{$currency->id}_enabled") ?? true)
                                                                     ->default(0),
                                                                     //->rule('gte:' . $minPrice),
                                                             ])
