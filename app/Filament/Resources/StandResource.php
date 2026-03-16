@@ -13,7 +13,9 @@ use App\Models\Stand;
 use App\Models\Event;
 use App\Models\Settings\Category;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
+use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
@@ -23,11 +25,85 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class StandResource extends Resource
 {
+    use HasFiltersForm;
+
     protected static ?string $model = Stand::class;
 
     protected static ?string $navigationIcon = 'heroicon-s-map-pin';
     protected static ?string $navigationGroup = 'Event Management';
     protected static ?int $navigationSort = 3;
+
+    public static function filtersForm(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Select::make('event_id')
+                    ->label('Filter By Event(s)')
+                    ->relationship(
+                        'Event',
+                        'name',
+                        fn($query) => $query->select(['id', 'name'])->orderBy('name')
+                    )
+                    ->multiple()
+                    ->searchable()
+                    ->preload()
+                    ->getOptionLabelUsing(function ($value) {
+                        if ($value) {
+                            return \App\Models\Event::find($value)?->name ?? $value;
+                        }
+                        return $value;
+                    }),
+
+                Select::make('category_id')
+                    ->label('Filter By Category(s)')
+                    ->relationship(
+                        'category',
+                        'name',
+                        fn($query) => $query->select(['id', 'name'])->orderBy('name')
+                    )
+                    ->multiple()
+                    ->searchable()
+                    ->preload()
+                    ->getOptionLabelUsing(function ($value) {
+                        if ($value) {
+                            return \App\Models\Settings\Category::find($value)?->name ?? $value;
+                        }
+                        return $value;
+                    }),
+
+                Select::make('status')
+                    ->label('Filter By Status')
+                    ->options([
+                        'Available' => 'Available',
+                        'Sold' => 'Sold',
+                        'Reserved' => 'Reserved',
+                    ])
+                    ->multiple(),
+
+                Select::make('deductable')
+                    ->label('Deductible')
+                    ->options([
+                        'true' => 'Yes',
+                        'false' => 'No',
+                    ])
+                    ->multiple(),
+            ])
+            ->columns(4);
+    }
+
+    /**
+     * Apply resource-level filters to both table and widgets
+     * Optimized with proper eager loading
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where(function ($q) {
+                $q->where('is_merged', false)
+                    ->orWhereNull('parent_stand_id');
+            })
+            ->with(['event:id,name', 'category:id,name']); // Eager load essential relationships
+    }
 
     public static function form(Form $form): Form
     {
@@ -36,10 +112,27 @@ class StandResource extends Resource
                 Forms\Components\Section::make('Stand Information')
                     ->schema([
                         Forms\Components\TextInput::make('no')
-                            ->required()
-                            ->label('Stand Number')
-                            ->unique(ignorable: fn($record) => $record)
-                            ->columnSpan(1),
+                        ->required()
+                        ->label('Stand Number')
+                        ->rules([
+                            function (callable $get, $record) {
+                                return function ($attribute, $value, $fail) use($get, $record) {
+                                    $eventId = $get('event_id');
+
+                                    $query = Stand::where('no', $value)
+                                        ->where('event_id', $eventId);
+
+                                    if ($record) {
+                                        $query->where('id', '!=', $record->id);
+                                    }
+
+                                    if ($query->exists()) {
+                                        $fail('This stand no is already taken in this event.');
+                                    }
+                                };
+                            },
+                        ])
+                        ->columnSpan(1),
 
                         Forms\Components\TextInput::make('space')
                             ->required()
@@ -49,7 +142,11 @@ class StandResource extends Resource
                             ->columnSpan(1),
 
                         Forms\Components\Select::make('category_id')
-                            ->relationship('Category', 'name')
+                            ->relationship(
+                                'Category',
+                                'name',
+                                fn($query) => $query->select(['id', 'name'])->orderBy('name')
+                            )
                             ->required()
                             ->searchable()
                             ->preload()
@@ -62,13 +159,16 @@ class StandResource extends Resource
                             ->columnSpan(1),
 
                         Forms\Components\Select::make('event_id')
-                            ->relationship('Event', 'name')
+                            ->relationship(
+                                'Event',
+                                'name',
+                                fn($query) => $query->select(['id', 'name'])->orderBy('name')
+                            )
                             ->required()
                             ->searchable()
                             ->preload()
                             ->label('Event')
                             ->reactive()
-                            ->afterStateUpdated(fn($state, callable $set) => $set('no', null))
                             ->columnSpan(1),
 
                         Forms\Components\Toggle::make('deductable')
@@ -81,7 +181,7 @@ class StandResource extends Resource
                                 'Available' => 'Available',
                                 'Sold' => 'Sold',
                                 'Reserved' => 'Reserved',
-                                'Merged' => 'Merged', // Add Merged status
+                                //'Merged' => 'Merged', // Add Merged status
                             ])
                             ->default('Available')
                             ->required()
@@ -154,13 +254,6 @@ class StandResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(
-                fn(Builder $query) =>
-                $query->where(function ($q) {
-                    $q->where('is_merged', false)
-                        ->orWhereNull('parent_stand_id');
-                })
-            )
             ->columns([
                 Tables\Columns\TextColumn::make('no')
                     ->label('Stand No.')
@@ -179,12 +272,12 @@ class StandResource extends Resource
                     ->suffix(' sqm')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('Category.name')
+                Tables\Columns\TextColumn::make('category.name')
                     ->label('Category')
                     ->sortable()
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('Event.name')
+                Tables\Columns\TextColumn::make('event.name')
                     ->label('Event')
                     ->sortable()
                     ->searchable(),
@@ -216,7 +309,8 @@ class StandResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->toggleable()
-                    ->toggledHiddenByDefault(),
+                    ->toggledHiddenByDefault()
+                    ->placeholder('-'),
 
                 Tables\Columns\TextColumn::make('merge_info')
                     ->label('Merge Group')
@@ -233,13 +327,21 @@ class StandResource extends Resource
 
                 Tables\Columns\TextColumn::make('Contract.Company.name')
                     ->label('Client info')
-                    ->default('-'),
+                    ->default('-')
+                    ->placeholder('-'),
             ])
             ->deferLoading()
+            ->defaultPaginationPageOption(25)
+            ->extremePaginationLinks()
+            ->poll('60s') // Auto-refresh every minute instead of real-time
             ->filters([
                 Tables\Filters\SelectFilter::make('event_id')
                     ->label('Event')
-                    ->relationship('Event', 'name')
+                    ->relationship(
+                        'Event',
+                        'name',
+                        fn($query) => $query->select(['id', 'name'])->orderBy('name')
+                    )
                     ->searchable()
                     ->preload()
                     ->multiple()
@@ -247,7 +349,11 @@ class StandResource extends Resource
 
                 Tables\Filters\SelectFilter::make('category_id')
                     ->label('Category')
-                    ->relationship('category', 'name')
+                    ->relationship(
+                        'category',
+                        'name',
+                        fn($query) => $query->select(['id', 'name'])->orderBy('name')
+                    )
                     ->searchable()
                     ->multiple()
                     ->preload(),
@@ -261,27 +367,6 @@ class StandResource extends Resource
 
                 Tables\Filters\TernaryFilter::make('deductable')
                     ->label('Deductible'),
-
-                // Add merge status filter
-                // Tables\Filters\SelectFilter::make('merge_status')
-                //     ->label('Merge Status')
-                //     ->options([
-                //         'parent' => 'Parent (Merged Stands)',
-                //         'child' => 'Child (Merged into another)',
-                //         'none' => 'Not Merged',
-                //     ])
-                //     ->query(function (Builder $query, array $data) {
-                //         if (!isset($data['value'])) {
-                //             return $query;
-                //         }
-
-                //         return match ($data['value']) {
-                //             'parent' => $query->where('is_merged', true),
-                //             'child' => $query->whereNotNull('parent_stand_id'),
-                //             'none' => $query->where('is_merged', false)->whereNull('parent_stand_id'),
-                //             default => $query,
-                //         };
-                //     }),
             ], layout: FiltersLayout::AboveContent)->filtersFormColumns(5)
             ->actions([
                 Tables\Actions\ActionGroup::make([
