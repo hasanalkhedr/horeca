@@ -24,6 +24,7 @@ class Report extends Model
         'show_categories',
         'special_price',
         'with_options',
+        'organizer'
     ];
 
     protected $casts = [

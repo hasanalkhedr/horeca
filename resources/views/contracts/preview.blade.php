@@ -29,7 +29,8 @@
                 'showCategories' => $contract->Report->show_categories,
                 'special_price' => $contract->Report->special_price,
                 'with_options'=>$contract->Report->with_options,
-                'vat'=>$contract->Event->vat_rate,])
+                'vat'=>$contract->Event->vat_rate,
+                'organizer'=>$contract->Report->organizer])
                 @if(!$loop->last && !$loop->first)
                     <div class="w-full"><hr class="h-1 my-[2px] bg-blue-900 border-3 dark:bg-gray-700"></div>
                 @endif
@@ -38,6 +39,6 @@
     <!-- Page 2: Terms and Conditions -->
     <div
         class="page mx-auto bg-white max-h-[297mm] max-w-[210mm] shadow-lg print:shadow-none px-[5mm] py-[2mm] my-2 print:my-0 relative print:mx-0 print:px-0">
-        @livewire('footer-component')
+        @livewire('footer-component', [$contract->Report])
     </div>
 @endsection

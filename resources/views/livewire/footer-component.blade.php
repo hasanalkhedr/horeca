@@ -18,8 +18,10 @@
             employees, staff and agents of any company, stock-in-trade, firm or individual to whom space has been
             allocated
             for the purpose of exhibiting.
-            The term “Exhibition” shall mean: HORECA 2025.
-            The term “Organizer” shall mean: Hospitality Services s.a.r.l.
+            {{-- The term “Exhibition” shall mean: HORECA 2025. --}}
+            The term “Exhibition” shall mean: <strong>{{$report->Event->name}}</strong>
+            {{-- The term “Organizer” shall mean: Hospitality Services s.a.r.l. --}}
+            The term “Organizer” shall mean: <strong>{{$report->organizer}}.</strong>
         </p>
 
         <h2 class="text-xs font-semibold mb-0">2. APPLICATION FOR PARTICIPATION</h2>
@@ -192,7 +194,8 @@
 
     <!-- Footer Section -->
     <footer class="footer text-center text-xs text-gray-600">
-        An event by <strong>Hospitality Services s.a.r.l.</strong>
+        {{-- An event by <strong>Hospitality Services s.a.r.l.</strong> --}}
+        An event by <strong>{{$report->organizer}}</strong>
     </footer>
 </div>
 

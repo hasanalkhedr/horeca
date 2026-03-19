@@ -19,6 +19,7 @@
                 'special_price' => $report->special_price,
                 'with_options' => $report->with_options,
                 'vat' => $report->Event->vat_rate,
+                'organizer' =>$report->organizer,
             ])
             @if(!$loop->last && !$loop->first)
             <div class="w-full"><hr class="h-1 my-[2px] bg-blue-900 border-3 dark:bg-gray-700"></div>
@@ -28,6 +29,6 @@
     <!-- Terms and Conditions -->
     <div
         class="page mx-auto bg-white min-h-[297mm] max-w-[210mm] shadow-lg print:shadow-none px-[5mm] py-[1mm] my-8 print:my-0 relative">
-        @livewire('footer-component')
+        @livewire('footer-component', [$report])
     </div>
 @endsection

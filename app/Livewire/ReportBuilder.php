@@ -22,6 +22,7 @@ class ReportBuilder extends Component
     public string $bankAccount = '';
     public string $bankNameAddress = '';
     public string $swiftCode = '';
+    public string $organizer = '';
     public string $iban = '';
     public bool $with_logo = false;
     public bool $showCategories = false;
@@ -49,6 +50,7 @@ class ReportBuilder extends Component
             $this->bankAccount = $report->bank_account;
             $this->bankNameAddress = $report->bank_name_address;
             $this->swiftCode = $report->swift_code;
+            $this->organizer = $report->organizer;
             $this->iban = $report->iban;
             $this->currency_id = $report->currency_id;
             $this->showCategories = $report->show_categories;
@@ -78,6 +80,7 @@ class ReportBuilder extends Component
                 'bank_account' => $this->bankAccount,
                 'bank_name_address' => $this->bankNameAddress,
                 'swift_code' => $this->swiftCode,
+                'organizer' => $this->organizer,
                 'iban' => $this->iban,
                 'with_logo' => $this->with_logo,
                 'logo_path' => $this->logo_path,

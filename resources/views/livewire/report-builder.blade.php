@@ -103,6 +103,10 @@
                                         <input type="text" wire:model.live="swiftCode"
                                             class="w-full px-3 py-2 border rounded-md focus:ring focus:ring-blue-200 focus:outline-none"
                                             placeholder="Enter bank account details">
+                                        <label class="block text-gray-700 font-semibold">Organizer</label>
+                                        <input type="text" wire:model.live="organizer"
+                                            class="w-full px-3 py-2 border rounded-md focus:ring focus:ring-blue-200 focus:outline-none"
+                                            placeholder="Enter Organizer name">
                                         <label class="block text-gray-700 font-semibold">IBAN</label>
                                         <input type="text" wire:model.live="iban"
                                             class="w-full px-3 py-2 border rounded-md focus:ring focus:ring-blue-200 focus:outline-none"
@@ -185,7 +189,7 @@
                 class="flex-1 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none">
                 Go Back
             </button>
-            <button onclick="window.location.href='{{ route('reports.index') }}'"
+            <button onclick="window.location.href='{{ route('filament.admin.resources.reports.index') }}'"
                 class="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none">
                 View Templates
             </button>
@@ -216,7 +220,7 @@
                             <div data-id="{{ $component }}"
                                 class="bg-white p-2 border rounded shadow-sm cursor-move flex justify-between items-center">
                                 @if ($component == 'payment-section')
-                                    @livewire($component, [null, $paymentMethod, $bankAccount, $bankNameAddress, $swiftCode, $iban, $currency, $report ? $report->Event->vat_rate : 11], key($component . '-' . $index))
+                                    @livewire($component, [null, $paymentMethod, $bankAccount, $bankNameAddress, $swiftCode, $iban, $currency, $report ? $report->Event->vat_rate : 11, $organizer], key($component . '-' . $index))
                                 @elseif($component == 'header-component')
                                     @livewire($component, [null, $with_logo, $logo_path], key($component . '-' . $index))
                                 @elseif($component == 'price-section-component')

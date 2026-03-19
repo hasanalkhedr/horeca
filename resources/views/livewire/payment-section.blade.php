@@ -13,8 +13,11 @@
     </div>
     <div class="flex justify-between">
         <div class="flex justify-start pt-[1px] w-2/3 mr-1 text-[10px]">
-            <p>
+            {{-- <p>
                 No application will be considered binding upon the Organizer unless accompanied by the appropriate payment. All payments have to be made by cash or bank transfer to the order of Hospitality Services s.a.r.l.
+            </p> --}}
+            <p>
+                No application will be considered binding upon the Organizer unless accompanied by the appropriate payment. All payments have to be made by cash or bank transfer to the order of {{ $organizer }}.
             </p>
         </div>
         <div class="w-1/3 flex justify-between">
