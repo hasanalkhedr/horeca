@@ -32,10 +32,16 @@ use HasWidgetShield;
 
         // Calculate total space by status
         $totalSpace = [
-            Contract::STATUS_DRAFT => 0,
             Contract::STATUS_INTERESTED => 0,
             Contract::STATUS_SIGNED_NOT_PAID => 0,
             Contract::STATUS_SIGNED_PAID => 0,
+            Contract::STATUS_CLOSED => 0,
+            Contract::STATUS_FREE_FROM_HS => 0,
+            Contract::STATUS_PAID_TROC => 0,
+            Contract::STATUS_ON_HOLD => 0,
+            Contract::STATUS_ON_SITE_FREE => 0,
+            Contract::STATUS_ANIMATION => 0,
+            Contract::STATUS_SPONSOR => 0,
         ];
 
         foreach ($contracts as $contract) {
@@ -52,28 +58,46 @@ use HasWidgetShield;
                 [
                     'label' => 'Total Space (m²)',
                     'data' => [
-                        $totalSpace[Contract::STATUS_DRAFT],
                         $totalSpace[Contract::STATUS_INTERESTED],
                         $totalSpace[Contract::STATUS_SIGNED_NOT_PAID],
                         $totalSpace[Contract::STATUS_SIGNED_PAID],
+                        $totalSpace[Contract::STATUS_CLOSED],
+                        $totalSpace[Contract::STATUS_FREE_FROM_HS],
+                        $totalSpace[Contract::STATUS_PAID_TROC],
+                        $totalSpace[Contract::STATUS_ON_HOLD],
+                        $totalSpace[Contract::STATUS_ON_SITE_FREE],
+                        $totalSpace[Contract::STATUS_ANIMATION],
+                        $totalSpace[Contract::STATUS_SPONSOR],
                     ],
                     'backgroundColor' => [
-                        'rgba(107, 114, 128, 0.8)',     // Gray - Draft
                         'rgba(14, 165, 233, 0.8)',      // Blue - Interested
                         'rgba(245, 158, 11, 0.8)',      // Amber - Signed Not Paid
                         'rgba(16, 185, 129, 0.8)',      // Green - Signed Paid
+                        'rgba(239, 68, 68, 0.8)',       // Red - Closed
+                        'rgba(59, 130, 246, 0.8)',      // Indigo - Free From HS
+                        'rgba(16, 185, 129, 0.8)',      // Green - Paid Troc
+                        'rgba(245, 158, 11, 0.8)',      // Amber - On Hold
+                        'rgba(14, 165, 233, 0.8)',      // Blue - On Site Free
+                        'rgba(168, 85, 247, 0.8)',      // Purple - Animation
+                        'rgba(16, 185, 129, 0.8)',      // Green - Sponsor
                     ],
                     'borderColor' => [
-                        'rgb(75, 85, 99)',
                         'rgb(2, 132, 199)',
                         'rgb(217, 119, 6)',
+                        'rgb(5, 150, 105)',
+                        'rgb(220, 38, 38)',
+                        'rgb(37, 99, 235)',
+                        'rgb(5, 150, 105)',
+                        'rgb(217, 119, 6)',
+                        'rgb(2, 132, 199)',
+                        'rgb(147, 51, 234)',
                         'rgb(5, 150, 105)',
                     ],
                     'borderWidth' => 2,
                     'borderRadius' => 4,
                 ],
             ],
-            'labels' => ['Draft', 'Interested', 'Signed (Not Paid)', 'Signed (Paid)'],
+            'labels' => ['Interested', 'Signed (Not Paid)', 'Signed (Paid)', 'Closed', 'Free From HS', 'Paid Troc', 'On Hold', 'On Site Free', 'Animation', 'Sponsor'],
         ];
     }
 

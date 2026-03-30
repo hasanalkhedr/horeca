@@ -39,10 +39,16 @@ use HasWidgetShield;
         $groupedContracts = [];
         $allCurrencies = [];
         $statuses = [
-            Contract::STATUS_DRAFT,
             Contract::STATUS_INTERESTED,
             Contract::STATUS_SIGNED_NOT_PAID,
             Contract::STATUS_SIGNED_PAID,
+            Contract::STATUS_CLOSED,
+            Contract::STATUS_FREE_FROM_HS,
+            Contract::STATUS_PAID_TROC,
+            Contract::STATUS_ON_HOLD,
+            Contract::STATUS_ON_SITE_FREE,
+            Contract::STATUS_ANIMATION,
+            Contract::STATUS_SPONSOR,
         ];
 
         foreach ($contracts as $contract) {
@@ -51,10 +57,16 @@ use HasWidgetShield;
 
             if (!isset($groupedContracts[$currencyCode])) {
                 $groupedContracts[$currencyCode] = [
-                    Contract::STATUS_DRAFT => 0,
                     Contract::STATUS_INTERESTED => 0,
                     Contract::STATUS_SIGNED_NOT_PAID => 0,
                     Contract::STATUS_SIGNED_PAID => 0,
+                    Contract::STATUS_CLOSED => 0,
+                    Contract::STATUS_FREE_FROM_HS => 0,
+                    Contract::STATUS_PAID_TROC => 0,
+                    Contract::STATUS_ON_HOLD => 0,
+                    Contract::STATUS_ON_SITE_FREE => 0,
+                    Contract::STATUS_ANIMATION => 0,
+                    Contract::STATUS_SPONSOR => 0,
                 ];
                 $allCurrencies[$currencyCode] = $currencyCode;
             }
@@ -80,10 +92,16 @@ use HasWidgetShield;
             $datasets[] = [
                 'label' => $currencyCode,
                 'data' => [
-                    $amountsByStatus[Contract::STATUS_DRAFT],
                     $amountsByStatus[Contract::STATUS_INTERESTED],
                     $amountsByStatus[Contract::STATUS_SIGNED_NOT_PAID],
                     $amountsByStatus[Contract::STATUS_SIGNED_PAID],
+                    $amountsByStatus[Contract::STATUS_CLOSED],
+                    $amountsByStatus[Contract::STATUS_FREE_FROM_HS],
+                    $amountsByStatus[Contract::STATUS_PAID_TROC],
+                    $amountsByStatus[Contract::STATUS_ON_HOLD],
+                    $amountsByStatus[Contract::STATUS_ON_SITE_FREE],
+                    $amountsByStatus[Contract::STATUS_ANIMATION],
+                    $amountsByStatus[Contract::STATUS_SPONSOR],
                 ],
                 'backgroundColor' => $this->adjustOpacity($color, 0.7),
                 'borderColor' => $color,
@@ -98,7 +116,7 @@ use HasWidgetShield;
 
         return [
             'datasets' => $datasets,
-            'labels' => ['Draft', 'Interested', 'Signed (Not Paid)', 'Signed (Paid)'],
+            'labels' => ['Interested', 'Signed (Not Paid)', 'Signed (Paid)', 'Closed', 'Free From HS', 'Paid Troc', 'On Hold', 'On Site Free', 'Animation', 'Sponsor'],
         ];
     }
 

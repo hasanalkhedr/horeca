@@ -31,6 +31,7 @@ class StandResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-s-map-pin';
     protected static ?string $navigationGroup = 'Event Management';
+    protected static ?string $navigationLabel = 'Space Management';
     protected static ?int $navigationSort = 3;
 
     public static function filtersForm(Form $form): Form

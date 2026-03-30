@@ -31,10 +31,16 @@ use HasWidgetShield;
             ->get();
 
         $counts = [
-            $contracts->where('status', Contract::STATUS_DRAFT)->count(),
             $contracts->where('status', Contract::STATUS_INTERESTED)->count(),
             $contracts->where('status', Contract::STATUS_SIGNED_NOT_PAID)->count(),
             $contracts->where('status', Contract::STATUS_SIGNED_PAID)->count(),
+            $contracts->where('status', Contract::STATUS_CLOSED)->count(),
+            $contracts->where('status', Contract::STATUS_FREE_FROM_HS)->count(),
+            $contracts->where('status', Contract::STATUS_PAID_TROC)->count(),
+            $contracts->where('status', Contract::STATUS_ON_HOLD)->count(),
+            $contracts->where('status', Contract::STATUS_ON_SITE_FREE)->count(),
+            $contracts->where('status', Contract::STATUS_ANIMATION)->count(),
+            $contracts->where('status', Contract::STATUS_SPONSOR)->count(),
         ];
 
         return [
@@ -43,22 +49,34 @@ use HasWidgetShield;
                     'label' => 'Number of Contracts',
                     'data' => $counts,
                     'backgroundColor' => [
-                        'rgb(107, 114, 128)', // Gray - Draft
                         'rgb(14, 165, 233)',  // Blue - Interested
                         'rgb(245, 158, 11)',  // Amber - Signed Not Paid
                         'rgb(16, 185, 129)',  // Green - Signed Paid
+                        'rgb(239, 68, 68)',   // Red - Closed
+                        'rgb(59, 130, 246)',  // Indigo - Free From HS
+                        'rgb(16, 185, 129)',  // Green - Paid Troc
+                        'rgb(245, 158, 11)',  // Amber - On Hold
+                        'rgb(14, 165, 233)',  // Blue - On Site Free
+                        'rgb(168, 85, 247)',  // Purple - Animation
+                        'rgb(16, 185, 129)',  // Green - Sponsor
                     ],
                     'borderColor' => [
-                        'rgb(75, 85, 99)',
                         'rgb(2, 132, 199)',
                         'rgb(217, 119, 6)',
+                        'rgb(5, 150, 105)',
+                        'rgb(220, 38, 38)',
+                        'rgb(37, 99, 235)',
+                        'rgb(5, 150, 105)',
+                        'rgb(217, 119, 6)',
+                        'rgb(2, 132, 199)',
+                        'rgb(147, 51, 234)',
                         'rgb(5, 150, 105)',
                     ],
                     'borderWidth' => 2,
                     'borderRadius' => 4,
                 ],
             ],
-            'labels' => ['Draft', 'Interested', 'Signed (Not Paid)', 'Signed (Paid)'],
+            'labels' => ['Interested', 'Signed (Not Paid)', 'Signed (Paid)', 'Closed', 'Free From HS', 'Paid Troc', 'On Hold', 'On Site Free', 'Animation', 'Sponsor'],
         ];
     }
 

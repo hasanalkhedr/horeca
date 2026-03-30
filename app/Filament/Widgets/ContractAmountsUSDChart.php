@@ -35,10 +35,16 @@ use HasWidgetShield;
 
         // Calculate amounts in USD equivalent
         $amountsInUSD = [
-            Contract::STATUS_DRAFT => 0,
             Contract::STATUS_INTERESTED => 0,
             Contract::STATUS_SIGNED_NOT_PAID => 0,
             Contract::STATUS_SIGNED_PAID => 0,
+            Contract::STATUS_CLOSED => 0,
+            Contract::STATUS_FREE_FROM_HS => 0,
+            Contract::STATUS_PAID_TROC => 0,
+            Contract::STATUS_ON_HOLD => 0,
+            Contract::STATUS_ON_SITE_FREE => 0,
+            Contract::STATUS_ANIMATION => 0,
+            Contract::STATUS_SPONSOR => 0,
         ];
 
         foreach ($contracts as $contract) {
@@ -56,28 +62,46 @@ use HasWidgetShield;
                 [
                     'label' => 'Amount in USD',
                     'data' => [
-                        $amountsInUSD[Contract::STATUS_DRAFT],
                         $amountsInUSD[Contract::STATUS_INTERESTED],
                         $amountsInUSD[Contract::STATUS_SIGNED_NOT_PAID],
                         $amountsInUSD[Contract::STATUS_SIGNED_PAID],
+                        $amountsInUSD[Contract::STATUS_CLOSED],
+                        $amountsInUSD[Contract::STATUS_FREE_FROM_HS],
+                        $amountsInUSD[Contract::STATUS_PAID_TROC],
+                        $amountsInUSD[Contract::STATUS_ON_HOLD],
+                        $amountsInUSD[Contract::STATUS_ON_SITE_FREE],
+                        $amountsInUSD[Contract::STATUS_ANIMATION],
+                        $amountsInUSD[Contract::STATUS_SPONSOR],
                     ],
                     'backgroundColor' => [
-                        'rgba(107, 114, 128, 0.8)',
                         'rgba(14, 165, 233, 0.8)',
                         'rgba(245, 158, 11, 0.8)',
                         'rgba(16, 185, 129, 0.8)',
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(14, 165, 233, 0.8)',
+                        'rgba(168, 85, 247, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
                     ],
                     'borderColor' => [
-                        'rgb(75, 85, 99)',
                         'rgb(2, 132, 199)',
                         'rgb(217, 119, 6)',
+                        'rgb(5, 150, 105)',
+                        'rgb(220, 38, 38)',
+                        'rgb(37, 99, 235)',
+                        'rgb(5, 150, 105)',
+                        'rgb(217, 119, 6)',
+                        'rgb(2, 132, 199)',
+                        'rgb(147, 51, 234)',
                         'rgb(5, 150, 105)',
                     ],
                     'borderWidth' => 2,
                     'borderRadius' => 4,
                 ],
             ],
-            'labels' => ['Draft', 'Interested', 'Signed (Not Paid)', 'Signed (Paid)'],
+            'labels' => ['Interested', 'Signed (Not Paid)', 'Signed (Paid)', 'Closed', 'Free From HS', 'Paid Troc', 'On Hold', 'On Site Free', 'Animation', 'Sponsor'],
         ];
     }
 

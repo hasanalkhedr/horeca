@@ -30,13 +30,27 @@ use HasWidgetShield;
 
         // Get counts
         $totalContracts = $query->count();
-        $draftCount = $query->clone()->where('status', Contract::STATUS_DRAFT)->count();
         $interestedCount = $query->clone()->where('status', Contract::STATUS_INTERESTED)->count();
         $signedCount = $query->clone()->whereIn('status', [
             Contract::STATUS_SIGNED_NOT_PAID,
             Contract::STATUS_SIGNED_PAID,
         ])->count();
-        $paidCount = $query->clone()->where('status', Contract::STATUS_SIGNED_PAID)->count();
+        $finalizedCount = $query->clone()->whereIn('status', [
+            Contract::STATUS_SIGNED_PAID,
+            Contract::STATUS_PAID_TROC,
+            Contract::STATUS_SPONSOR,
+        ])->count();
+        $activeCount = $query->clone()->whereIn('status', [
+            Contract::STATUS_INTERESTED,
+            Contract::STATUS_SIGNED_NOT_PAID,
+            Contract::STATUS_SIGNED_PAID,
+            Contract::STATUS_FREE_FROM_HS,
+            Contract::STATUS_PAID_TROC,
+            Contract::STATUS_ON_HOLD,
+            Contract::STATUS_ON_SITE_FREE,
+            Contract::STATUS_ANIMATION,
+            Contract::STATUS_SPONSOR,
+        ])->count();
 
         // Get total amount in USD
         $totalAmount = Contract::with(['Report.Currency'])
@@ -59,16 +73,16 @@ use HasWidgetShield;
                 ->chart([7, 3, 5, 8, 10, 12, 15])
                 ->extraAttributes(['class' => 'cursor-pointer']),
 
-            Stat::make('Signed Contracts', $signedCount)
-                ->description($totalContracts > 0 ? round(($signedCount / $totalContracts) * 100, 1) . '% of total' : '0%')
+            Stat::make('Active Contracts', $activeCount)
+                ->description($totalContracts > 0 ? round(($activeCount / $totalContracts) * 100, 1) . '% of total' : '0%')
                 ->descriptionIcon('heroicon-o-check-circle')
-                ->color($signedCount > 0 ? 'success' : 'gray')
+                ->color($activeCount > 0 ? 'success' : 'gray')
                 ->chart([1, 2, 3, 4, 5, 6, 7]),
 
-            Stat::make('Paid Contracts', $paidCount)
-                ->description($signedCount > 0 ? round(($paidCount / $signedCount) * 100, 1) . '% of signed' : '0%')
+            Stat::make('Finalized Contracts', $finalizedCount)
+                ->description($activeCount > 0 ? round(($finalizedCount / $activeCount) * 100, 1) . '% of active' : '0%')
                 ->descriptionIcon('heroicon-o-currency-dollar')
-                ->color($paidCount > 0 ? 'success' : 'gray')
+                ->color($finalizedCount > 0 ? 'success' : 'gray')
                 ->chart([1, 2, 2, 3, 4, 5, 6]),
 
             Stat::make('Total Amount (USD)', '$' . number_format($totalAmount, 2))

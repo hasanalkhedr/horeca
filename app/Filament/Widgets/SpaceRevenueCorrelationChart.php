@@ -39,10 +39,16 @@ use HasWidgetShield;
         $statusLabels = [];
 
         $statusColorMap = [
-            Contract::STATUS_DRAFT => 'rgba(107, 114, 128, 0.8)',
             Contract::STATUS_INTERESTED => 'rgba(14, 165, 233, 0.8)',
             Contract::STATUS_SIGNED_NOT_PAID => 'rgba(245, 158, 11, 0.8)',
             Contract::STATUS_SIGNED_PAID => 'rgba(16, 185, 129, 0.8)',
+            Contract::STATUS_CLOSED => 'rgba(239, 68, 68, 0.8)',
+            Contract::STATUS_FREE_FROM_HS => 'rgba(59, 130, 246, 0.8)',
+            Contract::STATUS_PAID_TROC => 'rgba(16, 185, 129, 0.8)',
+            Contract::STATUS_ON_HOLD => 'rgba(245, 158, 11, 0.8)',
+            Contract::STATUS_ON_SITE_FREE => 'rgba(14, 165, 233, 0.8)',
+            Contract::STATUS_ANIMATION => 'rgba(168, 85, 247, 0.8)',
+            Contract::STATUS_SPONSOR => 'rgba(16, 185, 129, 0.8)',
         ];
 
         foreach ($contracts as $contract) {

@@ -30,6 +30,8 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\Navigation\NavigationItem;
+use Filament\Navigation\NavigationGroup;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -45,7 +47,8 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->sidebarCollapsibleOnDesktop()
+            //->sidebarCollapsibleOnDesktop()
+            ->sidebarFullyCollapsibleOnDesktop()
             // ->sidebarWidth('15rem')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -83,13 +86,85 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->navigationGroups([
+                'Contract Filters',
                 'Event Management',
                 'Contracts',
                 'Settings',
                 'User/Role Management',
             ])
             ->navigationItems([
+                NavigationItem::make('INT')
+                    ->label('INT (Interested)')
+                    ->icon('heroicon-s-document-arrow-up')
+                    ->url(fn() => \App\Filament\Resources\ContractResource::getUrl('index', ['tableFilters[status][value]' => \App\Models\Contract::STATUS_INTERESTED]))
+                    ->badge(fn() => \App\Models\Contract::where('status', \App\Models\Contract::STATUS_INTERESTED)->count())
+                    ->group('Contract Filters')
+                    ->sort(1),
 
+                NavigationItem::make('S&NP')
+                    ->label('S&NP (Signed & Not Paid)')
+                    ->icon('heroicon-s-document-check')
+                    ->url(fn() => \App\Filament\Resources\ContractResource::getUrl('index', ['tableFilters[status][value]' => \App\Models\Contract::STATUS_SIGNED_NOT_PAID]))
+                    ->badge(fn() => \App\Models\Contract::where('status', \App\Models\Contract::STATUS_SIGNED_NOT_PAID)->count())
+                    ->group('Contract Filters')
+                    ->sort(2),
+
+                NavigationItem::make('S&P')
+                    ->label('S&P (Signed & Paid)')
+                    ->icon('heroicon-s-check-circle')
+                    ->url(fn() => \App\Filament\Resources\ContractResource::getUrl('index', ['tableFilters[status][value]' => \App\Models\Contract::STATUS_SIGNED_PAID]))
+                    ->badge(fn() => \App\Models\Contract::where('status', \App\Models\Contract::STATUS_SIGNED_PAID)->count())
+                    ->group('Contract Filters')
+                    ->sort(3),
+
+                NavigationItem::make('Closed')
+                    ->icon('heroicon-s-x-circle')
+                    ->url(fn() => \App\Filament\Resources\ContractResource::getUrl('index', ['tableFilters[status][value]' => \App\Models\Contract::STATUS_CLOSED]))
+                    ->badge(fn() => \App\Models\Contract::where('status', \App\Models\Contract::STATUS_CLOSED)->count())
+                    ->group('Contract Filters')
+                    ->sort(4),
+
+                NavigationItem::make('Free From HS')
+                    ->icon('heroicon-s-gift')
+                    ->url(fn() => \App\Filament\Resources\ContractResource::getUrl('index', ['tableFilters[status][value]' => \App\Models\Contract::STATUS_FREE_FROM_HS]))
+                    ->badge(fn() => \App\Models\Contract::where('status', \App\Models\Contract::STATUS_FREE_FROM_HS)->count())
+                    ->group('Contract Filters')
+                    ->sort(5),
+
+                NavigationItem::make('Paid Troc')
+                    ->icon('heroicon-s-banknotes')
+                    ->url(fn() => \App\Filament\Resources\ContractResource::getUrl('index', ['tableFilters[status][value]' => \App\Models\Contract::STATUS_PAID_TROC]))
+                    ->badge(fn() => \App\Models\Contract::where('status', \App\Models\Contract::STATUS_PAID_TROC)->count())
+                    ->group('Contract Filters')
+                    ->sort(6),
+
+                NavigationItem::make('On Hold')
+                    ->icon('heroicon-s-pause-circle')
+                    ->url(fn() => \App\Filament\Resources\ContractResource::getUrl('index', ['tableFilters[status][value]' => \App\Models\Contract::STATUS_ON_HOLD]))
+                    ->badge(fn() => \App\Models\Contract::where('status', \App\Models\Contract::STATUS_ON_HOLD)->count())
+                    ->group('Contract Filters')
+                    ->sort(7),
+
+                NavigationItem::make('On Site Free')
+                    ->icon('heroicon-s-home')
+                    ->url(fn() => \App\Filament\Resources\ContractResource::getUrl('index', ['tableFilters[status][value]' => \App\Models\Contract::STATUS_ON_SITE_FREE]))
+                    ->badge(fn() => \App\Models\Contract::where('status', \App\Models\Contract::STATUS_ON_SITE_FREE)->count())
+                    ->group('Contract Filters')
+                    ->sort(8),
+
+                NavigationItem::make('Animation')
+                    ->icon('heroicon-s-sparkles')
+                    ->url(fn() => \App\Filament\Resources\ContractResource::getUrl('index', ['tableFilters[status][value]' => \App\Models\Contract::STATUS_ANIMATION]))
+                    ->badge(fn() => \App\Models\Contract::where('status', \App\Models\Contract::STATUS_ANIMATION)->count())
+                    ->group('Contract Filters')
+                    ->sort(9),
+
+                NavigationItem::make('Sponsor')
+                    ->icon('heroicon-s-star')
+                    ->url(fn() => \App\Filament\Resources\ContractResource::getUrl('index', ['tableFilters[status][value]' => \App\Models\Contract::STATUS_SPONSOR]))
+                    ->badge(fn() => \App\Models\Contract::where('status', \App\Models\Contract::STATUS_SPONSOR)->count())
+                    ->group('Contract Filters')
+                    ->sort(10),
             ])
             ->renderHook(
                 'panels::head.end',

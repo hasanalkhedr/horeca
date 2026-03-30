@@ -25,6 +25,7 @@ use Filament\Navigation\NavigationItem;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn\TextColumnSize;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -223,7 +224,7 @@ class ContractResource extends Resource
                                 Forms\Components\Select::make('status')
                                     ->label('Contract Status')
                                     ->options(Contract::getStatuses())
-                                    ->default(Contract::STATUS_DRAFT)
+                                    ->default(Contract::STATUS_INTERESTED)
                                     ->required()
                                     ->native(false)
                                     ->columnSpan(1),
@@ -1498,8 +1499,7 @@ if($price) {
                 Tables\Columns\TextColumn::make('Company.name')
                     ->label('Company')
                     ->searchable()
-                    ->sortable()
-                    ->limit(20),
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('Stand.no')
                     ->label('Stand')
@@ -1516,22 +1516,38 @@ if($price) {
                     ->sortable()
                     ->searchable(),
 
+                Tables\Columns\TextColumn::make('space_net')
+                    ->label('Space Amount')
+                    ->money(
+                        fn($record): string =>
+                        $record->Report?->Currency?->CODE ?? 'USD')
+                    ->size(TextColumnSize::Large)
+                    ->sortable(),
+
+                    Tables\Columns\TextColumn::make('sponsor_net')
+                    ->label('Sponsor Amount')
+                    ->money(
+                        fn($record): string =>
+                        $record->Report?->Currency?->CODE ?? 'USD')
+                    ->size(TextColumnSize::Large)
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('net_total')
                     ->label('Total Amount')
                     ->money(
                         fn($record): string =>
-                        $record->Report?->Currency?->CODE ?? 'USD'
-                    )
+                        $record->Report?->Currency?->CODE ?? 'USD')
+                    ->size(TextColumnSize::Large)
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('contract_date')
                     ->date()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('Seller.name')
+                Tables\Columns\TextColumn::make('User.name')
                     ->label('Sales Person')
-                    ->toggleable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: false),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -1545,12 +1561,7 @@ if($price) {
                     ->searchable(),
 
                 Tables\Filters\SelectFilter::make('status')
-                    ->options([
-                        'draft' => 'Draft',
-                        'active' => 'Active',
-                        'completed' => 'Completed',
-                        'cancelled' => 'Cancelled',
-                    ]),
+                    ->options(Contract::getStatuses()),
 
                 Tables\Filters\Filter::make('contract_date')
                     ->form([
@@ -1568,7 +1579,17 @@ if($price) {
                                 fn(Builder $query, $date): Builder => $query->whereDate('contract_date', '<=', $date),
                             );
                     }),
-            ], FiltersLayout::AboveContent)->filtersFormColumns(4)
+
+                Tables\Filters\Filter::make('has_space_net')
+                    ->label('Has Space Amount')
+                    ->query(fn (Builder $query): Builder => $query->whereNotNull('space_net')->where('space_net', '>', 0))
+                    ->toggle(),
+
+                Tables\Filters\Filter::make('has_sponsor_net')
+                    ->label('Has Sponsor Amount')
+                    ->query(fn (Builder $query): Builder => $query->whereNotNull('sponsor_net')->where('sponsor_net', '>', 0))
+                    ->toggle(),
+            ], FiltersLayout::AboveContent)->filtersFormColumns(3)
             ->actions([
                 Tables\Actions\Action::make('preview')
                     ->label('')
@@ -1627,6 +1648,27 @@ if($price) {
                             case Contract::STATUS_SIGNED_PAID:
                                 $record->markAsPaid();
                                 break;
+                            case Contract::STATUS_FREE_FROM_HS:
+                                $record->setFreeFromHS();
+                                break;
+                            case Contract::STATUS_PAID_TROC:
+                                $record->setPaidTroc();
+                                break;
+                            case Contract::STATUS_ON_HOLD:
+                                $record->putOnHold();
+                                break;
+                            case Contract::STATUS_ON_SITE_FREE:
+                                $record->setOnSiteFree();
+                                break;
+                            case Contract::STATUS_ANIMATION:
+                                $record->setAnimation();
+                                break;
+                            case Contract::STATUS_SPONSOR:
+                                $record->setSponsor();
+                                break;
+                            case Contract::STATUS_CLOSED:
+                                $record->close();
+                                break;
                         }
 
                         Notification::make()
@@ -1642,7 +1684,7 @@ if($price) {
 
                 Tables\Actions\EditAction::make()
                     ->label('')
-                    ->visible(fn(Contract $record) => $record->status !== Contract::STATUS_SIGNED_PAID),
+                    ->visible(fn(Contract $record) => $record->canBeEdited()),
                 // Tables\Actions\DeleteAction::make()
                 //     ->before(function (Contract $record) {
                 //         if ($record->Stand) {
@@ -1717,92 +1759,7 @@ if($price) {
                     return $todayCount > 0 ? $todayCount : null;
                 })
             ,
-
-            // Optional: Add quick filters
-            NavigationItem::make('Drafts')
-                ->icon('heroicon-s-document')
-                ->url(static::getUrl('index', ['tableFilters[status][value]' => Contract::STATUS_DRAFT]))
-                ->badge(fn() => static::getModel()::where('status', Contract::STATUS_DRAFT)->count())
-            ,
-
-            NavigationItem::make('INT')
-                ->icon('heroicon-s-document-arrow-up')
-                ->url(static::getUrl('index', ['tableFilters[status][value]' => Contract::STATUS_INTERESTED]))
-                ->badge(fn() => static::getModel()::where('status', Contract::STATUS_INTERESTED)->count())
-            ,
-            NavigationItem::make('S&NP')
-                ->icon('heroicon-s-document-check')
-                ->url(static::getUrl('index', ['tableFilters[status][value]' => Contract::STATUS_SIGNED_NOT_PAID]))
-                ->badge(fn() => static::getModel()::where('status', Contract::STATUS_SIGNED_NOT_PAID)->count())
-            ,
-            NavigationItem::make('S&P')
-                ->icon('heroicon-s-document-currency-dollar')
-                ->url(static::getUrl('index', ['tableFilters[status][value]' => Contract::STATUS_SIGNED_PAID]))
-                ->badge(fn() => static::getModel()::where('status', Contract::STATUS_SIGNED_PAID)->count())
-            ,
         ];
     }
 
-
-
-
-    // private function processContractData(array $data): array
-    // {
-    //     // Process stand selection
-    //     $data = $this->processStandSelection($data);
-
-    //     // Ensure tax per sqm fields are properly set
-    //     $enableTaxPerSqm = $data['enable_tax_per_sqm'] ?? false;
-    //     if (!$enableTaxPerSqm) {
-    //         $data['tax_per_sqm_amount'] = 0;
-    //         $data['tax_per_sqm_total'] = 0;
-    //     }
-
-    //     // Calculate base space amount if not already calculated
-    //     if (!isset($data['base_space_amount'])) {
-    //         $data['base_space_amount'] = $data['space_amount'] - ($data['tax_per_sqm_total'] ?? 0);
-    //     }
-
-    //     return $data;
-    // }
-    // protected function beforeCreate(array $data): array
-    // {
-    //     // return $this->processStandSelection($data);
-    //     return $this->processContractData($data);
-
-    // }
-
-    // protected function beforeSave(array $data): array
-    // {
-    //     dd($data);
-    //     // return $this->processStandSelection($data);
-    //     return $this->processContractData($data);
-    // }
-
-    // private function processStandSelection(array $data): array
-    // {
-    //     // Validate stand exists and is available
-    //     if (!empty($data['stand_id'])) {
-    //         $stand = Stand::find($data['stand_id']);
-    //         if ($stand && $stand->status === 'Available') {
-    //             $data['stand_id'] = $stand->id;
-
-    //             // Update stand status based on contract status
-    //             $contractStatus = $data['status'] ?? Contract::STATUS_DRAFT;
-    //             if (
-    //                 $contractStatus === Contract::STATUS_SIGNED_PAID ||
-    //                 $contractStatus === Contract::STATUS_SIGNED_NOT_PAID
-    //             ) {
-    //                 $stand->update(['status' => 'Sold']);
-    //             }
-
-    //             // Clear caches
-    //             self::clearFormCache($data['event_id'] ?? null, $data['report_id'] ?? null);
-    //         } else {
-    //             throw new \Exception('Selected stand is not available or does not exist');
-    //         }
-    //     }
-
-    //     return $data;
-    // }
 }

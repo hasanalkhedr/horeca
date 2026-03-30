@@ -10,10 +10,16 @@ use Storage;
 class Contract extends Model
 {
     // ==================== STATUS CONSTANTS ====================
-    const STATUS_DRAFT = 'draft';
-    const STATUS_INTERESTED = 'INT';          // Interested
+    const STATUS_INTERESTED = 'INT';          // Interested (Default)
     const STATUS_SIGNED_NOT_PAID = 'S&NP';    // Signed and Not Paid
     const STATUS_SIGNED_PAID = 'S&P';         // Signed and Paid
+    const STATUS_CLOSED = 'CLOSED';           // Closed
+    const STATUS_FREE_FROM_HS = 'Free From HS'; // Free From HS
+    const STATUS_PAID_TROC = 'Paid Troc';      // Paid Troc
+    const STATUS_ON_HOLD = 'On Hold';         // On Hold
+    const STATUS_ON_SITE_FREE = 'On Site Free'; // On Site Free
+    const STATUS_ANIMATION = 'Animation';      // Animation
+    const STATUS_SPONSOR = 'Sponsor';         // Sponsor
 
     /**
      * Get all available statuses with display names
@@ -21,10 +27,16 @@ class Contract extends Model
     public static function getStatuses(): array
     {
         return [
-            self::STATUS_DRAFT => 'Draft',
             self::STATUS_INTERESTED => 'Interested (INT)',
             self::STATUS_SIGNED_NOT_PAID => 'Signed & Not Paid (S&NP)',
             self::STATUS_SIGNED_PAID => 'Signed & Paid (S&P)',
+            self::STATUS_CLOSED => 'Closed',
+            self::STATUS_FREE_FROM_HS => 'Free From HS',
+            self::STATUS_PAID_TROC => 'Paid Troc',
+            self::STATUS_ON_HOLD => 'On Hold',
+            self::STATUS_ON_SITE_FREE => 'On Site Free',
+            self::STATUS_ANIMATION => 'Animation',
+            self::STATUS_SPONSOR => 'Sponsor',
         ];
     }
 
@@ -34,10 +46,16 @@ class Contract extends Model
     public static function getSimpleStatuses(): array
     {
         return [
-            self::STATUS_DRAFT => 'Draft',
             self::STATUS_INTERESTED => 'Interested',
             self::STATUS_SIGNED_NOT_PAID => 'Signed (Not Paid)',
             self::STATUS_SIGNED_PAID => 'Signed (Paid)',
+            self::STATUS_CLOSED => 'Closed',
+            self::STATUS_FREE_FROM_HS => 'Free From HS',
+            self::STATUS_PAID_TROC => 'Paid Troc',
+            self::STATUS_ON_HOLD => 'On Hold',
+            self::STATUS_ON_SITE_FREE => 'On Site Free',
+            self::STATUS_ANIMATION => 'Animation',
+            self::STATUS_SPONSOR => 'Sponsor',
         ];
     }
 
@@ -47,10 +65,16 @@ class Contract extends Model
     public static function getStatusColor($status): string
     {
         return match ($status) {
-            self::STATUS_DRAFT => 'gray',
             self::STATUS_INTERESTED => 'info',
             self::STATUS_SIGNED_NOT_PAID => 'warning',
             self::STATUS_SIGNED_PAID => 'success',
+            self::STATUS_CLOSED => 'danger',
+            self::STATUS_FREE_FROM_HS => 'primary',
+            self::STATUS_PAID_TROC => 'success',
+            self::STATUS_ON_HOLD => 'warning',
+            self::STATUS_ON_SITE_FREE => 'info',
+            self::STATUS_ANIMATION => 'purple',
+            self::STATUS_SPONSOR => 'success',
             default => 'gray',
         };
     }
@@ -61,10 +85,16 @@ class Contract extends Model
     public static function getStatusIcon($status): string
     {
         return match ($status) {
-            self::STATUS_DRAFT => 'heroicon-o-document',
             self::STATUS_INTERESTED => 'heroicon-o-eye',
             self::STATUS_SIGNED_NOT_PAID => 'heroicon-o-document-check',
             self::STATUS_SIGNED_PAID => 'heroicon-o-check-circle',
+            self::STATUS_CLOSED => 'heroicon-o-x-circle',
+            self::STATUS_FREE_FROM_HS => 'heroicon-o-gift',
+            self::STATUS_PAID_TROC => 'heroicon-o-banknotes',
+            self::STATUS_ON_HOLD => 'heroicon-o-pause-circle',
+            self::STATUS_ON_SITE_FREE => 'heroicon-o-home',
+            self::STATUS_ANIMATION => 'heroicon-o-sparkles',
+            self::STATUS_SPONSOR => 'heroicon-o-star',
             default => 'heroicon-o-document',
         };
     }
@@ -112,14 +142,6 @@ class Contract extends Model
     }
 
     /**
-     * Check if contract is draft
-     */
-    public function isDraft(): bool
-    {
-        return $this->status === self::STATUS_DRAFT;
-    }
-
-    /**
      * Check if contract shows interest
      */
     public function isInterested(): bool
@@ -144,6 +166,62 @@ class Contract extends Model
     }
 
     /**
+     * Check if contract is closed
+     */
+    public function isClosed(): bool
+    {
+        return $this->status === self::STATUS_CLOSED;
+    }
+
+    /**
+     * Check if contract is free from HS
+     */
+    public function isFreeFromHS(): bool
+    {
+        return $this->status === self::STATUS_FREE_FROM_HS;
+    }
+
+    /**
+     * Check if contract is paid troc
+     */
+    public function isPaidTroc(): bool
+    {
+        return $this->status === self::STATUS_PAID_TROC;
+    }
+
+    /**
+     * Check if contract is on hold
+     */
+    public function isOnHold(): bool
+    {
+        return $this->status === self::STATUS_ON_HOLD;
+    }
+
+    /**
+     * Check if contract is on site free
+     */
+    public function isOnSiteFree(): bool
+    {
+        return $this->status === self::STATUS_ON_SITE_FREE;
+    }
+
+    /**
+     * Check if contract is animation
+     */
+    public function isAnimation(): bool
+    {
+        return $this->status === self::STATUS_ANIMATION;
+    }
+
+    /**
+     * Check if contract is sponsor
+     */
+    public function isSponsor(): bool
+    {
+        return $this->status === self::STATUS_SPONSOR;
+    }
+
+    /**
      * Check if contract is signed (either paid or not paid)
      */
     public function isSigned(): bool
@@ -159,7 +237,29 @@ class Contract extends Model
      */
     public function isFinalized(): bool
     {
-        return $this->isSignedPaid();
+        return in_array($this->status, [
+            self::STATUS_SIGNED_PAID,
+            self::STATUS_PAID_TROC,
+            self::STATUS_SPONSOR,
+        ]);
+    }
+
+    /**
+     * Check if contract is active (not closed)
+     */
+    public function isActive(): bool
+    {
+        return in_array($this->status, [
+            self::STATUS_INTERESTED,
+            self::STATUS_SIGNED_NOT_PAID,
+            self::STATUS_SIGNED_PAID,
+            self::STATUS_FREE_FROM_HS,
+            self::STATUS_PAID_TROC,
+            self::STATUS_ON_HOLD,
+            self::STATUS_ON_SITE_FREE,
+            self::STATUS_ANIMATION,
+            self::STATUS_SPONSOR,
+        ]);
     }
 
     /**
@@ -167,10 +267,10 @@ class Contract extends Model
      */
     public function canBeEdited(): bool
     {
-        // Can edit draft and interested contracts
+        // Can edit interested and on hold contracts
         return in_array($this->status, [
-            self::STATUS_DRAFT,
             self::STATUS_INTERESTED,
+            self::STATUS_ON_HOLD,
         ]);
     }
 
@@ -179,10 +279,10 @@ class Contract extends Model
      */
     public function canBeSigned(): bool
     {
-        // Can sign draft or interested contracts
+        // Can sign interested and on hold contracts
         return in_array($this->status, [
-            self::STATUS_DRAFT,
             self::STATUS_INTERESTED,
+            self::STATUS_ON_HOLD,
         ]);
     }
 
@@ -200,16 +300,30 @@ class Contract extends Model
      */
     public function canBeDeleted(): bool
     {
-        // Can delete only draft contracts
-        return $this->status === self::STATUS_DRAFT;
+        // Only interested contracts can be deleted (no longer draft)
+        return $this->status === self::STATUS_INTERESTED;
     }
 
     /**
-     * Scope for draft contracts
+     * Check if contract can be closed
      */
-    public function scopeDraft($query)
+    public function canBeClosed(): bool
     {
-        return $query->where('status', self::STATUS_DRAFT);
+        // Can close finalized contracts
+        return in_array($this->status, [
+            self::STATUS_SIGNED_PAID,
+            self::STATUS_PAID_TROC,
+            self::STATUS_SPONSOR,
+        ]);
+    }
+
+    /**
+     * Check if contract can be put on hold
+     */
+    public function canBePutOnHold(): bool
+    {
+        // Can put interested contracts on hold
+        return $this->status === self::STATUS_INTERESTED;
     }
 
     /**
@@ -234,6 +348,80 @@ class Contract extends Model
     public function scopeSignedPaid($query)
     {
         return $query->where('status', self::STATUS_SIGNED_PAID);
+    }
+
+    /**
+     * Scope for closed contracts
+     */
+    public function scopeClosed($query)
+    {
+        return $query->where('status', self::STATUS_CLOSED);
+    }
+
+    /**
+     * Scope for free from HS contracts
+     */
+    public function scopeFreeFromHS($query)
+    {
+        return $query->where('status', self::STATUS_FREE_FROM_HS);
+    }
+
+    /**
+     * Scope for paid troc contracts
+     */
+    public function scopePaidTroc($query)
+    {
+        return $query->where('status', self::STATUS_PAID_TROC);
+    }
+
+    /**
+     * Scope for on hold contracts
+     */
+    public function scopeOnHold($query)
+    {
+        return $query->where('status', self::STATUS_ON_HOLD);
+    }
+
+    /**
+     * Scope for on site free contracts
+     */
+    public function scopeOnSiteFree($query)
+    {
+        return $query->where('status', self::STATUS_ON_SITE_FREE);
+    }
+
+    /**
+     * Scope for animation contracts
+     */
+    public function scopeAnimation($query)
+    {
+        return $query->where('status', self::STATUS_ANIMATION);
+    }
+
+    /**
+     * Scope for sponsor contracts
+     */
+    public function scopeSponsor($query)
+    {
+        return $query->where('status', self::STATUS_SPONSOR);
+    }
+
+    /**
+     * Scope for active contracts (not closed)
+     */
+    public function scopeActive($query)
+    {
+        return $query->whereIn('status', [
+            self::STATUS_INTERESTED,
+            self::STATUS_SIGNED_NOT_PAID,
+            self::STATUS_SIGNED_PAID,
+            self::STATUS_FREE_FROM_HS,
+            self::STATUS_PAID_TROC,
+            self::STATUS_ON_HOLD,
+            self::STATUS_ON_SITE_FREE,
+            self::STATUS_ANIMATION,
+            self::STATUS_SPONSOR,
+        ]);
     }
 
     /**
@@ -310,22 +498,134 @@ class Contract extends Model
     }
 
     /**
+     * Put contract on hold
+     */
+    public function putOnHold(): bool
+    {
+        if ($this->canBePutOnHold()) {
+            $this->status = self::STATUS_ON_HOLD;
+            return $this->save();
+        }
+        return false;
+    }
+
+    /**
+     * Close contract
+     */
+    public function close(): bool
+    {
+        if ($this->canBeClosed()) {
+            $this->status = self::STATUS_CLOSED;
+            return $this->save();
+        }
+        return false;
+    }
+
+    /**
+     * Set contract as free from HS
+     */
+    public function setFreeFromHS(): bool
+    {
+        // Can be set from interested
+        if ($this->status === self::STATUS_INTERESTED) {
+            $this->status = self::STATUS_FREE_FROM_HS;
+            return $this->save();
+        }
+        return false;
+    }
+
+    /**
+     * Set contract as paid troc
+     */
+    public function setPaidTroc(): bool
+    {
+        // Can be set from interested
+        if ($this->status === self::STATUS_INTERESTED) {
+            $this->status = self::STATUS_PAID_TROC;
+            return $this->save();
+        }
+        return false;
+    }
+
+    /**
+     * Set contract as on site free
+     */
+    public function setOnSiteFree(): bool
+    {
+        // Can be set from interested
+        if ($this->status === self::STATUS_INTERESTED) {
+            $this->status = self::STATUS_ON_SITE_FREE;
+            return $this->save();
+        }
+        return false;
+    }
+
+    /**
+     * Set contract as animation
+     */
+    public function setAnimation(): bool
+    {
+        // Can be set from interested
+        if ($this->status === self::STATUS_INTERESTED) {
+            $this->status = self::STATUS_ANIMATION;
+            return $this->save();
+        }
+        return false;
+    }
+
+    /**
+     * Set contract as sponsor
+     */
+    public function setSponsor(): bool
+    {
+        // Can be set from interested
+        if ($this->status === self::STATUS_INTERESTED) {
+            $this->status = self::STATUS_SPONSOR;
+            return $this->save();
+        }
+        return false;
+    }
+
+    /**
      * Get next possible status transitions
      */
     public function getNextPossibleStatuses(): array
     {
         return match ($this->status) {
-            self::STATUS_DRAFT => [
-                self::STATUS_INTERESTED => 'Mark as Interested',
-                self::STATUS_SIGNED_NOT_PAID => 'Sign Contract',
-            ],
             self::STATUS_INTERESTED => [
                 self::STATUS_SIGNED_NOT_PAID => 'Sign Contract',
+                self::STATUS_FREE_FROM_HS => 'Set as Free From HS',
+                self::STATUS_PAID_TROC => 'Set as Paid Troc',
+                self::STATUS_ON_SITE_FREE => 'Set as On Site Free',
+                self::STATUS_ANIMATION => 'Set as Animation',
+                self::STATUS_SPONSOR => 'Set as Sponsor',
+                self::STATUS_ON_HOLD => 'Put on Hold',
+            ],
+            self::STATUS_ON_HOLD => [
+                self::STATUS_INTERESTED => 'Mark as Interested',
+                self::STATUS_SIGNED_NOT_PAID => 'Sign Contract',
+                self::STATUS_FREE_FROM_HS => 'Set as Free From HS',
+                self::STATUS_PAID_TROC => 'Set as Paid Troc',
+                self::STATUS_ON_SITE_FREE => 'Set as On Site Free',
+                self::STATUS_ANIMATION => 'Set as Animation',
+                self::STATUS_SPONSOR => 'Set as Sponsor',
             ],
             self::STATUS_SIGNED_NOT_PAID => [
                 self::STATUS_SIGNED_PAID => 'Mark as Paid',
             ],
-            self::STATUS_SIGNED_PAID => [], // No further transitions
+            self::STATUS_SIGNED_PAID => [
+                self::STATUS_CLOSED => 'Close Contract',
+            ],
+            self::STATUS_PAID_TROC => [
+                self::STATUS_CLOSED => 'Close Contract',
+            ],
+            self::STATUS_SPONSOR => [
+                self::STATUS_CLOSED => 'Close Contract',
+            ],
+            self::STATUS_FREE_FROM_HS => [], // No further transitions
+            self::STATUS_ON_SITE_FREE => [], // No further transitions
+            self::STATUS_ANIMATION => [], // No further transitions
+            self::STATUS_CLOSED => [], // No further transitions
             default => [],
         };
     }
@@ -335,7 +635,7 @@ class Contract extends Model
         static::creating(function (Contract $contract) {
             $contract->contract_no = Contract::generateContractNumber($contract);
             if (empty($contract->status)) {
-                $contract->status = self::STATUS_DRAFT;
+                $contract->status = self::STATUS_INTERESTED; // Default to INT
             }
         });
         static::created(function (Contract $contract) {
@@ -490,9 +790,9 @@ class Contract extends Model
     {
         return $this->belongsTo(Category::class);
     }
-    public function Seller()
+    public function User()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'seller', 'id', 'users');
     }
     public function AdsPackage()
     {

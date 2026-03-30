@@ -55,7 +55,7 @@ class StandStatisticsWidget extends BaseWidget
 
         // Calculate available statistics
         $availableStands = $stands->where('status', 'Available')->count();
-        $availableSpace = $stands->where('status', 'Available')->sum('space');
+        $availableSpace = $stands->where('status', 'Available')->sum('space') - $stands->where('deductable', false)->sum('space');
         $availablePercentage = $totalStands > 0 ? round(($availableStands / $totalStands) * 100, 1) : 0;
         $availableSpacePercentage = $totalSpace > 0 ? round(($availableSpace / $totalSpace) * 100, 1) : 0;
 
@@ -82,7 +82,7 @@ class StandStatisticsWidget extends BaseWidget
             //     ->chart($this->getStatusTrend('Sold', 'count')),
 
             // Available Statistics
-            Stat::make('Available Space', number_format($availableSpace, 2) . ' sqm')
+            Stat::make('Available Space to Sell', number_format($availableSpace, 2) . ' sqm')
                 ->description("{$availableStands} stands • {$availableSpacePercentage}% of total space")
                 ->descriptionIcon('heroicon-o-check-circle')
                 ->color('success')
@@ -95,7 +95,7 @@ class StandStatisticsWidget extends BaseWidget
             //     ->chart($this->getStatusTrend('Available', 'count')),
 
             // Total Statistics
-            Stat::make('Total Space', number_format($totalSpace, 2) . ' sqm')
+            Stat::make('Total Area', number_format($totalSpace, 2) . ' sqm')
                 ->description("{$totalStands} total stands")
                 ->descriptionIcon('heroicon-o-square-3-stack-3d')
                 ->color('primary')
