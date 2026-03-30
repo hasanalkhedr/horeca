@@ -1583,6 +1583,11 @@ if($price) {
                             );
                     }),
 
+                Tables\Filters\SelectFilter::make('seller')
+                    ->label('Seller')
+                    ->options(User::pluck('name', 'id')->toArray())
+                    ->searchable(),
+
                 Tables\Filters\Filter::make('has_space_net')
                     ->label('Has Space Amount')
                     ->query(fn (Builder $query): Builder => $query->whereNotNull('space_net')->where('space_net', '>', 0))
@@ -1592,7 +1597,7 @@ if($price) {
                     ->label('Has Sponsor Amount')
                     ->query(fn (Builder $query): Builder => $query->whereNotNull('sponsor_net')->where('sponsor_net', '>', 0))
                     ->toggle(),
-            ], FiltersLayout::AboveContent)->filtersFormColumns(3)
+            ], FiltersLayout::AboveContent)->filtersFormColumns(4)
             ->actions([
                 Tables\Actions\Action::make('preview')
                     ->label('')
