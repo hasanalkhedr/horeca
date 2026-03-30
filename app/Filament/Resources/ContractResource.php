@@ -1517,27 +1517,30 @@ if($price) {
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('space_net')
-                    ->label('Space Amount')
+                    ->label('Space')
                     ->money(
                         fn($record): string =>
                         $record->Report?->Currency?->CODE ?? 'USD')
-                    ->size(TextColumnSize::Large)
+                    ->badge()
+                    ->color(fn($record) => $record->status_color)
                     ->sortable(),
 
                     Tables\Columns\TextColumn::make('sponsor_net')
-                    ->label('Sponsor Amount')
+                    ->label('Sponsor')
                     ->money(
                         fn($record): string =>
                         $record->Report?->Currency?->CODE ?? 'USD')
-                    ->size(TextColumnSize::Large)
+                    ->badge()
+                    ->color(fn($record) => $record->status_color)
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('net_total')
-                    ->label('Total Amount')
+                    ->label('Total')
                     ->money(
                         fn($record): string =>
                         $record->Report?->Currency?->CODE ?? 'USD')
-                    ->size(TextColumnSize::Large)
+                    ->badge()
+                    ->color(fn($record) => $record->status_color)
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('contract_date')
