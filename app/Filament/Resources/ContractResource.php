@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use AlperenErsoy\FilamentExport\Actions\FilamentExportBulkAction;
 use AlperenErsoy\FilamentExport\Actions\FilamentExportHeaderAction;
 use App\Filament\Resources\ContractResource\Pages;
+use App\Filament\Resources\ContractResource\Widgets\ContractStatisticsWidget;
 use App\Models\Contract;
 use App\Models\Event;
 use App\Models\Report;
@@ -1767,6 +1768,13 @@ if($price) {
                     return $todayCount > 0 ? $todayCount : null;
                 })
             ,
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            ContractStatisticsWidget::class,
         ];
     }
 
