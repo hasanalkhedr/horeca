@@ -45,6 +45,9 @@ class ContractStatisticsWidget extends BaseWidget
 
         $contracts = $query->get();
 
+        // Get event targets if filtered by single event
+        $eventTargets = $this->getEventTargets();
+
         // Calculate total statistics
         $totalContracts = $contracts->count();
         $totalSpace = $contracts->sum(function ($contract) {
@@ -94,6 +97,9 @@ class ContractStatisticsWidget extends BaseWidget
         $contractsWithSpaceAmount = $contracts->whereNotNull('space_net')->where('space_net', '>', 0)->count();
         $contractsWithSponsorAmount = $contracts->whereNotNull('sponsor_net')->where('sponsor_net', '>', 0)->count();
 
+        // Calculate target comparisons
+        $targetComparisons = $this->calculateTargetComparisons($totalSpace, $spaceAmount, $sponsorAmount, $eventTargets, $totalContracts, $contractsWithSpaceAmount, $contractsWithSponsorAmount);
+
         return [
             // Contract Count Statistics
             Stat::make('Total Contracts', $totalContracts)
@@ -135,9 +141,9 @@ class ContractStatisticsWidget extends BaseWidget
 
             // Space Statistics
             Stat::make('Total Space', number_format($totalSpace, 2) . ' sqm')
-                ->description("{$totalContracts} contracts")
+                ->description($targetComparisons['space_description'])
                 ->descriptionIcon('heroicon-o-square-3-stack-3d')
-                ->color('primary')
+                ->color($targetComparisons['space_color'])
                 ->chart($this->getTotalSpaceTrend()),
 
             // Financial Statistics
@@ -148,15 +154,15 @@ class ContractStatisticsWidget extends BaseWidget
                 ->chart($this->getAmountTrend()),
 
             Stat::make('Space Amount', '$' . number_format($spaceAmount, 2))
-                ->description("{$contractsWithSpaceAmount} contracts")
+                ->description($targetComparisons['space_amount_description'])
                 ->descriptionIcon('heroicon-o-banknotes')
-                ->color('success')
+                ->color($targetComparisons['space_amount_color'])
                 ->chart($this->getSpaceAmountTrend()),
 
             Stat::make('Sponsor Amount', '$' . number_format($sponsorAmount, 2))
-                ->description("{$contractsWithSponsorAmount} contracts")
+                ->description($targetComparisons['sponsor_amount_description'])
                 ->descriptionIcon('heroicon-o-star')
-                ->color('warning')
+                ->color($targetComparisons['sponsor_amount_color'])
                 ->chart($this->getSponsorAmountTrend()),
         ];
     }
@@ -500,5 +506,110 @@ class ContractStatisticsWidget extends BaseWidget
         }
 
         return $query;
+    }
+
+    /**
+     * Get event targets based on current filters
+     */
+    protected function getEventTargets(): ?array
+    {
+        $filters = $this->pageFilters;
+
+        if (empty($filters)) {
+            // Try to get from Livewire component
+            try {
+                if (method_exists($this, 'getLivewire')) {
+                    $livewire = $this->getLivewire();
+                    if ($livewire && isset($livewire->tableFilters)) {
+                        $filters = $livewire->tableFilters;
+                    }
+                }
+            } catch (\Exception $e) {
+                // Error accessing Livewire filters
+            }
+        }
+
+        if (!empty($filters) && isset($filters['event_id'])) {
+            $getValue = function (mixed $filter): mixed {
+                if (!is_array($filter)) {
+                    return null;
+                }
+                if (array_key_exists('value', $filter)) {
+                    return $filter['value'];
+                }
+                if (array_key_exists('values', $filter)) {
+                    return $filter['values'];
+                }
+                return null;
+            };
+
+            $eventIdsValue = $getValue($filters['event_id']);
+            $eventIds = is_array($eventIdsValue) ? $eventIdsValue : (empty($eventIdsValue) ? [] : [$eventIdsValue]);
+            $eventIds = array_filter($eventIds, fn ($v) => !empty($v));
+
+            if (!empty($eventIds)) {
+                // Get sum of targets for selected events
+                $events = \App\Models\Event::whereIn('id', $eventIds)->get();
+                return [
+                    'target_space' => $events->sum('target_space'),
+                    'target_space_amount' => $events->sum('target_space_amount'),
+                    'target_sponsor_amount' => $events->sum('target_sponsor_amount'),
+                ];
+            }
+        }
+
+        // No event filter or empty event filter - sum all targets
+        return [
+            'target_space' => \App\Models\Event::sum('target_space'),
+            'target_space_amount' => \App\Models\Event::sum('target_space_amount'),
+            'target_sponsor_amount' => \App\Models\Event::sum('target_sponsor_amount'),
+        ];
+
+        return null;
+    }
+
+    /**
+     * Calculate target comparisons
+     */
+    protected function calculateTargetComparisons(float $achievedSpace, float $achievedSpaceAmount, float $achievedSponsorAmount, ?array $targets, int $totalContracts, int $contractsWithSpaceAmount, int $contractsWithSponsorAmount): array
+    {
+        $comparisons = [
+            'space_description' => 'No target set',
+            'space_color' => 'primary',
+            'space_amount_description' => 'No target set',
+            'space_amount_color' => 'success',
+            'sponsor_amount_description' => 'No target set',
+            'sponsor_amount_color' => 'warning',
+        ];
+
+        if ($targets) {
+            // Space comparison
+            if ($targets['target_space'] && $targets['target_space'] > 0) {
+                $percentage = ($achievedSpace / $targets['target_space']) * 100;
+                $comparisons['space_description'] = number_format($percentage, 1) . '% of ' . number_format($targets['target_space'], 0) . ' sqm target';
+                $comparisons['space_color'] = $percentage >= 100 ? 'success' : ($percentage >= 75 ? 'warning' : 'danger');
+            }
+
+            // Space amount comparison
+            if ($targets['target_space_amount'] && $targets['target_space_amount'] > 0) {
+                $percentage = ($achievedSpaceAmount / $targets['target_space_amount']) * 100;
+                $comparisons['space_amount_description'] = number_format($percentage, 1) . '% of $' . number_format($targets['target_space_amount'], 0) . ' target';
+                $comparisons['space_amount_color'] = $percentage >= 100 ? 'success' : ($percentage >= 75 ? 'warning' : 'danger');
+            }
+
+            // Sponsor amount comparison
+            if ($targets['target_sponsor_amount'] && $targets['target_sponsor_amount'] > 0) {
+                $percentage = ($achievedSponsorAmount / $targets['target_sponsor_amount']) * 100;
+                $comparisons['sponsor_amount_description'] = number_format($percentage, 1) . '% of $' . number_format($targets['target_sponsor_amount'], 0) . ' target';
+                $comparisons['sponsor_amount_color'] = $percentage >= 100 ? 'success' : ($percentage >= 75 ? 'warning' : 'danger');
+            }
+        } else {
+            // No targets available
+            $comparisons['space_description'] = "{$totalContracts} contracts";
+            $comparisons['space_amount_description'] = "{$contractsWithSpaceAmount} contracts";
+            $comparisons['sponsor_amount_description'] = "{$contractsWithSponsorAmount} contracts";
+        }
+
+        return $comparisons;
     }
 }

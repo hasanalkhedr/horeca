@@ -99,6 +99,9 @@ protected function mutateFormDataBeforeFill(array $data): array
             'city' => $data['city'],
             'address' => $data['address'],
             'vat_rate' => $data['vat_rate'],
+        'target_space' => $data['target_space'],
+        'target_space_amount' => $data['target_space_amount'],
+        'target_sponsor_amount' => $data['target_sponsor_amount'],
         ]);
 
         // Sync event currencies

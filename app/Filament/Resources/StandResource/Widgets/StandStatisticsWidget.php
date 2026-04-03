@@ -43,6 +43,9 @@ class StandStatisticsWidget extends BaseWidget
         $query = $this->getFilteredQuery();
 
         $stands = $query->get();
+
+        // Get event targets if filtered by single event
+        $eventTargets = $this->getEventTargets();
         // Calculate total statistics
         $totalStands = $stands->count();
         $totalSpace = $stands->sum('space');
@@ -67,12 +70,15 @@ class StandStatisticsWidget extends BaseWidget
         $deductibleStands = $stands->where('deductable', true)->count();
         $deductiblePercentage = $totalStands > 0 ? round(($deductibleStands / $totalStands) * 100, 1) : 0;
 
+        // Calculate target comparisons
+        $targetComparisons = $this->calculateTargetComparisons($soldSpace, $eventTargets);
+
         return [
             // Sold Statistics
             Stat::make('Sold Space', number_format($soldSpace, 2) . ' sqm')
-                ->description("{$soldStands} stands • {$soldSpacePercentage}% of total space")
+                ->description($targetComparisons['description'])
                 ->descriptionIcon('heroicon-o-check-badge')
-                ->color('danger')
+                ->color($targetComparisons['color'])
                 ->chart($this->getStatusTrend('Sold')),
 
             // Stat::make('Sold Stands', $soldStands)
@@ -296,5 +302,77 @@ class StandStatisticsWidget extends BaseWidget
         }
 
         return $query;
+    }
+
+    /**
+     * Get event targets based on current filters
+     */
+    protected function getEventTargets(): ?array
+    {
+        $filters = $this->pageFilters;
+
+        if (empty($filters)) {
+            // Try to get from Livewire component
+            try {
+                if (method_exists($this, 'getLivewire')) {
+                    $livewire = $this->getLivewire();
+                    if ($livewire && isset($livewire->tableFilters)) {
+                        $filters = $livewire->tableFilters;
+                    }
+                }
+            } catch (\Exception $e) {
+                // Error accessing Livewire filters
+            }
+        }
+
+        if (!empty($filters) && isset($filters['event_id'])) {
+            $getValue = function (mixed $filter): mixed {
+                if (!is_array($filter)) {
+                    return null;
+                }
+                if (array_key_exists('values', $filter)) {
+                    return $filter['values'];
+                }
+                return null;
+            };
+
+            $eventIdsValue = $getValue($filters['event_id']);
+            $eventIds = is_array($eventIdsValue) ? $eventIdsValue : (empty($eventIdsValue) ? [] : [$eventIdsValue]);
+            $eventIds = array_filter($eventIds, fn ($v) => !empty($v));
+
+            if (!empty($eventIds)) {
+                // Get sum of targets for selected events
+                $events = \App\Models\Event::whereIn('id', $eventIds)->get();
+                return [
+                    'target_space' => $events->sum('target_space'),
+                ];
+            }
+        }
+
+        // No event filter or empty event filter - sum all targets
+        return [
+            'target_space' => \App\Models\Event::sum('target_space'),
+        ];
+    }
+
+    /**
+     * Calculate target comparisons for stands
+     */
+    protected function calculateTargetComparisons(float $soldSpace, ?array $targets): array
+    {
+        $comparisons = [
+            'description' => 'No target set',
+            'color' => 'danger',
+        ];
+
+        if ($targets) {
+            if ($targets['target_space'] && $targets['target_space'] > 0) {
+                $percentage = ($soldSpace / $targets['target_space']) * 100;
+                $comparisons['description'] = number_format($percentage, 1) . '% of ' . number_format($targets['target_space'], 0) . ' sqm target';
+                $comparisons['color'] = $percentage >= 100 ? 'success' : ($percentage >= 75 ? 'warning' : 'danger');
+            }
+        }
+
+        return $comparisons;
     }
 }

@@ -123,6 +123,33 @@ class EventResource extends Resource
                                             $set('remaining_space_to_sell', $record->remaining_space_to_sell . ' sqm');
                                             $set('remaining_free_space', $record->remaining_free_space . ' sqm');
                                         }),
+
+                                    Forms\Components\Grid::make(3)
+                                        ->schema([
+                                            Forms\Components\TextInput::make('target_space')
+                                                ->label('Target Space')
+                                                ->numeric()
+                                                ->minValue(0)
+                                                ->suffix('sqm')
+                                                ->helperText('Desired space sales target for this event')
+                                                ->columnSpan(1),
+
+                                            Forms\Components\TextInput::make('target_space_amount')
+                                                ->label('Target Space Amount')
+                                                ->numeric()
+                                                ->minValue(0)
+                                                ->prefix('$')
+                                                ->helperText('Desired space amount sales target')
+                                                ->columnSpan(1),
+
+                                            Forms\Components\TextInput::make('target_sponsor_amount')
+                                                ->label('Target Sponsor Amount')
+                                                ->numeric()
+                                                ->minValue(0)
+                                                ->prefix('$')
+                                                ->helperText('Desired sponsor amount sales target')
+                                                ->columnSpan(1),
+                                        ]),
                                 ]),
 
                             Forms\Components\Section::make('Location & Tax')
@@ -422,6 +449,30 @@ class EventResource extends Resource
                 Tables\Columns\TextColumn::make('free_space')
                     ->label('Free Space')
                     ->suffix(' sqm')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                Tables\Columns\TextColumn::make('target_space')
+                    ->label('Target Space')
+                    ->suffix(' sqm')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                Tables\Columns\TextColumn::make('target_space_amount')
+                    ->label('Target Space Amount')
+                    ->prefix('$')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                Tables\Columns\TextColumn::make('target_sponsor_amount')
+                    ->label('Target Sponsor Amount')
+                    ->prefix('$')
                     ->numeric()
                     ->sortable()
                     ->toggleable()

@@ -26,6 +26,7 @@ class Dashboard extends BaseDashboard
 {
     use HasFiltersForm;
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
+
     public function filtersForm(Form $form): Form
     {
         return $form
@@ -35,16 +36,24 @@ class Dashboard extends BaseDashboard
                         Select::make('event_id')
                             ->label('Filter By Event(s)')
                             ->options(Event::all()->pluck('name', 'id'))
-                            ->multiple(),
+                            ->multiple()
+                            ->live()
+                            ->afterStateUpdated(fn () => $this->dispatch('filtersUpdated')),
 
                         Select::make('user_id')
                             ->label('Filter By User(s)')
                             ->options(User::all()->pluck('name', 'id'))
-                            ->multiple(),
+                            ->multiple()
+                            ->live()
+                            ->afterStateUpdated(fn () => $this->dispatch('filtersUpdated')),
 
+                        DatePicker::make('startDate')
+                            ->live()
+                            ->afterStateUpdated(fn () => $this->dispatch('filtersUpdated')),
 
-                        DatePicker::make('startDate'),
-                        DatePicker::make('endDate'),
+                        DatePicker::make('endDate')
+                            ->live()
+                            ->afterStateUpdated(fn () => $this->dispatch('filtersUpdated')),
                         // ...
                     ])
                     ->columns(4),
@@ -54,22 +63,26 @@ class Dashboard extends BaseDashboard
     protected function getHeaderWidgets(): array
     {
         return [
-            ContractSummaryStats::class,
-            SpaceStatsOverview::class,
+            // Empty for now - widgets moved to main section
         ];
     }
 
     public function getWidgets(): array
     {
         return [
-    ContractCountsChart::class,
-    ContractAmountsByCurrencyChart::class,
-    ContractAmountsUSDChart::class,
-    ContractSpaceByStatusChart::class,
-    SpaceByEventChart::class,
-    SpaceDistributionChart::class,
-    SpaceRevenueCorrelationChart::class,
-    AverageSpacePerContractChart::class,
+            // Statistics widgets at the top
+            ContractSummaryStats::class,
+            SpaceStatsOverview::class,
+
+            // Chart widgets
+            ContractCountsChart::class,
+            ContractAmountsByCurrencyChart::class,
+            ContractAmountsUSDChart::class,
+            ContractSpaceByStatusChart::class,
+            SpaceByEventChart::class,
+            SpaceDistributionChart::class,
+            SpaceRevenueCorrelationChart::class,
+            AverageSpacePerContractChart::class,
         ];
     }
 

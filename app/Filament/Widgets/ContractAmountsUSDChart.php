@@ -16,6 +16,13 @@ use HasWidgetShield;
     protected static ?string $maxHeight = '400px';
     protected static ?string $pollingInterval = null;
 
+    protected $listeners = ['filtersUpdated' => 'refreshWidget'];
+
+    public function refreshWidget(): void
+    {
+        $this->dispatch('$refresh');
+    }
+
     protected function getData(): array
     {
         $startDate = $this->filters['startDate'] ?? null;

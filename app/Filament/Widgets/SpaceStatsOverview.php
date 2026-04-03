@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Contract;
+use App\Models\Event;
 use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -14,6 +15,27 @@ class SpaceStatsOverview extends BaseWidget
     use InteractsWithPageFilters;
 use HasWidgetShield;
     protected static ?string $pollingInterval = null;
+
+    protected $listeners = ['filtersUpdated' => 'refreshWidget'];
+
+    public function refreshWidget(): void
+    {
+        $this->dispatch('$refresh');
+    }
+
+    // Override the filters property to get them from the page
+    public function getFilters(): array
+    {
+        // Try to get filters from the parent page
+        if (method_exists($this, 'getLivewire')) {
+            $livewire = $this->getLivewire();
+            if ($livewire && method_exists($livewire, 'filters')) {
+                return $livewire->filters;
+            }
+        }
+
+        return $this->filters ?? [];
+    }
 
     protected function getStats(): array
     {
@@ -56,6 +78,12 @@ use HasWidgetShield;
         $minSpace = !empty($spaceValues) ? min($spaceValues) : 0;
         $utilizationRate = $totalSpace > 0 ? ($signedPaidSpace / $totalSpace) * 100 : 0;
 
+        // Get event targets if filtered by single event
+        $eventTargets = $this->getEventTargets($event_id);
+
+        // Calculate target comparisons
+        $targetComparisons = $this->calculateTargetComparisons($signedPaidSpace, $eventTargets);
+
         return [
             Stat::make('Total Space', number_format($totalSpace, 1) . ' m²')
                 ->description('All contracts with space')
@@ -70,9 +98,9 @@ use HasWidgetShield;
                 ->chart([10, 15, 20, 18, 22, 25, 23]),
 
             Stat::make('Utilization Rate', number_format($utilizationRate, 1) . '%')
-                ->description('Signed & Paid / Total')
-                ->descriptionIcon($utilizationRate >= 50 ? 'heroicon-o-arrow-trending-up' : 'heroicon-o-arrow-trending-down')
-                ->color($utilizationRate >= 75 ? 'success' : ($utilizationRate >= 50 ? 'warning' : 'danger'))
+                ->description($targetComparisons['description'])
+                ->descriptionIcon($targetComparisons['icon'])
+                ->color($targetComparisons['color'])
                 ->chart([30, 40, 50, 60, 70, 80, 75]),
 
             Stat::make('Space Range', number_format($minSpace, 0) . ' - ' . number_format($maxSpace, 0) . ' m²')
@@ -87,5 +115,51 @@ use HasWidgetShield;
     {
         // Generate sample trend data
         return array_map(fn($i) => rand(50, 200), range(1, 7));
+    }
+
+    /**
+     * Get event targets based on current filters
+     */
+    protected function getEventTargets($event_id): ?array
+    {
+        if ($event_id && is_array($event_id) && !empty($event_id)) {
+            // Get sum of targets for selected events
+            $events = Event::whereIn('id', $event_id)->get();
+            return [
+                'target_space' => $events->sum('target_space'),
+            ];
+        }
+
+        // No event filter - sum all targets
+        return [
+            'target_space' => Event::sum('target_space'),
+        ];
+    }
+
+    /**
+     * Calculate target comparisons for space utilization
+     */
+    protected function calculateTargetComparisons(float $signedPaidSpace, ?array $targets): array
+    {
+        $comparisons = [
+            'description' => 'Signed & Paid / Total',
+            'icon' => 'heroicon-o-arrow-trending-up',
+            'color' => 'primary',
+        ];
+
+        if ($targets && $targets['target_space'] && $targets['target_space'] > 0) {
+            $percentage = ($signedPaidSpace / $targets['target_space']) * 100;
+            $comparisons['description'] = number_format($percentage, 1) . '% of ' . number_format($targets['target_space'], 0) . ' sqm target';
+            $comparisons['icon'] = $percentage >= 100 ? 'heroicon-o-check-circle' : 'heroicon-o-arrow-trending-up';
+            $comparisons['color'] = $percentage >= 100 ? 'success' : ($percentage >= 75 ? 'warning' : 'danger');
+        } else {
+            // Fallback to original utilization rate logic
+            $totalSpace = $signedPaidSpace; // This is not accurate, but we need the total space
+            $utilizationRate = 0; // Will be calculated properly in the main method
+            $comparisons['icon'] = $utilizationRate >= 50 ? 'heroicon-o-arrow-trending-up' : 'heroicon-o-arrow-trending-down';
+            $comparisons['color'] = 'primary';
+        }
+
+        return $comparisons;
     }
 }
