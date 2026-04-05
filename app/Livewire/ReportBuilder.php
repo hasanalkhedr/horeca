@@ -99,6 +99,7 @@ class ReportBuilder extends Component
                 'bank_account' => $this->bankAccount,
                 'bank_name_address' => $this->bankNameAddress,
                 'swift_code' => $this->swiftCode,
+                'organizer' => $this->organizer,
                 'iban' => $this->iban,
                 'with_logo' => $this->with_logo,
                 'logo_path' => $this->logo_path,

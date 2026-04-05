@@ -33,226 +33,84 @@ class ListStands extends ListRecords
         return StandResource::filtersForm($form);
     }
 
-    // Override the table filters to trigger widget refresh
-    protected function tableUpdatedFilters(): void
-    {
-        \Log::info('Table filters updated, dispatching refresh-widget event');
-        \Log::info('Current tableFilters:', $this->tableFilters ?? 'not set');
-        $this->dispatch('refresh-widget');
-    }
-
-    // Override the table search to trigger widget refresh
-    protected function tableUpdatedSearch(): void
-    {
-        \Log::info('Table search updated, dispatching refresh-widget event');
-        $this->dispatch('refresh-widget');
-    }
-
-    // Add this method to handle filter reset
-    protected function tableResetFilters(): void
-    {
-        \Log::info('Table filters reset, dispatching refresh-widget event with null');
-        $this->dispatch('refresh-widget', null);
-    }
-
-    // Add method to handle filter clearing
-    protected function tableClearedFilters(): void
-    {
-        \Log::info('Table filters cleared, dispatching refresh-widget event with null');
-        $this->dispatch('refresh-widget', null);
-    }
-
-    // Add method to handle filter removal
-    protected function tableRemovedFilter(): void
-    {
-        \Log::info('Table filter removed, checking if all filters are cleared');
-        $filters = $this->tableFilters ?? [];
-        $hasActiveFilters = false;
-
-        foreach ($filters as $key => $filter) {
-            if (isset($filter['values']) && !empty($filter['values'])) {
-                $hasActiveFilters = true;
-                break;
-            }
-            if (isset($filter['value']) && $filter['value'] !== null) {
-                $hasActiveFilters = true;
-                break;
-            }
-        }
-
-        if ($hasActiveFilters) {
-            \Log::info('Still has active filters, dispatching with filter data');
-            $this->dispatch('refresh-widget', $filters);
-        } else {
-            \Log::info('All filters cleared, dispatching null');
-            $this->dispatch('refresh-widget', null);
-        }
-    }
-
-    // Add this method to test if it's being called
+    // Use the same pattern as ContractResource - handle table filters
     public function updatedTableFilters(): void
     {
-        \Log::info('updatedTableFilters called with:', $this->tableFilters ?? 'not set');
-
-        // Check if filters are empty (all cleared)
         $filters = $this->tableFilters ?? [];
         $hasActiveFilters = false;
 
-        foreach ($filters as $key => $filter) {
+        $normalize = function (mixed $payload): mixed {
+            if (is_array($payload) && isset($payload[0]) && is_array($payload[0])) {
+                return $payload[0];
+            }
+
+            return $payload;
+        };
+
+        foreach ($filters as $filter) {
+            $filter = $normalize($filter);
+
+            if (!is_array($filter)) {
+                continue;
+            }
+
             if (isset($filter['values']) && !empty($filter['values'])) {
                 $hasActiveFilters = true;
                 break;
             }
-            if (isset($filter['value']) && $filter['value'] !== null) {
+
+            if (isset($filter['value']) && $filter['value'] !== null && $filter['value'] !== '' && $filter['value'] !== []) {
+                $hasActiveFilters = true;
+                break;
+            }
+
+            if (isset($filter['isActive']) && $filter['isActive'] === true) {
+                $hasActiveFilters = true;
+                break;
+            }
+
+            if ((isset($filter['from']) && !empty($filter['from'])) || (isset($filter['until']) && !empty($filter['until']))) {
                 $hasActiveFilters = true;
                 break;
             }
         }
 
         if ($hasActiveFilters) {
-            \Log::info('Filters are active, dispatching with filter data');
             $this->dispatch('refresh-widget', $filters);
         } else {
-            \Log::info('All filters cleared, dispatching null');
             $this->dispatch('refresh-widget', null);
         }
     }
 
-    // Add method to handle table filter reset specifically
-    protected function tableFiltersReset(): void
+    public function updatedTableSearch(): void
     {
-        \Log::info('Table filters reset button clicked, clearing tableFilters');
-        \Log::info('Before reset - tableFilters:', $this->tableFilters);
-        $this->tableFilters = [];
-        \Log::info('After reset - tableFilters:', $this->tableFilters);
+        // Search affects table results; keep widget in sync with the current filters.
+        $this->dispatch('refresh-widget', $this->tableFilters ?? []);
+    }
+
+    protected function tableResetFilters(): void
+    {
+        // Dispatch event to notify widget of filter reset
         $this->dispatch('refresh-widget', null);
     }
 
-    // Add method to handle table filter form reset (the actual method being called)
-    public function resetTableFiltersForm(): void
+    protected function tableClearedFilters(): void
     {
-        \Log::info('resetTableFiltersForm called, clearing tableFilters');
-        \Log::info('Before reset - tableFilters:', $this->tableFilters);
-        $this->tableFilters = [];
-        \Log::info('After reset - tableFilters:', $this->tableFilters);
+        // Dispatch event to notify widget of filter clear
         $this->dispatch('refresh-widget', null);
     }
 
-    // Add method to handle individual table filter removal
-    public function removeTableFilter(string $filterName, string|null $field = null, bool $isRemovingAllFilters = false): void
+    // Also handle form filters (filtersForm) if they exist
+    protected function updatedFilters(): void
     {
-        \Log::info('removeTableFilter called for filter: ' . $filterName);
-        \Log::info('Before removal - tableFilters:', $this->tableFilters);
-
-        // Remove the specific filter
-        if (isset($this->tableFilters[$filterName])) {
-            unset($this->tableFilters[$filterName]);
-        }
-
-        \Log::info('After removal - tableFilters:', $this->tableFilters);
-
-        // Check if any filters remain
-        $hasActiveFilters = false;
-        foreach ($this->tableFilters as $key => $filter) {
-            if (isset($filter['values']) && !empty($filter['values'])) {
-                $hasActiveFilters = true;
-                break;
-            }
-            if (isset($filter['value']) && $filter['value'] !== null) {
-                $hasActiveFilters = true;
-                break;
-            }
-        }
-
-        if (!$hasActiveFilters) {
-            \Log::info('No active filters remain, dispatching null to widget');
-            $this->dispatch('refresh-widget', null);
-        } else {
-            \Log::info('Still has active filters, dispatching filter data');
-            $this->dispatch('refresh-widget', $this->tableFilters);
-        }
+        $this->dispatch('refresh-widget', $this->filters ?? []);
     }
 
-    // Add method to handle when individual filters are removed
-    protected function tableFilterRemoved(): void
+    // Add method to initialize widget with current filters on page load
+    public function mount(): void
     {
-        \Log::info('Individual filter removed, checking if all filters are cleared');
-        \Log::info('Current tableFilters:', $this->tableFilters);
-
-        $filters = $this->tableFilters ?? [];
-        $hasActiveFilters = false;
-
-        foreach ($filters as $key => $filter) {
-            if (isset($filter['values']) && !empty($filter['values'])) {
-                $hasActiveFilters = true;
-                break;
-            }
-            if (isset($filter['value']) && $filter['value'] !== null) {
-                $hasActiveFilters = true;
-                break;
-            }
-        }
-
-        if (!$hasActiveFilters) {
-            \Log::info('No active filters remain, dispatching null to widget');
-            $this->dispatch('refresh-widget', null);
-        } else {
-            \Log::info('Still has active filters, dispatching filter data');
-            $this->dispatch('refresh-widget', $filters);
-        }
-    }
-
-    // Add magic method to catch any other filter-related method calls
-    public function __call($method, $parameters)
-    {
-        if (str_contains($method, 'filter') || str_contains($method, 'Filter')) {
-            \Log::info("Unknown filter method called: " . $method, $parameters);
-            \Log::info("Current tableFilters before operation:", $this->tableFilters ?? 'not set');
-
-            // If this looks like a reset operation, clear the filters first
-            if (str_contains($method, 'reset') || str_contains($method, 'clear') || str_contains($method, 'remove')) {
-                \Log::info('Detected reset/clear operation, clearing tableFilters');
-                $this->tableFilters = [];
-                $this->dispatch('refresh-widget', null);
-                return;
-            }
-
-            // Check if this might be a filter reset/clear operation
-            $filters = $this->tableFilters ?? [];
-            $hasActiveFilters = false;
-
-            foreach ($filters as $key => $filter) {
-                if (isset($filter['values']) && !empty($filter['values'])) {
-                    $hasActiveFilters = true;
-                    break;
-                }
-                if (isset($filter['value']) && $filter['value'] !== null) {
-                    $hasActiveFilters = true;
-                    break;
-                }
-            }
-
-            if (!$hasActiveFilters) {
-                \Log::info('No active filters found, dispatching null to widget');
-                $this->dispatch('refresh-widget', null);
-            }
-        }
-
-        return parent::__call($method, $parameters);
-    }
-
-    // Add a method to intercept any Livewire call that might reset filters
-    public function callMethod($method, $params = [], $captureReturnValue = false)
-    {
-        \Log::info("Livewire callMethod intercepted: " . $method, $params);
-
-        if (str_contains($method, 'reset') || str_contains($method, 'clear')) {
-            \Log::info('Intercepted reset method, clearing tableFilters');
-            $this->tableFilters = [];
-            $this->dispatch('refresh-widget', null);
-        }
-
-        return parent::callMethod($method, $params, $captureReturnValue);
+        // Dispatch initial filters to widget when page loads
+        $this->dispatch('refresh-widget', $this->tableFilters ?? []);
     }
 
     protected function getHeaderActions(): array
@@ -266,7 +124,6 @@ class ListStands extends ListRecords
                 ->icon('heroicon-o-x-circle')
                 ->color('gray')
                 ->action(function () {
-                    \Log::info('Custom reset action triggered, clearing all filters');
                     $this->reset(['tableFilters']);
                     $this->dispatch('refresh-widget', null);
                 }),

@@ -40,8 +40,11 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('')
             ->login(Login::class)
+            // ->emailVerification()
+            // ->registration()
+            // ->passwordReset()
             ->brandLogo(asset('/images/logo.png'))
             ->brandLogoHeight('5rem')
             ->colors([

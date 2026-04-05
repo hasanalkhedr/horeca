@@ -88,10 +88,20 @@ class ContractStatisticsWidget extends BaseWidget
             Contract::STATUS_SPONSOR,
         ])->count();
 
-        // Calculate amount statistics
-        $totalAmount = $contracts->sum('net_total');
-        $spaceAmount = $contracts->sum('space_net');
-        $sponsorAmount = $contracts->sum('sponsor_net');
+        // Calculate amount statistics (converted to USD)
+        $totalAmount = $contracts->sum(function ($contract) {
+            $rateToUSD = $contract->Report->Currency->rate_to_usd ?? 1;
+            \Log::info('rate_to_usd', [$rateToUSD]);
+            return ($contract->net_total ?? 0) * $rateToUSD;
+        });
+        $spaceAmount = $contracts->sum(function ($contract) {
+            $rateToUSD = $contract->Report->Currency->rate_to_usd ?? 1;
+            return ($contract->space_net ?? 0) * $rateToUSD;
+        });
+        $sponsorAmount = $contracts->sum(function ($contract) {
+            $rateToUSD = $contract->Report->Currency->rate_to_usd ?? 1;
+            return ($contract->sponsor_net ?? 0) * $rateToUSD;
+        });
 
         // Calculate contracts with amounts
         $contractsWithSpaceAmount = $contracts->whereNotNull('space_net')->where('space_net', '>', 0)->count();
@@ -146,20 +156,20 @@ class ContractStatisticsWidget extends BaseWidget
                 ->color($targetComparisons['space_color'])
                 ->chart($this->getTotalSpaceTrend()),
 
-            // Financial Statistics
-            Stat::make('Total Amount', '$' . number_format($totalAmount, 2))
-                ->description("{$contractsWithSpaceAmount} with space amount")
+            // Financial Statistics (in USD)
+            Stat::make('Total Amount (USD)', '$' . number_format($totalAmount, 2))
+                ->description("{$contractsWithSpaceAmount} contracts with space amount")
                 ->descriptionIcon('heroicon-o-currency-dollar')
                 ->color('primary')
                 ->chart($this->getAmountTrend()),
 
-            Stat::make('Space Amount', '$' . number_format($spaceAmount, 2))
+            Stat::make('Space Amount (USD)', '$' . number_format($spaceAmount, 2))
                 ->description($targetComparisons['space_amount_description'])
                 ->descriptionIcon('heroicon-o-banknotes')
                 ->color($targetComparisons['space_amount_color'])
                 ->chart($this->getSpaceAmountTrend()),
 
-            Stat::make('Sponsor Amount', '$' . number_format($sponsorAmount, 2))
+            Stat::make('Sponsor Amount (USD)', '$' . number_format($sponsorAmount, 2))
                 ->description($targetComparisons['sponsor_amount_description'])
                 ->descriptionIcon('heroicon-o-star')
                 ->color($targetComparisons['sponsor_amount_color'])
@@ -294,7 +304,11 @@ class ContractStatisticsWidget extends BaseWidget
             $date = now()->subDays($i);
             $value = $this->getFilteredQuery()
                 ->whereDate('contract_date', '<=', $date)
-                ->sum('net_total');
+                ->get()
+                ->sum(function ($contract) {
+                    $rateToUSD = $contract->Report->Currency->rate_to_usd ?? 1;
+                    return ($contract->net_total ?? 0) * $rateToUSD;
+                });
             $data[] = $value;
         }
 
@@ -313,7 +327,11 @@ class ContractStatisticsWidget extends BaseWidget
             $date = now()->subDays($i);
             $value = $this->getFilteredQuery()
                 ->whereDate('contract_date', '<=', $date)
-                ->sum('space_net');
+                ->get()
+                ->sum(function ($contract) {
+                    $rateToUSD = $contract->Report->Currency->rate_to_usd ?? 1;
+                    return ($contract->space_net ?? 0) * $rateToUSD;
+                });
             $data[] = $value;
         }
 
@@ -332,7 +350,11 @@ class ContractStatisticsWidget extends BaseWidget
             $date = now()->subDays($i);
             $value = $this->getFilteredQuery()
                 ->whereDate('contract_date', '<=', $date)
-                ->sum('sponsor_net');
+                ->get()
+                ->sum(function ($contract) {
+                    $rateToUSD = $contract->Report->Currency->rate_to_usd ?? 1;
+                    return ($contract->sponsor_net ?? 0) * $rateToUSD;
+                });
             $data[] = $value;
         }
         return $data;

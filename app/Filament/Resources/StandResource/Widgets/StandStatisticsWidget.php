@@ -22,14 +22,11 @@ class StandStatisticsWidget extends BaseWidget
 
     public function onRefreshWidget($filters = null): void
     {
-        \Log::info('Widget received refresh-widget event, refreshing...');
         if ($filters) {
             $this->pageFilters = $filters;
-            \Log::info('Widget received filter data:', $filters);
         } else {
             // Clear stored filters when null is passed (filters cleared)
             $this->pageFilters = [];
-            \Log::info('Widget cleared all filters');
         }
         // Trigger widget re-render
         $this->dispatch('$refresh');
@@ -37,7 +34,10 @@ class StandStatisticsWidget extends BaseWidget
 
     protected function getStats(): array
     {
-        \Log::info('Widget getStats called, building statistics...');
+        // If no filters are set initially, try to get them from the request
+        if (empty($this->pageFilters)) {
+            $this->pageFilters = $this->getFiltersFromRequest();
+        }
 
         // Get the filtered query using the filters from the page
         $query = $this->getFilteredQuery();
@@ -46,6 +46,7 @@ class StandStatisticsWidget extends BaseWidget
 
         // Get event targets if filtered by single event
         $eventTargets = $this->getEventTargets();
+
         // Calculate total statistics
         $totalStands = $stands->count();
         $totalSpace = $stands->sum('space');
@@ -81,24 +82,12 @@ class StandStatisticsWidget extends BaseWidget
                 ->color($targetComparisons['color'])
                 ->chart($this->getStatusTrend('Sold')),
 
-            // Stat::make('Sold Stands', $soldStands)
-            //     ->description("{$soldPercentage}% of total stands")
-            //     ->descriptionIcon('heroicon-o-map-pin')
-            //     ->color('danger')
-            //     ->chart($this->getStatusTrend('Sold', 'count')),
-
             // Available Statistics
             Stat::make('Available Space to Sell', number_format($availableSpace, 2) . ' sqm')
                 ->description("{$availableStands} stands • {$availableSpacePercentage}% of total space")
                 ->descriptionIcon('heroicon-o-check-circle')
                 ->color('success')
                 ->chart($this->getStatusTrend('Available')),
-
-            // Stat::make('Available Stands', $availableStands)
-            //     ->description("{$availablePercentage}% of total stands")
-            //     ->descriptionIcon('heroicon-o-map-pin')
-            //     ->color('success')
-            //     ->chart($this->getStatusTrend('Available', 'count')),
 
             // Total Statistics
             Stat::make('Total Area', number_format($totalSpace, 2) . ' sqm')
@@ -112,13 +101,47 @@ class StandStatisticsWidget extends BaseWidget
                 ->description(number_format($reservedSpace, 2) . ' sqm')
                 ->descriptionIcon('heroicon-o-clock')
                 ->color('warning'),
-
-            // Deductible
-            // Stat::make('Deductible Stands', $deductibleStands)
-            //     ->description("{$deductiblePercentage}% of total")
-            //     ->descriptionIcon('heroicon-o-receipt-percent')
-            //     ->color('warning'),
         ];
+    }
+
+    /**
+     * Get filters from request as fallback
+     */
+    protected function getFiltersFromRequest(): array
+    {
+        try {
+            $requestData = request()->all();
+
+            if (isset($requestData['components']) && is_array($requestData['components'])) {
+                foreach ($requestData['components'] as $component) {
+                    if (!isset($component['snapshot'])) {
+                        continue;
+                    }
+
+                    $snapshot = is_array($component['snapshot'])
+                        ? $component['snapshot']
+                        : json_decode($component['snapshot'], true);
+
+                    if (!is_array($snapshot)) {
+                        continue;
+                    }
+
+                    // Check for table filters (primary)
+                    if (isset($snapshot['data']['tableFilters'])) {
+                        return $snapshot['data']['tableFilters'];
+                    }
+
+                    // Check for form data (filtersForm) as fallback
+                    if (isset($snapshot['data']['filters'])) {
+                        return $snapshot['data']['filters'];
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            // Error accessing request filters
+        }
+
+        return [];
     }
 
     /**
@@ -133,11 +156,13 @@ class StandStatisticsWidget extends BaseWidget
             $date = now()->subDays($i);
 
             if ($type === 'space') {
-                $value = Stand::where('status', $status)
+                $value = $this->getFilteredQuery()
+                    ->where('status', $status)
                     ->whereDate('created_at', '<=', $date)
                     ->sum('space');
             } else {
-                $value = Stand::where('status', $status)
+                $value = $this->getFilteredQuery()
+                    ->where('status', $status)
                     ->whereDate('created_at', '<=', $date)
                     ->count();
             }
@@ -158,7 +183,9 @@ class StandStatisticsWidget extends BaseWidget
         // Get last 7 days of total space
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i);
-            $value = $this->getFilteredQuery()->whereDate('created_at', '<=', $date)->sum('space');
+            $value = $this->getFilteredQuery()
+                ->whereDate('created_at', '<=', $date)
+                ->sum('space');
             $data[] = $value;
         }
 
@@ -178,125 +205,134 @@ class StandStatisticsWidget extends BaseWidget
 
         // Use the stored page filters if available, otherwise try to get them from request
         $filters = $this->pageFilters;
-\Log::info('FILTERS:',$filters);
+
         if (empty($filters)) {
-            \Log::info('Widget using request-based filtering as fallback');
-            // Fallback to request-based filtering (existing logic)
+            // Try to get from Livewire component
             try {
-                // Use the correct method to access the parent Livewire component
                 if (method_exists($this, 'getLivewire')) {
                     $livewire = $this->getLivewire();
                     if ($livewire && isset($livewire->tableFilters)) {
                         $filters = $livewire->tableFilters;
-                        \Log::info('Widget retrieved filters from Livewire:', $filters);
-                    } else {
-                        \Log::info('Widget could not retrieve filters - Livewire component not found or no tableFilters property');
                     }
                 } else {
-                    \Log::info('Widget getLivewire method does not exist, trying alternative approach');
-
                     // Alternative: try to access the Livewire component through the widget's internal properties
                     if (property_exists($this, 'livewire') && $this->livewire) {
                         $livewire = $this->livewire;
                         if (isset($livewire->tableFilters)) {
                             $filters = $livewire->tableFilters;
-                            \Log::info('Widget retrieved filters from livewire property:', $filters);
-                        } else {
-                            \Log::info('Widget livewire property exists but no tableFilters found');
                         }
                     } else {
-                        \Log::info('Widget has no livewire property, falling back to request-based filtering');
-
                         // Parse filter data from Livewire components in the request
-                        $request = request();
-                        $requestData = $request->all();
-
-                        \Log::info('Request data keys:', array_keys($requestData));
+                        $requestData = request()->all();
 
                         if (isset($requestData['components']) && is_array($requestData['components'])) {
                             foreach ($requestData['components'] as $component) {
-                                if (isset($component['snapshot']['data']['tableFilters'])) {
-                                    $tableFiltersJson = $component['snapshot']['data']['tableFilters'];
-                                    \Log::info('Raw tableFilters JSON:', $tableFiltersJson);
+                                if (!isset($component['snapshot'])) {
+                                    continue;
+                                }
 
-                                    // Decode the JSON string to get the actual filter array
-                                    $decodedFilters = json_decode($tableFiltersJson, true);
-                                    if ($decodedFilters !== null) {
-                                        $filters = $decodedFilters;
-                                        \Log::info('Widget retrieved and decoded filters from Livewire component:', $filters);
-                                        break;
-                                    } else {
-                                        \Log::info('Failed to decode tableFilters JSON');
-                                    }
+                                $snapshot = is_array($component['snapshot'])
+                                    ? $component['snapshot']
+                                    : json_decode($component['snapshot'], true);
+
+                                if (!is_array($snapshot)) {
+                                    continue;
+                                }
+
+                                // Check for table filters (primary)
+                                if (isset($snapshot['data']['tableFilters'])) {
+                                    $filters = $snapshot['data']['tableFilters'];
+                                    break;
+                                }
+
+                                // Check for form data (filtersForm) as fallback
+                                if (isset($snapshot['data']['filters'])) {
+                                    $filters = $snapshot['data']['filters'];
+                                    break;
                                 }
                             }
-                        }
-
-                        if (empty($filters)) {
-                            \Log::info('No tableFilters found in request components');
                         }
                     }
                 }
             } catch (\Exception $e) {
-                \Log::error('Widget error accessing Livewire filters: ' . $e->getMessage());
+                // Error accessing Livewire filters
             }
-         } else {
-             \Log::info('Widget using stored page filters:', $filters);
-         }
+        }
 
-        // Apply event filter
-        if (isset($filters['event_id']) && !empty($filters['event_id'])) {
-            $eventIdFilter = $filters['event_id'];
-            // Extract the actual values from the nested structure
-            if (isset($eventIdFilter['values']) && is_array($eventIdFilter['values'])) {
-                $eventIds = $eventIdFilter['values'];
-                // Remove empty values and flatten the array
-                $eventIds = array_filter($eventIds, function($value) {
-                    return is_array($value) ? !empty($value) : !empty($value);
-                });
-                if (!empty($eventIds)) {
-                    $query->whereIn('event_id', $eventIds);
-                    \Log::info('Applied event filter:', $eventIds);
+        // Normalize table filter structure (same as ContractResource)
+        $normalizeFilterPayload = function (mixed $payload): mixed {
+            if (is_array($payload) && isset($payload[0]) && is_array($payload[0])) {
+                return $payload[0];
+            }
+
+            return $payload;
+        };
+
+        $getValue = function (mixed $filter): mixed {
+            if (!is_array($filter)) {
+                return null;
+            }
+
+            if (array_key_exists('value', $filter)) {
+                return $filter['value'];
+            }
+
+            if (array_key_exists('values', $filter)) {
+                return $filter['values'];
+            }
+
+            return null;
+        };
+
+        // Apply table filters
+        if (is_array($filters)) {
+            foreach ($filters as $key => $filter) {
+                $filter = $normalizeFilterPayload($filter);
+
+                if (!is_array($filter)) {
+                    continue;
                 }
-            }
-        }
 
-        // Apply category filter
-        if (isset($filters['category_id']) && !empty($filters['category_id'])) {
-            $categoryIdFilter = $filters['category_id'];
-            if (isset($categoryIdFilter['values']) && is_array($categoryIdFilter['values'])) {
-                $categoryIds = $categoryIdFilter['values'];
-                $categoryIds = array_filter($categoryIds, function($value) {
-                    return is_array($value) ? !empty($value) : !empty($value);
-                });
-                if (!empty($categoryIds)) {
-                    $query->whereIn('category_id', $categoryIds);
-                    \Log::info('Applied category filter:', $categoryIds);
+                // Apply event filter
+                if ($key === 'event_id') {
+                    $eventIdsValue = $getValue($filter);
+                    $eventIds = is_array($eventIdsValue) ? $eventIdsValue : (empty($eventIdsValue) ? [] : [$eventIdsValue]);
+                    $eventIds = array_filter($eventIds, fn ($v) => !empty($v));
+                    if (!empty($eventIds)) {
+                        $query->whereIn('event_id', $eventIds);
+                    }
                 }
-            }
-        }
 
-        // Apply status filter
-        if (isset($filters['status']) && !empty($filters['status'])) {
-            $statusFilter = $filters['status'];
-            if (isset($statusFilter['value']) && !empty($statusFilter['value'])) {
-                $statuses = is_array($statusFilter['value']) ? $statusFilter['value'] : [$statusFilter['value']];
-                $query->whereIn('status', $statuses);
-                \Log::info('Applied status filter:', $statuses);
-            }
-        }
+                // Apply category filter
+                if ($key === 'category_id') {
+                    $categoryIdsValue = $getValue($filter);
+                    $categoryIds = is_array($categoryIdsValue) ? $categoryIdsValue : (empty($categoryIdsValue) ? [] : [$categoryIdsValue]);
+                    $categoryIds = array_filter($categoryIds, fn ($v) => !empty($v));
+                    if (!empty($categoryIds)) {
+                        $query->whereIn('category_id', $categoryIds);
+                    }
+                }
 
-        // Apply deductible filter
-        if (isset($filters['deductable']) && !empty($filters['deductable'])) {
-            $deductableFilter = $filters['deductable'];
-            if (isset($deductableFilter['value']) && $deductableFilter['value'] !== null) {
-                $deductable = $deductableFilter['value'];
-                if ($deductable === true || $deductable === 'yes' || $deductable === '1') {
-                    $query->where('deductable', true);
-                    \Log::info('Applied deductible filter: true');
-                } elseif ($deductable === false || $deductable === 'no' || $deductable === '0') {
-                    $query->where('deductable', false);
-                    \Log::info('Applied deductible filter: false');
+                // Apply status filter
+                if ($key === 'status') {
+                    $statusValue = $getValue($filter);
+                    $statuses = is_array($statusValue) ? $statusValue : (empty($statusValue) ? [] : [$statusValue]);
+                    $statuses = array_filter($statuses, fn ($v) => !empty($v));
+                    if (!empty($statuses)) {
+                        $query->whereIn('status', $statuses);
+                    }
+                }
+
+                // Apply deductible filter
+                if ($key === 'deductable') {
+                    if (isset($filter['value']) && $filter['value'] !== null) {
+                        $deductable = $filter['value'];
+                        if ($deductable === true || $deductable === 'yes' || $deductable === '1') {
+                            $query->where('deductable', true);
+                        } elseif ($deductable === false || $deductable === 'no' || $deductable === '0') {
+                            $query->where('deductable', false);
+                        }
+                    }
                 }
             }
         }
@@ -325,18 +361,35 @@ class StandStatisticsWidget extends BaseWidget
             }
         }
 
-        if (!empty($filters) && isset($filters['event_id'])) {
-            $getValue = function (mixed $filter): mixed {
-                if (!is_array($filter)) {
-                    return null;
-                }
-                if (array_key_exists('values', $filter)) {
-                    return $filter['values'];
-                }
-                return null;
-            };
+        // Normalize table filter structure (same as ContractResource)
+        $normalizeFilterPayload = function (mixed $payload): mixed {
+            if (is_array($payload) && isset($payload[0]) && is_array($payload[0])) {
+                return $payload[0];
+            }
 
-            $eventIdsValue = $getValue($filters['event_id']);
+            return $payload;
+        };
+
+        $getValue = function (mixed $filter): mixed {
+            if (!is_array($filter)) {
+                return null;
+            }
+
+            if (array_key_exists('value', $filter)) {
+                return $filter['value'];
+            }
+
+            if (array_key_exists('values', $filter)) {
+                return $filter['values'];
+            }
+
+            return null;
+        };
+
+        // Apply table filters to get event targets
+        if (is_array($filters) && isset($filters['event_id'])) {
+            $filter = $normalizeFilterPayload($filters['event_id']);
+            $eventIdsValue = $getValue($filter);
             $eventIds = is_array($eventIdsValue) ? $eventIdsValue : (empty($eventIdsValue) ? [] : [$eventIdsValue]);
             $eventIds = array_filter($eventIds, fn ($v) => !empty($v));
 

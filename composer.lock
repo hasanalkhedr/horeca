@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "76d472e1b6d9f8f39c1c3ca2ccb0ecb2",
+    "content-hash": "7638754ab7a5e1cc5d380c8ae348d1f4",
     "packages": [
         {
             "name": "alperenersoy/filament-export",
@@ -5799,87 +5799,6 @@
             "time": "2025-09-04T20:59:21+00:00"
         },
         {
-            "name": "rappasoft/laravel-livewire-tables",
-            "version": "v3.7.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/rappasoft/laravel-livewire-tables.git",
-                "reference": "a8637326d3df5fa9f8116490365d87179d957825"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/rappasoft/laravel-livewire-tables/zipball/a8637326d3df5fa9f8116490365d87179d957825",
-                "reference": "a8637326d3df5fa9f8116490365d87179d957825",
-                "shasum": ""
-            },
-            "require": {
-                "blade-ui-kit/blade-heroicons": "^2.1",
-                "illuminate/contracts": "^10.0|^11.0|^12.0",
-                "illuminate/support": "^10.0|^11.0|^12.0",
-                "livewire/livewire": "^3.0|dev-main",
-                "php": "^8.1|^8.2|^8.3|^8.4"
-            },
-            "require-dev": {
-                "brianium/paratest": "^5.0|^6.0|^7.0|^8.0|^9.0",
-                "ext-sqlite3": "*",
-                "larastan/larastan": "^2.6|^3.0",
-                "laravel/pint": "^1.10",
-                "monolog/monolog": "*",
-                "nunomaduro/collision": "^6.0|^7.0|^8.0|^9.0",
-                "orchestra/testbench": "^7.0|^8.0|^9.0|^10.0",
-                "phpunit/phpunit": "^9.0|^10.0|^11.0|^12.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Rappasoft\\LaravelLivewireTables\\LaravelLivewireTablesServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Rappasoft\\LaravelLivewireTables\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Anthony Rappa",
-                    "email": "rappa819@gmail.com",
-                    "role": "Developer"
-                },
-                {
-                    "name": "Joe McElwee",
-                    "email": "joe@lowerrocklabs.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "A dynamic table component for Laravel Livewire",
-            "homepage": "https://github.com/rappasoft/laravel-livewire-tables",
-            "keywords": [
-                "datatables",
-                "laravel",
-                "livewire",
-                "rappasoft",
-                "tables"
-            ],
-            "support": {
-                "issues": "https://github.com/rappasoft/laravel-livewire-tables/issues",
-                "source": "https://github.com/rappasoft/laravel-livewire-tables/tree/v3.7.1"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/rappasoft",
-                    "type": "github"
-                }
-            ],
-            "time": "2025-02-28T23:30:16+00:00"
-        },
-        {
             "name": "ryangjchandler/blade-capture-directive",
             "version": "v1.1.0",
             "source": {
@@ -9054,74 +8973,6 @@
             "time": "2025-12-02T11:56:42+00:00"
         },
         {
-            "name": "vildanbina/livewire-wizard",
-            "version": "v2.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/vildanbina/livewire-wizard.git",
-                "reference": "4af3d213999cc6fb4a21c5b02ce7a5b82da399e6"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/vildanbina/livewire-wizard/zipball/4af3d213999cc6fb4a21c5b02ce7a5b82da399e6",
-                "reference": "4af3d213999cc6fb4a21c5b02ce7a5b82da399e6",
-                "shasum": ""
-            },
-            "require": {
-                "livewire/livewire": "^3.0",
-                "php": "^8.1",
-                "spatie/laravel-package-tools": "^1.9",
-                "wireui/wireui": "^1.18"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "aliases": {
-                        "LivewireWizard": "Vildanbina\\LivewireWizard\\Facades\\LivewireWizard"
-                    },
-                    "providers": [
-                        "Vildanbina\\LivewireWizard\\LivewireWizardServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Vildanbina\\LivewireWizard\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Vildan Bina",
-                    "email": "vildanbina@gmail.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Laravel Livewire Wizard (Multi-Step Form) component",
-            "homepage": "https://github.com/vildanbina/livewire-wizard",
-            "keywords": [
-                "form",
-                "laravel",
-                "livewire",
-                "multi-steps",
-                "wizard"
-            ],
-            "support": {
-                "issues": "https://github.com/vildanbina/livewire-wizard/issues",
-                "source": "https://github.com/vildanbina/livewire-wizard/tree/v2.1"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/vildanbina",
-                    "type": "github"
-                }
-            ],
-            "time": "2024-08-04T06:45:19+00:00"
-        },
-        {
             "name": "vlucas/phpdotenv",
             "version": "v5.6.2",
             "source": {
@@ -9278,72 +9129,6 @@
                 }
             ],
             "time": "2024-11-21T01:49:47+00:00"
-        },
-        {
-            "name": "wireui/wireui",
-            "version": "v1.19.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/wireui/wireui.git",
-                "reference": "784c4f110e58eb41d0f2bdecd4655ea417f16e7e"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/wireui/wireui/zipball/784c4f110e58eb41d0f2bdecd4655ea417f16e7e",
-                "reference": "784c4f110e58eb41d0f2bdecd4655ea417f16e7e",
-                "shasum": ""
-            },
-            "require": {
-                "laravel/framework": "^10.0|^11.0",
-                "livewire/livewire": "^3.0",
-                "php": "^8.1|^8.2|^8.3"
-            },
-            "require-dev": {
-                "friendsofphp/php-cs-fixer": "^3.9",
-                "mockery/mockery": "^1.5",
-                "orchestra/testbench": "^8.0|^9.0",
-                "orchestra/testbench-dusk": "^8.0|^9.0",
-                "pestphp/pest": "^2.0",
-                "pestphp/pest-plugin-mock": "^2.0",
-                "psy/psysh": "@stable"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "aliases": [],
-                    "providers": [
-                        "WireUi\\Providers\\WireUiServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "WireUi\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Pedro Oliveira",
-                    "email": "pedrolivertwd@gmail.com"
-                }
-            ],
-            "description": "TallStack components",
-            "keywords": [
-                "blade components",
-                "laravel components",
-                "livewire components",
-                "livewire-ui",
-                "wireui"
-            ],
-            "support": {
-                "issues": "https://github.com/wireui/wireui/issues",
-                "source": "https://github.com/wireui/wireui/tree/v1.19.3"
-            },
-            "time": "2024-09-17T05:43:27+00:00"
         }
     ],
     "packages-dev": [
