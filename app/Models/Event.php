@@ -123,4 +123,9 @@ class Event extends Model
     {
         return $this->belongsToMany(EffAdsPackage::class);
     }
+
+    public function userTargets()
+    {
+        return $this->hasMany(UserTarget::class);
+    }
 }

@@ -208,6 +208,140 @@ class ViewEvent extends ViewRecord
                 ->url(fn (): string => StandResource::getUrl('create', [
                     'event_id' => $this->record->id,
                 ])),
+
+            Actions\Action::make('manageUserTargets')
+                ->label('Manage User Targets')
+                ->icon('heroicon-o-adjustments-vertical')
+                ->color('warning')
+                ->modalHeading('Manage User Targets for Event')
+                ->modalDescription('Set performance targets for users for this event')
+                ->modalSubmitActionLabel('Save Targets')
+                ->modalWidth('7xl')
+                ->form(function () {
+                    return [
+                        \Filament\Forms\Components\Grid::make()
+                            ->schema([
+                                // Table header using Grid
+                                \Filament\Forms\Components\Grid::make(6)
+                                    ->schema([
+                                        \Filament\Forms\Components\Placeholder::make('header_user')
+                                            ->label('User')
+                                            ->content(''),
+                                        \Filament\Forms\Components\Placeholder::make('header_space')
+                                            ->label('Target Space (sqm)')
+                                            ->content(''),
+                                        \Filament\Forms\Components\Placeholder::make('header_amount')
+                                            ->label('Target Amount ($)')
+                                            ->content(''),
+                                        \Filament\Forms\Components\Placeholder::make('header_sponsor')
+                                            ->label('Target Sponsor ($)')
+                                            ->content(''),
+                                        \Filament\Forms\Components\Placeholder::make('header_notes')
+                                            ->label('Notes')
+                                            ->content(''),
+                                        \Filament\Forms\Components\Placeholder::make('header_status')
+                                            ->label('Current Status')
+                                            ->content(''),
+                                    ])
+                                    ->extraAttributes(['class' => 'font-semibold border-b pb-2 mb-2']),
+
+                                // Dynamic user rows
+                                ...\App\Models\User::all()->map(function ($user) {
+                                    $existingTarget = \App\Models\UserTarget::where('user_id', $user->id)
+                                        ->where('event_id', $this->record->id)
+                                        ->first();
+
+                                    return \Filament\Forms\Components\Grid::make(6)
+                                        ->schema([
+                                            // Hidden user ID
+                                            \Filament\Forms\Components\Hidden::make("users.{$user->id}.user_id")
+                                                ->default($user->id),
+
+                                            // User name
+                                            \Filament\Forms\Components\Placeholder::make("users.{$user->id}.name")
+                                                ->label('')
+                                                ->content($user->name),
+
+                                            // Target Space
+                                            \Filament\Forms\Components\TextInput::make("users.{$user->id}.target_space")
+                                                ->label('')
+                                                ->numeric()
+                                                ->step(0.01)
+                                                ->suffix('sqm')
+                                                ->default($existingTarget?->target_space ?? 0),
+
+                                            // Target Amount
+                                            \Filament\Forms\Components\TextInput::make("users.{$user->id}.target_space_amount")
+                                                ->label('')
+                                                ->numeric()
+                                                ->step(0.01)
+                                                ->prefix('$')
+                                                ->default($existingTarget?->target_space_amount ?? 0),
+
+                                            // Target Sponsor Amount
+                                            \Filament\Forms\Components\TextInput::make("users.{$user->id}.target_sponsor_amount")
+                                                ->label('')
+                                                ->numeric()
+                                                ->step(0.01)
+                                                ->prefix('$')
+                                                ->default($existingTarget?->target_sponsor_amount ?? 0),
+
+                                            // Notes
+                                            \Filament\Forms\Components\TextInput::make("users.{$user->id}.notes")
+                                                ->label('')
+                                                ->placeholder('Notes...')
+                                                ->default($existingTarget?->notes),
+
+                                            // Current Status
+                                            \Filament\Forms\Components\Placeholder::make("users.{$user->id}.status")
+                                                ->label('')
+                                                ->content(function () use ($existingTarget) {
+                                                    if (!$existingTarget) return 'No target';
+
+                                                    $completion = $existingTarget->completion_percentage ?? 0;
+                                                    return "{$existingTarget->status} ({$completion}%)";
+                                                }),
+                                        ])
+                                        ->extraAttributes(['class' => 'border-b pb-2 mb-2']);
+                                })->toArray(),
+                            ])
+                    ];
+                })
+                ->action(function (array $data) {
+                    foreach ($data['users'] as $userId => $targetData) {
+                        // Skip if all target values are 0 and no notes exist (to avoid creating empty targets)
+                        if (($targetData['target_space'] == 0) &&
+                            ($targetData['target_space_amount'] == 0) &&
+                            ($targetData['target_sponsor_amount'] == 0) &&
+                            empty($targetData['notes'])) {
+
+                            // Delete existing target if it exists and all values are 0
+                            \App\Models\UserTarget::where('user_id', $userId)
+                                ->where('event_id', $this->record->id)
+                                ->delete();
+                            continue;
+                        }
+
+                        \App\Models\UserTarget::updateOrCreate(
+                            [
+                                'user_id' => $userId,
+                                'event_id' => $this->record->id,
+                            ],
+                            [
+                                'target_space' => $targetData['target_space'],
+                                'target_space_amount' => $targetData['target_space_amount'],
+                                'target_sponsor_amount' => $targetData['target_sponsor_amount'],
+                                'notes' => $targetData['notes'] ?? null,
+                                'status' => 'active',
+                            ]
+                        );
+                    }
+
+                    \Filament\Notifications\Notification::make()
+                        ->title('User targets updated successfully')
+                        ->success()
+                        ->send();
+                }),
         ];
     }
 }

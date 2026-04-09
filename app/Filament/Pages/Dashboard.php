@@ -8,6 +8,9 @@ use App\Filament\Widgets\ContractAmountsUSDChart;
 use App\Filament\Widgets\ContractCountsChart;
 use App\Filament\Widgets\ContractSpaceByStatusChart;
 use App\Filament\Widgets\ContractSummaryStats;
+use App\Filament\Widgets\DashboardUserTargetSpaceChartWidget;
+use App\Filament\Widgets\DashboardUserTargetAmountChartWidget;
+use App\Filament\Widgets\DashboardUserTargetSponsorChartWidget;
 use App\Filament\Widgets\SpaceByEventChart;
 use App\Filament\Widgets\SpaceDistributionChart;
 use App\Filament\Widgets\SpaceRevenueCorrelationChart;
@@ -74,6 +77,11 @@ class Dashboard extends BaseDashboard
             ContractSummaryStats::class,
             SpaceStatsOverview::class,
 
+            // Target Progress Charts
+            DashboardUserTargetSpaceChartWidget::class,
+            DashboardUserTargetAmountChartWidget::class,
+            DashboardUserTargetSponsorChartWidget::class,
+
             // Chart widgets
             ContractCountsChart::class,
             ContractAmountsByCurrencyChart::class,
@@ -84,6 +92,11 @@ class Dashboard extends BaseDashboard
             SpaceRevenueCorrelationChart::class,
             AverageSpacePerContractChart::class,
         ];
+    }
+
+    public function getColumns(): int | string | array
+    {
+        return 3;
     }
 
 }

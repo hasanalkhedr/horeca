@@ -60,6 +60,11 @@ class User extends Authenticatable implements FilamentUser
     public function Contracts() {
         return $this->hasMany(Contract::class,'seller','id');
     }
+
+    public function userTargets() {
+        return $this->hasMany(UserTarget::class);
+    }
+
     public function canAccessPanel(Panel $panel): bool{
         return true;
     }

@@ -6,6 +6,8 @@ use AlperenErsoy\FilamentExport\Actions\FilamentExportBulkAction;
 use AlperenErsoy\FilamentExport\Actions\FilamentExportHeaderAction;
 use App\Filament\Resources\ContractResource\Pages;
 use App\Filament\Resources\ContractResource\Widgets\ContractStatisticsWidget;
+use App\Filament\Resources\ContractResource\Widgets\ContractTypeChartWidget;
+use App\Filament\Resources\ContractResource\Widgets\UserTargetWidget;
 use App\Models\Contract;
 use App\Models\Event;
 use App\Models\Report;
@@ -1771,11 +1773,13 @@ if($price) {
         ];
     }
 
-    public static function getWidgets(): array
-    {
-        return [
-            ContractStatisticsWidget::class,
-        ];
-    }
+    // public static function getWidgets(): array
+    // {
+    //     return [
+    //         ContractStatisticsWidget::class,
+    //         ContractTypeChartWidget::class,
+    //         UserTargetWidget::class,
+    //     ];
+    // }
 
 }

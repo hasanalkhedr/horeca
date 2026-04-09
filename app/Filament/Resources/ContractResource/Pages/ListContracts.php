@@ -5,6 +5,10 @@ namespace App\Filament\Resources\ContractResource\Pages;
 use App\Filament\Resources\ContractResource;
 use App\Filament\Resources\ContractResource\Widgets\ContractStatisticsWidget;
 use App\Filament\Resources\ContractResource\Widgets\ContractTypeChartWidget;
+use App\Filament\Resources\ContractResource\Widgets\UserTargetWidget;
+use App\Filament\Resources\ContractResource\Widgets\UserTargetSpaceChartWidget;
+use App\Filament\Resources\ContractResource\Widgets\UserTargetAmountChartWidget;
+use App\Filament\Resources\ContractResource\Widgets\UserTargetSponsorChartWidget;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -24,6 +28,10 @@ class ListContracts extends ListRecords
         return [
             ContractStatisticsWidget::class,
             ContractTypeChartWidget::class,
+            UserTargetWidget::class,
+            UserTargetSpaceChartWidget::class,
+            UserTargetAmountChartWidget::class,
+            UserTargetSponsorChartWidget::class,
         ];
     }
 
